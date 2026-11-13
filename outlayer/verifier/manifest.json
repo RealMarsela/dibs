@@ -1,0 +1,7 @@
+{
+  "display": {"name": "Dibs verifier"},
+  "operations": ["public_key", "vrf", "booking"],
+  "signing_keys": [
+    {"path": "dibs", "type": "ed25519", "caller": "none"}
+  ]
+}

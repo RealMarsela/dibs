@@ -1,0 +1,16 @@
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=evil.example; s=t1; h=from:to:subject:date:message-id; bh=cGwPa5MKqsXhXy3eXOj2h/0V35fcBI02j3Uh0T0MzOY=; b=erCld8t/nYzbOurXQYbgIIuGtUuITENRqX9b2yIAN1T25ukZ28RT7viYwdmLvlIGo+vpK9Y2bylMFQwkdVxhDGeHBEiCWlpMXMjlqZeQ5aOZrviLS5X/TVD/iJkdpRh42QqUplY2a6op2vu0vdwSkmT5i2G9+PJazUlUyf5HkjdLRiB2FSOj8Z6b0YwD8rrL1ezcDGToxITtKNRO29eJP1r+tdwn3IdGR6wGIAjIxdB+izqOKZ4Dn56gzRohI9HtcIYoTGhiiJWfZLI28qsQM1ttA+8+/yyshAAKGL/br2OxYmZ+tAYdk2rSgeQBy1AZaXdHt+8zy2gCgodqhoel8g==
+From: Reservations <noreply@evil.example>
+To: crew@example.org
+Subject: Booking confirmation
+Date: Mon, 14 Sep 2026 10:00:00 +0000
+Message-ID: <abc123@evil.example>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Your booking is confirmed!
+Hotel Alfama Patio, Lisbon
+Confirmation number: 5123456789
+Check-in: 3 December 2026
+Check-out: 7 December 2026
+Guests: 4 adults
+Total price: EUR 1,480.00
