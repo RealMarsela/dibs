@@ -79,7 +79,7 @@ Init (owner): `new{owner, usdc, outlayer, project_id, domains, run_fee}`. Owner 
 
 | method | caller | gas | notes |
 |---|---|---|---|
-| `create_trip{code, price, n_beds, n_wait?=2, book_by:U64 ns, booker, dao, check_in, check_out, stay?}` | anyone, payable | 300 T | additions to the brief: `n_wait`, `check_in`, `check_out`, `stay`. Deposit >= `create_cost(n_beds,n_wait)` (about 0.027 NEAR per account plus 0.055), excess refunded. `n_beds` 1..16, `n_beds+n_wait` <= 20 |
+| `create_trip{code, price, n_beds, n_wait?=2, book_by:U64 ns, booker, dao, check_in, check_out, stay?}` | anyone, payable | 300 T | additions to the brief: `n_wait`, `check_in`, `check_out`, `stay`. Deposit >= `create_cost(n_beds,n_wait)` (about 0.027 NEAR per account plus 0.055), excess refunded. `n_beds` 1..16, `n_beds+n_wait` <= 18 (about 11 Tgas per account; 14+4 burns 205 Tgas) |
 | `hold{trip, n, holder}` | holder or relayer | 60 T | Open -> Held. On a Listed bed: reserves it for a resale buyer |
 | `release_hold{trip, n}` | the reserver | | Held -> Open (or drops a resale reservation) |
 | `ft_on_transfer{sender_id, amount, msg}` | usdc only | | see below |

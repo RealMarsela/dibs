@@ -41,7 +41,7 @@ impl Dibs {
         let n_wait = n_wait.unwrap_or(2);
         ensure(code_ok(&code), "E_BAD_ARGS");
         ensure(!self.trips.contains_key(&code), "E_TRIP_EXISTS");
-        ensure(price.0 > 0 && (1..=16).contains(&n_beds) && n_beds as u16 + n_wait as u16 <= 20, "E_BAD_ARGS");
+        ensure(price.0 > 0 && (1..=16).contains(&n_beds) && n_beds as u16 + n_wait as u16 <= 18, "E_BAD_ARGS");
         ensure(date_ok(&check_in) && date_ok(&check_out) && check_in < check_out, "E_BAD_ARGS");
         ensure(book_by.0 > env::block_timestamp(), "E_BAD_ARGS");
         let need = cost(n_beds, n_wait);

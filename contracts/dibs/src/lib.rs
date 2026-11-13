@@ -144,6 +144,6 @@ impl Dibs {
     }
 
     pub(crate) fn register_usdc(&self, who: AccountId) -> near_sdk::Promise {
-        ext_ft::ext(self.usdc.clone()).with_attached_deposit(STORAGE).with_static_gas(Gas::from_tgas(8)).storage_deposit(Some(who), Some(true))
+        ext_ft::ext(self.usdc.clone()).with_attached_deposit(STORAGE).with_static_gas(Gas::from_tgas(5)).storage_deposit(Some(who), Some(true))
     }
 }
