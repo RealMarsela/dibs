@@ -1,0 +1,12 @@
+[package]
+name = "dibs-bed"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+# Without DIBS_USDC set at build time the USDC id is the mainnet contract.
+default = []

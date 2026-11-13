@@ -1,0 +1,15 @@
+[package]
+name = "dibs-tests"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+near-workspaces = "0.24"
+tokio = { version = "1", features = ["full"] }
+serde_json = "1"
+ed25519-dalek = "2"
+hex = "0.4"
+anyhow = "1"

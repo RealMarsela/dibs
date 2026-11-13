@@ -1,0 +1,21 @@
+{
+  "roles": [
+    {
+      "name": "trip",
+      "kind": { "Group": ["__DIBS__"] },
+      "permissions": ["transfer:AddProposal", "transfer:VoteApprove"],
+      "vote_policy": { "transfer": { "weight_kind": "RoleWeight", "quorum": "0", "threshold": "1" } }
+    },
+    {
+      "name": "crew",
+      "kind": { "Group": [__CREW__] },
+      "permissions": ["*:VoteReject", "*:RemoveProposal"],
+      "vote_policy": {}
+    }
+  ],
+  "default_vote_policy": { "weight_kind": "RoleWeight", "quorum": "0", "threshold": [1, 2] },
+  "proposal_bond": "0",
+  "proposal_period": "604800000000000",
+  "bounty_bond": "0",
+  "bounty_forgiveness_period": "0"
+}

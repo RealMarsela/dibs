@@ -1,0 +1,221 @@
+{
+  "all_ok": true,
+  "checks": [
+    {
+      "expected_code": "E_NO_REFUND",
+      "name": "request_refund always refused",
+      "ok": true
+    },
+    {
+      "expected_code": "E_NOT_HOLDER",
+      "name": "non-holder lists a bed",
+      "ok": true
+    },
+    {
+      "expected_code": "E_NOT_RELAYER",
+      "name": "stranger holds a bed for someone else",
+      "ok": true
+    },
+    {
+      "expected_code": "E_NOT_HELD",
+      "name": "pay a bed nobody holds",
+      "ok": true
+    },
+    {
+      "expected_code": "E_WRONG_AMOUNT",
+      "name": "pay wrong amount (price - 1)",
+      "ok": true
+    },
+    {
+      "expected_code": "",
+      "name": "pay wrong amount (balance too small)",
+      "ok": true
+    },
+    {
+      "expected_code": "E_BAD_SENDER",
+      "name": "sweep from a fake (non-bed) account",
+      "ok": true
+    },
+    {
+      "expected_code": "E_NOT_USDC",
+      "name": "ft_on_transfer from non-USDC caller",
+      "ok": true
+    },
+    {
+      "expected_code": "E_PRIVATE",
+      "name": "booker calls private callback on_proof",
+      "ok": true
+    },
+    {
+      "expected_code": "E_PRIVATE",
+      "name": "booker calls private callback on_draw",
+      "ok": true
+    },
+    {
+      "expected_code": "E_PRIVATE",
+      "name": "booker calls private callback on_forward",
+      "ok": true
+    },
+    {
+      "expected_code": "ERR_PERMISSION_DENIED",
+      "name": "booker adds a DAO transfer directly",
+      "ok": true
+    },
+    {
+      "expected_code": "E_NOT_OWNER",
+      "name": "non-owner replaces verifier key",
+      "ok": true
+    },
+    {
+      "expected_code": "E_NOT_FULL",
+      "name": "submit proof before all beds paid",
+      "ok": true
+    },
+    {
+      "expected_code": "E_NOT_FULL",
+      "name": "draw before full",
+      "ok": true
+    },
+    {
+      "expected_code": "E_TRIP_EXISTS",
+      "name": "create a trip twice",
+      "ok": true
+    },
+    {
+      "expected_code": "E_DEPOSIT",
+      "name": "create a trip without the deposit",
+      "ok": true
+    },
+    {
+      "expected_code": "E_ALREADY_PAID",
+      "name": "pay an already-paid bed again",
+      "ok": true
+    },
+    {
+      "expected_code": "",
+      "name": "all four beds paid, pot sits in the DAO",
+      "ok": true
+    },
+    {
+      "expected_code": "E_BAD_SIG",
+      "name": "forged draw signature",
+      "ok": true
+    },
+    {
+      "expected_code": "E_NO_RESULT",
+      "name": "OutLayer returns nothing for the draw",
+      "ok": true
+    },
+    {
+      "expected_code": "",
+      "name": "genuine draw succeeds",
+      "ok": true
+    },
+    {
+      "expected_code": "E_DRAWN",
+      "name": "double draw",
+      "ok": true
+    },
+    {
+      "expected_code": "E_DATES",
+      "name": "proof with wrong dates",
+      "ok": true
+    },
+    {
+      "expected_code": "E_GUESTS",
+      "name": "proof with wrong guests",
+      "ok": true
+    },
+    {
+      "expected_code": "E_TOTAL",
+      "name": "proof with total above the pot",
+      "ok": true
+    },
+    {
+      "expected_code": "E_DOMAIN",
+      "name": "proof from a domain that is not allowed",
+      "ok": true
+    },
+    {
+      "expected_code": "E_TRIP_MISMATCH",
+      "name": "proof for another trip",
+      "ok": true
+    },
+    {
+      "expected_code": "E_BAD_SIG",
+      "name": "forged OutLayer booking signature",
+      "ok": true
+    },
+    {
+      "expected_code": "E_BAD_PREFIX",
+      "name": "wrong message prefix",
+      "ok": true
+    },
+    {
+      "expected_code": "E_NOT_BOOKER",
+      "name": "non-booker submits proof",
+      "ok": true
+    },
+    {
+      "expected_code": "E_BEFORE_DEADLINE",
+      "name": "refund_all before the deadline",
+      "ok": true
+    },
+    {
+      "expected_code": "",
+      "name": "valid proof pays the booker through the DAO",
+      "ok": true
+    },
+    {
+      "expected_code": "E_PROOF_EXISTS",
+      "name": "second proof for the same trip",
+      "ok": true
+    },
+    {
+      "expected_code": "E_REPLAY",
+      "name": "same booking reference replayed on another trip",
+      "ok": true
+    },
+    {
+      "expected_code": "E_WRONG_AMOUNT",
+      "name": "resale above face value is refused",
+      "ok": true
+    },
+    {
+      "expected_code": "",
+      "name": "resale at face: seller gets exactly price, buyer holds",
+      "ok": true
+    },
+    {
+      "expected_code": "",
+      "name": "waitlist head fills a listed bed at once",
+      "ok": true
+    },
+    {
+      "expected_code": "",
+      "name": "leave_waitlist returns the buyer's funds",
+      "ok": true
+    },
+    {
+      "expected_code": "E_DEADLINE",
+      "name": "proof after the deadline",
+      "ok": true
+    },
+    {
+      "expected_code": "",
+      "name": "refund_all pays the first batch back",
+      "ok": true
+    },
+    {
+      "expected_code": "",
+      "name": "every holder got full price back after the deadline",
+      "ok": true
+    },
+    {
+      "expected_code": "E_REFUNDED",
+      "name": "double refund_all",
+      "ok": true
+    }
+  ],
+  "generated_by": "contracts/tests (near-workspaces sandbox)"
+}
