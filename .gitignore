@@ -1,0 +1,9 @@
+node_modules
+dist
+target
+.env*
+!.env.example
+*.local
+*.local.md
+.DS_Store
+neardev

@@ -1,0 +1,195 @@
+@import "tailwindcss";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/jetbrains-mono";
+
+/* Dibs theme: "boarding-pass paper" (Gabriel's pick A, 14 Nov).
+   Warm paper, ink type, two stamp colours. Red-orange means due / refused.
+   Green means paid / verified. Blue means any-chain money moving. */
+@theme {
+  --font-sans: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, monospace;
+
+  --color-paper: #f3ecdf;
+  --color-paper-deep: #e9dfcc;
+  --color-card: #fbf7ef;
+  --color-ink: #1e1b16;
+  --color-ink-soft: #5b5447;
+  --color-ink-faint: #8f8676;
+  --color-rule: #d8ccb6;
+  --color-rule-strong: #c2b499;
+  --color-stamp: #d4492a;
+  --color-stamp-soft: #d4492a1a;
+  --color-paid: #1f6f5c;
+  --color-paid-soft: #1f6f5c17;
+  --color-sea: #2b5aa6;
+  --color-sea-soft: #2b5aa614;
+  --color-sun: #f0b23c;
+  --color-sun-soft: #f0b23c2e;
+
+  --radius-ticket: 14px;
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+:root {
+  color-scheme: light;
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --card: var(--color-card);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-card);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-ink);
+  --primary-foreground: var(--color-card);
+  --secondary: var(--color-paper-deep);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-paper-deep);
+  --muted-foreground: var(--color-ink-soft);
+  --accent: var(--color-paper-deep);
+  --accent-foreground: var(--color-ink);
+  --destructive: var(--color-stamp);
+  --border: var(--color-rule);
+  --input: var(--color-rule-strong);
+  --ring: var(--color-ink-faint);
+  --radius: 12px;
+}
+
+html,
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Paper grain: two soft noise layers, cheap and static. */
+body {
+  background-image:
+    radial-gradient(circle at 20% 10%, #ffffff66 0, transparent 45%),
+    radial-gradient(circle at 85% 80%, #e2d5bd55 0, transparent 40%);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: var(--color-sun-soft);
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-faint);
+}
+@utility ticket {
+  position: relative;
+  border-radius: var(--radius-ticket);
+  border: 1px solid var(--color-rule);
+  background: var(--color-card);
+  box-shadow:
+    0 1px 0 #ffffffb3 inset,
+    0 1px 2px #1e1b160d,
+    0 8px 24px -12px #1e1b1626;
+}
+@utility stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 6px;
+  border-width: 1.5px;
+  border-style: solid;
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  transform: rotate(-4deg);
+}
+@utility focus-ring {
+  outline: none;
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px #1e1b1666;
+  }
+}
+@utility btn {
+  display: inline-flex;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 0 20px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: transform 150ms var(--ease-out-strong), background-color 150ms, box-shadow 150ms;
+  &:active { transform: scale(0.97); }
+  &:disabled { pointer-events: none; opacity: 0.45; }
+}
+@utility btn-ink {
+  @apply btn;
+  background: var(--color-ink);
+  color: var(--color-card);
+  box-shadow: 0 1px 0 #ffffff26 inset, 0 6px 16px -8px #1e1b1680;
+  &:hover { background: #2e2a23; }
+}
+@utility btn-paper {
+  @apply btn;
+  border: 1px solid var(--color-rule-strong);
+  background: var(--color-card);
+  color: var(--color-ink);
+  &:hover { background: var(--color-paper-deep); }
+}
+@utility btn-sm {
+  height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+/* Perforation: a dashed vertical rule with punched half-circles top and bottom. */
+.perf {
+  position: relative;
+  background-image: linear-gradient(var(--color-rule-strong) 50%, transparent 0);
+  background-size: 1.5px 8px;
+  background-repeat: repeat-y;
+  background-position: center;
+}
+.perf::before,
+.perf::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  transform: translateX(-50%);
+}
+.perf::before { top: -9px; clip-path: inset(50% 0 0 0); }
+.perf::after { bottom: -9px; clip-path: inset(0 0 50% 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes fade-out { from { opacity: 1 } to { opacity: 0 } }
+@keyframes sheet-up { from { transform: translateY(100%) } to { transform: translateY(0) } }
+@keyframes sheet-down { from { transform: translateY(0) } to { transform: translateY(100%) } }
+@keyframes pop-in {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.97) }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1) }
+}
+@keyframes stamp-in {
+  0% { opacity: 0; transform: rotate(-4deg) scale(1.8) }
+  60% { opacity: 1; transform: rotate(-4deg) scale(0.94) }
+  100% { opacity: 1; transform: rotate(-4deg) scale(1) }
+}
+.animate-stamp { animation: stamp-in 420ms var(--ease-out-strong) both }
