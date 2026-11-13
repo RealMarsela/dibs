@@ -78,6 +78,13 @@ impl Dibs {
         self.verifier_key = Some(k.unwrap_or_else(|| fail("E_BAD_ARGS")));
     }
 
+    /// Point at the OutLayer contract and project (set once Lane B's verifier is deployed).
+    pub fn set_outlayer(&mut self, outlayer: AccountId, project_id: String) {
+        self.only_owner();
+        self.outlayer = outlayer;
+        self.project_id = project_id;
+    }
+
     pub fn set_domains(&mut self, domains: Vec<String>) {
         self.only_owner();
         self.domains = domains;

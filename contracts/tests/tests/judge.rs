@@ -124,6 +124,10 @@ async fn judge_attacks() -> anyhow::Result<()> {
         rep.check(name, code, &w.trip(a).await["last_error"].to_string(), w.bal(dao.id()).await == pot && w.trip(a).await["proof"].is_null());
     }
     let f = good();
+    let view_ok: String = w.dibs.view("check_proof").args_json(json!({"trip": a, "message": f.message(), "signature": sign(&w.verifier, &f.message())})).await?.json()?;
+    rep.check("check_proof view accepts a genuine message", "OK", &view_ok, true);
+    let view_bad: String = w.dibs.view("check_proof").args_json(json!({"trip": a, "message": f.message(), "signature": sign(&key(9), &f.message())})).await?.json()?;
+    rep.check("check_proof view rejects a forged message", "E_BAD_SIG", &view_bad, true);
     w.stage(&f.message(), &sign(&key(9), &f.message())).await;
     w.submit_proof(a).await?;
     rep.check("forged OutLayer booking signature", "E_BAD_SIG", &w.trip(a).await["last_error"].to_string(), w.bal(dao.id()).await == pot);
@@ -198,6 +202,16 @@ async fn judge_attacks() -> anyhow::Result<()> {
     let r = w.refund_all("dead0001", 2).await?;
     rep.check("double refund_all", "E_REFUNDED", &text(&r), r.is_failure());
 
+    let sz = |f: &str| wasm(f).len();
+    rep.check("bed wasm is at most 8 KB", "", "", sz("bed.wasm") <= 8 * 1024);
+    let d = sz("dibs.wasm");
+    rep.note(
+        "dibs wasm <= 110 KB after wasm-opt -Oz",
+        if d <= 110 * 1024 { "met" } else { "NOT MET" },
+        &format!("{d} bytes; see HANDBACK.md for the cost and the options"),
+    );
+    rep.note("create_trip does not check that the DAO policy gives only dibs the transfer role", "unenforced", "coordinator seeds DAOs with scripts/dao-policy.json; on-chain policy read-back not implemented");
+    rep.note("OutLayer real worker signature and VRF", "unverified", "sandbox uses mock-outlayer with a local ed25519 key; the real key is pinned later with set_verifier_key");
     rep.write(&contracts_dir().join("judge-report.json"));
     Ok(())
 }

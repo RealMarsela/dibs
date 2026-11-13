@@ -3,6 +3,7 @@ use serde_json::{json, Value};
 #[derive(Default)]
 pub struct Report {
     checks: Vec<Value>,
+    notes: Vec<Value>,
 }
 
 impl Report {
@@ -17,9 +18,14 @@ impl Report {
         ok
     }
 
+    /// A rule that is not met or not enforced by a test: listed in the report, never counted as ok.
+    pub fn note(&mut self, rule: &str, status: &str, detail: &str) {
+        self.notes.push(json!({"rule": rule, "status": status, "detail": detail}));
+    }
+
     pub fn write(&self, path: &std::path::Path) {
         let all_ok = self.checks.iter().all(|c| c["ok"] == true);
-        let body = json!({"generated_by": "contracts/tests (near-workspaces sandbox)", "all_ok": all_ok, "checks": self.checks});
+        let body = json!({"generated_by": "contracts/tests (near-workspaces sandbox)", "all_ok": all_ok, "checks": self.checks, "unmet_or_unenforced": self.notes});
         std::fs::write(path, serde_json::to_string_pretty(&body).unwrap() + "\n").unwrap();
         assert!(all_ok, "some judge checks failed, see {path:?}");
     }

@@ -142,6 +142,16 @@
       "ok": true
     },
     {
+      "expected_code": "OK",
+      "name": "check_proof view accepts a genuine message",
+      "ok": true
+    },
+    {
+      "expected_code": "E_BAD_SIG",
+      "name": "check_proof view rejects a forged message",
+      "ok": true
+    },
+    {
       "expected_code": "E_BAD_SIG",
       "name": "forged OutLayer booking signature",
       "ok": true
@@ -215,7 +225,29 @@
       "expected_code": "E_REFUNDED",
       "name": "double refund_all",
       "ok": true
+    },
+    {
+      "expected_code": "",
+      "name": "bed wasm is at most 8 KB",
+      "ok": true
     }
   ],
-  "generated_by": "contracts/tests (near-workspaces sandbox)"
+  "generated_by": "contracts/tests (near-workspaces sandbox)",
+  "unmet_or_unenforced": [
+    {
+      "detail": "283746 bytes; see HANDBACK.md for the cost and the options",
+      "rule": "dibs wasm <= 110 KB after wasm-opt -Oz",
+      "status": "NOT MET"
+    },
+    {
+      "detail": "coordinator seeds DAOs with scripts/dao-policy.json; on-chain policy read-back not implemented",
+      "rule": "create_trip does not check that the DAO policy gives only dibs the transfer role",
+      "status": "unenforced"
+    },
+    {
+      "detail": "sandbox uses mock-outlayer with a local ed25519 key; the real key is pinned later with set_verifier_key",
+      "rule": "OutLayer real worker signature and VRF",
+      "status": "unverified"
+    }
+  ]
 }
