@@ -1,0 +1,12 @@
+{
+  "booking": {
+    "message": "dibs-booking:v1:{\"trip\":\"lis0312\",\"stay\":\"Casa do Largo, Lisbon\",\"check_in\":\"2026-12-04\",\"check_out\":\"2026-12-07\",\"guests\":8,\"total\":\"1800000\",\"currency\":\"EUR\",\"dkim_domain\":\"booking.com\",\"eml_sha256\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"booking_ref_hash\":\"abababababababababababababababababababababababababababababababab\"}",
+    "signature_hex": "014edce980efb5fa5987915c690dd2943128d1416fe01b65f56ee071f4050ab5c3318d464fc08a3f425e191b148f0890bd1afde4f1166b3f3a3a0a76c4a1d408"
+  },
+  "note": "TEST KEY ONLY (ed25519 seed = 32 bytes of 0x07). The real verifier key is pinned with set_verifier_key.",
+  "public_key_hex": "ea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c",
+  "vrf": {
+    "message": "dibs-vrf:v1:{\"trip\":\"lis0312\",\"output_hex\":\"1111111111111111111111111111111111111111111111111111111111111111\"}",
+    "signature_hex": "a65c70b424ede369448d0af26650e25eff21dc46b269fbc6e8999575522477b61e7d90d81499934feddf853759de8da28c47938cef1b3c08639efab4c46c5701"
+  }
+}

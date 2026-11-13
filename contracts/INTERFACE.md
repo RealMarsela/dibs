@@ -36,6 +36,10 @@ Check order (first failure wins): key set `E_NO_KEY`, prefix `E_BAD_PREFIX`, sig
 `E_BAD_FACTS`, trip `E_TRIP_MISMATCH`, hex fields `E_BAD_FACTS`, guests `E_GUESTS`, total `E_TOTAL`,
 domain `E_DOMAIN`, dates `E_DATES`, replay `E_REPLAY`. No output from OutLayer: `E_NO_RESULT`.
 
+Golden vectors (fixed test key, byte-exact messages and signatures): `contracts/fixtures/golden-vectors.json`,
+produced by `tests/tests/golden.rs`; the sandbox suite signs with the same builders, so the contract provably
+accepts exactly these bytes.
+
 ## What the contract sends to OutLayer
 
 `<outlayer>.request_execution`, 150 Tgas, the caller's deposit (>= 0.02 NEAR) attached:
