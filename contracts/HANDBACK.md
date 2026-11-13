@@ -19,7 +19,17 @@ Run: `scripts/fetch-sputnik.sh && scripts/build.sh sandbox && (cd tests && cargo
 Sputnik v2 DAO wasm (fetched from a live testnet DAO, not committed) so the `add_proposal` + `act_proposal`
 chain and the `trip` role are exercised against the real contract.
 
-## Tests (real output is in the final message of the session; re-run to reproduce)
+## Testnet deploy: BLOCKED (not deployed)
+
+`scripts/deploy-testnet.sh` and `scripts/seed-lisbon.sh` are written and shell-checked but never ran against
+testnet. The only funding route, `helper.nearprotocol.com/account` (near-cli faucet), returns HTTP 429
+`Rate limit exceeded, retry in 10 hours` (limit 10 per window, already spent on this IP). near-faucet.io is browser
+only, gives about 2 NEAR, and the full deploy needs about 10 NEAR (dibs 2.8, test USDC 1.05, Sputnik DAO 6 via
+`sputnik-v2.testnet`, trip 0.3). No testnet account ids exist. Once the faucet resets run:
+`scripts/deploy-testnet.sh` then `PRICE=250000 scripts/seed-lisbon.sh` (`PRICE=40000000` for the UI preview).
+Faucet-created keys go to `~/.near-credentials/testnet`. (The near-cli config was auto-migrated by the CLI on first use.)
+
+## Tests (re-run: `scripts/build.sh sandbox && cd tests && cargo test`)
 
 - `tests/happy.rs`: 8 beds funded, draw, proof, payout through the DAO.
 - `tests/judge.rs`: every attack from the brief with exact codes, 40+ checks, pot-untouched assertions, refund path.
@@ -28,8 +38,8 @@ chain and the `trip` role are exercised against the real contract.
 
 | artifact | bytes | target |
 |---|---|---|
-| `bed.wasm` | see final message | <= 8 KB, met |
-| `dibs.wasm` | see final message | <= 110 KB, NOT MET |
+| `bed.wasm` | 2047 | <= 8 KB, met |
+| `dibs.wasm` | 283746 | <= 110 KB, NOT MET |
 
 The 110 KB target is not reachable with this feature set on stable Rust 1.86 and near-sdk 5.17. The probe from
 the preflight (10 methods) was already 111 KB; this contract has about 30 exported methods plus the resale,
