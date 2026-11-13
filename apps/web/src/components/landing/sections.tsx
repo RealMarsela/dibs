@@ -77,7 +77,7 @@ export function Trust() {
 
 const STACK = [
   { k: "Sputnik DAO + Trezu", v: "The crew’s pot lives in its own DAO. The booker’s payout is a DAO proposal anyone can open in Trezu." },
-  { k: "Global contracts", v: "Every bed is its own keyless account, all running one shared contract. About a tenth of a cent each." },
+  { k: "Keyless bed accounts", v: "Every bed is its own NEAR account with no keys at all. Its only code forwards your payment to the trip, tagged with your bed." },
   { k: "NEAR Intents · 1Click", v: "Pay from any chain in. Resale money and refunds go back out to the chain you paid from." },
   { k: "OutLayer", v: "The trip contract itself asks an Intel TDX enclave whether the booking email is real, and verifies the signed answer on-chain." },
   { k: "NEAR AI Cloud", v: "Reads the email inside a GPU enclave. Friends see dates, guests and total. Never names, address or card." },
