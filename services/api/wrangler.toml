@@ -1,0 +1,38 @@
+name = "dibs-api"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Default = testnet. Mainnet is a separate deploy: `wrangler deploy --env mainnet`.
+[vars]
+NEAR_NETWORK = "testnet"
+NEAR_RPC_URLS = "https://test.rpc.fastnear.com,https://rpc.testnet.near.org"
+ONECLICK_URL = "https://1click.chaindefuser.com"
+# TODO(coordinator): fill after Lane A deploys.
+DIBS_CONTRACT = "dibs-REPLACE.testnet"
+USDC_CONTRACT = "usdc-REPLACE.testnet"
+RELAYER_ACCOUNT_ID = "dibs-relayer-REPLACE.testnet"
+ALLOWED_ORIGIN = "*"
+# Public base URL used to build blob capability URLs (no trailing slash). Empty = request origin.
+PUBLIC_BASE_URL = ""
+
+[[r2_buckets]]
+binding = "BLOBS"
+bucket_name = "dibs-blobs-testnet"
+
+[env.mainnet]
+name = "dibs-api-mainnet"
+
+[env.mainnet.vars]
+NEAR_NETWORK = "mainnet"
+NEAR_RPC_URLS = "https://free.rpc.fastnear.com,https://rpc.mainnet.near.org"
+ONECLICK_URL = "https://1click.chaindefuser.com"
+DIBS_CONTRACT = "dibs-REPLACE.near"
+USDC_CONTRACT = "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1"
+RELAYER_ACCOUNT_ID = "dibs-relayer-REPLACE.near"
+ALLOWED_ORIGIN = "*"
+PUBLIC_BASE_URL = ""
+
+[[env.mainnet.r2_buckets]]
+binding = "BLOBS"
+bucket_name = "dibs-blobs-mainnet"
