@@ -11,11 +11,12 @@ import { pad2, stayDates, usd } from "@/lib/utils";
 import { explorer } from "@/live/api";
 import { deviceKey } from "@/live/passkey";
 import { devKey } from "@/live/dev-keys";
+import { callFromNear, rememberedNear } from "@/live/near-wallet";
 
 type Step = "ask" | "refused" | "tear" | "matching" | "sold";
 
 export function ResaleSheet({ n, onClose }: { n: number | null; onClose: () => void }) {
-  const { trip, act, live } = useTrip();
+  const { trip, act, live, network, contract, code, refresh } = useTrip();
   const [refusal, setRefusal] = useState<{ code?: string; tx?: string } | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [startHolder, setStartHolder] = useState<string | undefined>();
@@ -136,7 +137,12 @@ export function ResaleSheet({ n, onClose }: { n: number | null; onClose: () => v
               setStartHolder(spot?.holder);
               if (live) {
                 try {
-                  await act.list(n!, await signer());
+                  // A bed held by the signed-in NEAR wallet is listed by that wallet; a passkey bed signs gaslessly.
+                  const w = rememberedNear(network);
+                  if (w && spot?.holder === w.accountId) {
+                    await callFromNear(network, w, contract, "list_for_resale", { trip: code.toLowerCase(), n: n! });
+                    await refresh();
+                  } else await act.list(n!, await signer());
                 } catch (e) {
                   setErr(e instanceof Error ? e.message : "Listing failed");
                   return;

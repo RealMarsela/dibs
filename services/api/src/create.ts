@@ -8,7 +8,8 @@ import { accountExists, nearBalance, view } from "./near";
 import { recordActivity } from "./activity";
 import { addInboxRule } from "./inboxrule";
 import { tripCode } from "./schemas";
-import { BOOKER_MESSAGE, proofSchema, verifyNep413 } from "./nep413";
+import { BOOKER_MESSAGE, type Nep413Proof, proofSchema, verifyNep413 } from "./nep413";
+import { type Erc191Proof, erc191ProofSchema, verifyErc191 } from "./erc191";
 
 export const createRoute = new Hono<{ Bindings: Env }>();
 
@@ -37,7 +38,9 @@ const text = (min: number, max: number) =>
 
 const IMPLICIT = z.string().regex(/^[0-9a-f]{64}$/);
 const NAMED = /^(?=.{2,64}$)([a-z\d]+[-_])*[a-z\d]+(\.([a-z\d]+[-_])*[a-z\d]+)*$/;
+const ETH_IMPLICIT = z.string().regex(/^0x[0-9a-f]{40}$/);
 const isImplicit = (a: string): boolean => /^[0-9a-f]{64}$/.test(a);
+const isEth = (a: string): boolean => /^0x[0-9a-f]{40}$/.test(a);
 
 export const createBody = z
   .object({
@@ -47,8 +50,8 @@ export const createBody = z
     check_out: ymd,
     beds: z.number().int().min(2).max(6),
     price_usdc: z.number().int().min(1).max(50),
-    booker: z.union([IMPLICIT, z.string().regex(NAMED, "booker must be a 64-hex implicit account or a NEAR account id")]),
-    auth: proofSchema.optional(),
+    booker: z.union([IMPLICIT, ETH_IMPLICIT, z.string().regex(NAMED, "booker must be a 64-hex implicit account or a NEAR account id")]),
+    auth: z.union([proofSchema, erc191ProofSchema]).optional(),
   })
   .strict()
   .superRefine((b, ctx) => {
@@ -79,9 +82,13 @@ createRoute.post("/trips", async (c) => {
   const env = c.env;
   const b = parse(createBody, await readJson(c));
   const dao = env.TRIP_DAO;
-  const named = !isImplicit(b.booker);
+  const eth = isEth(b.booker);
+  const named = !isImplicit(b.booker) && !eth;
   if (!dao) throw new ApiError(503, "E_NOT_CONFIGURED", "trip creation is not enabled on this deployment");
   if (named && !b.auth) throw new ApiError(401, "E_AUTH_REQUIRED", "a named NEAR account needs a signed NEP-413 proof (auth)");
+  if (eth && !b.auth) throw new ApiError(401, "E_AUTH_REQUIRED", "an Ethereum wallet account needs a signed ERC-191 proof (auth)");
+  if (named && b.auth && !("accountId" in b.auth)) throw new ApiError(400, "E_BAD_INPUT", "a named NEAR account needs a NEP-413 proof, not an ERC-191 one");
+  if (eth && b.auth && !("address" in b.auth)) throw new ApiError(400, "E_BAD_INPUT", "an Ethereum wallet account needs an ERC-191 proof, not a NEP-413 one");
   const day = new Date().toISOString().slice(0, 10);
   const ip = clientIp(c);
   // Check both counters before bumping either, so a refused request costs the caller nothing.
@@ -92,8 +99,12 @@ createRoute.post("/trips", async (c) => {
   if ((await nearBalance(env, env.RELAYER_ACCOUNT_ID)) < MIN_RELAYER) throw new ApiError(503, "E_RELAYER_LOW", "the demo relayer is low on testnet NEAR, try later");
   if (named) {
     // Verify only after the cheap quota and balance checks; the proof consumes its nonce.
-    if ((await verifyNep413(env, b.auth!, BOOKER_MESSAGE)) !== b.booker) throw new ApiError(401, "E_AUTH_ACCOUNT", "the proof is for a different account than booker");
+    if ((await verifyNep413(env, b.auth as Nep413Proof, BOOKER_MESSAGE)) !== b.booker) throw new ApiError(401, "E_AUTH_ACCOUNT", "the proof is for a different account than booker");
     if (!(await accountExists(env, b.booker))) throw new ApiError(400, "E_ACCOUNT_NOT_FOUND", `account ${b.booker} does not exist`);
+  }
+  if (eth) {
+    // eth-implicit accounts are created on first use, so no existence check and no bootstrap.
+    if ((await verifyErc191(env, b.auth as Erc191Proof)) !== b.booker) throw new ApiError(401, "E_AUTH_ACCOUNT", "the proof is for a different account than booker");
   }
   let code = makeCode(b.place);
   for (let i = 0; i < 4 && (await view(env, env.DIBS_CONTRACT, "get_trip", { trip: code })); i++) code = makeCode(b.place);
@@ -112,7 +123,7 @@ createRoute.post("/trips", async (c) => {
     { deposit: cost + MARGIN, gas: GAS_300, failCode: "E_CREATE_FAILED", failMsg: "the contract refused the trip (dates, code or funds)" },
   );
 
-  if (!named) await ensureImplicitAccount(env, b.booker);
+  if (isImplicit(b.booker)) await ensureImplicitAccount(env, b.booker);
   const hold_tx = await relayerCall(env, env.DIBS_CONTRACT, "hold", { trip: code, n: 1, holder: b.booker }, { failCode: "E_HOLD_FAILED", failMsg: "trip created but bed 1 could not be held" });
 
   const meta: TripMeta = { code, place: b.place, stay: b.stay, created_at: new Date().toISOString(), creator: b.booker };

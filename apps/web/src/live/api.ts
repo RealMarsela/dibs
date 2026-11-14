@@ -161,7 +161,9 @@ export const cardSimulate = (trip: string, merchant: "carlton" | "electronics") 
   post<{ approved: boolean; descriptor: string; reason?: string; result?: string; lithic_request_id?: string }>(`/card/${encodeURIComponent(trip)}/simulate`, { merchant });
 
 /** A one-time nonce and the exact text a booker's NEAR wallet signs (NEP-413) to start a trip as a named account. */
-export const authNonce = () => call<{ nonce: string; recipient: string; message: string; expires_at: string }>("/auth/nonce");
+export const authNonce = () => call<{ nonce: string; recipient: string; message: string; erc191_message: string; expires_at: string }>("/auth/nonce");
+type Nep413Auth = { accountId: string; publicKey: string; signature: string; nonce: string; message: string };
+type Erc191Auth = { address: string; signature: string; nonce: string; message: string };
 export const createTrip = (b: {
   place: string;
   stay: string;
@@ -170,6 +172,6 @@ export const createTrip = (b: {
   beds: number;
   price_usdc: number;
   booker: string;
-  auth?: { accountId: string; publicKey: string; signature: string; nonce: string; message: string };
+  auth?: Nep413Auth | Erc191Auth;
 }) =>
   post<{ code: string; url: string; tx_hash: string; hold_tx?: string; inbox?: string | null }>("/trips", b);

@@ -9,6 +9,7 @@ import type { ChainId } from "@/data/types";
 import { pad2 } from "@/lib/utils";
 import * as api from "@/live/api";
 import { evmTxUrl, isEvmChain } from "@/live/evm-wallet";
+import { isEthAccount } from "@/live/near-wallet";
 import { solTxUrl } from "@/live/solana-wallet";
 
 /* Paying a bed on a live trip, wallet first. The bed is held for this device's passkey key, then the friend's own
@@ -208,7 +209,7 @@ export function LivePay({ n, chain, me, step, setStep }: { n: number; chain: Cha
       <div>
         {wallet}
         {divider("or send it yourself")}
-        <ManualStart chain={chain} busy={busy} err={err} onStart={(refund) => void run(async () => void (await quoteFor(refund)))} />
+        <ManualStart chain={chain} busy={busy} err={err} initial={isEthAccount(me) ? me : ""} onStart={(refund) => void run(async () => void (await quoteFor(refund)))} />
       </div>
     );
   }

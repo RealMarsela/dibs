@@ -12,6 +12,8 @@ export const authRoute = new Hono<{ Bindings: Env }>();
 export const AUTH_RECIPIENT = "dibs.larinova.com";
 export const BOOKER_MESSAGE = "Start a Dibs trip as the booker";
 export const NONCE_TTL_MS = 10 * 60 * 1000;
+/** The exact text an EVM wallet signs (ERC-191 personal_sign) to act as the booker. */
+export const erc191Message = (nonceHex: string): string => `${BOOKER_MESSAGE}\nApp: ${AUTH_RECIPIENT}\nNonce: ${nonceHex}`;
 const NEP413_TAG = 2147484061; // 2^31 + 413
 
 export const proofSchema = z
@@ -55,9 +57,10 @@ export async function nep413Hash(message: string, nonceHex: string, recipient: s
   return new Uint8Array(await crypto.subtle.digest("SHA-256", payload));
 }
 
-const authFail = (code: string, msg: string) => new ApiError(401, code, msg);
+export const authFail = (code: string, msg: string) => new ApiError(401, code, msg);
 
-async function consumeNonce(env: Env, nonce: string): Promise<void> {
+/** Single-use nonce check shared by the NEP-413 and ERC-191 proofs: consumed whatever happens next. */
+export async function consumeNonce(env: Env, nonce: string): Promise<void> {
   const key = `auth/nonce/${nonce}`;
   const obj = await env.BLOBS.get(key);
   if (!obj) throw authFail("E_AUTH_NONCE", "unknown or already used nonce");
@@ -110,5 +113,5 @@ authRoute.get("/auth/nonce", async (c) => {
   const now = Date.now();
   await c.env.BLOBS.put(`auth/nonce/${nonce}`, JSON.stringify({ created_at: now }));
   c.header("cache-control", "no-store");
-  return c.json({ nonce, recipient: AUTH_RECIPIENT, message: BOOKER_MESSAGE, expires_at: new Date(now + NONCE_TTL_MS).toISOString() });
+  return c.json({ nonce, recipient: AUTH_RECIPIENT, message: BOOKER_MESSAGE, erc191_message: erc191Message(nonce), expires_at: new Date(now + NONCE_TTL_MS).toISOString() });
 });

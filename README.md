@@ -64,7 +64,7 @@ testnet. It has its own relayer, `relayer.dibsapp.near`. All ids: [deploy/mainne
 
 ### Pay with your wallet
 
-On a mainnet trip the pay sheet offers the friend's own wallet before the copy-and-send route:
+Every live trip pays from the friend's own wallet first. On mainnet:
 
 - **EVM wallets** (MetaMask, Rabby, Coinbase, Brave…) found through EIP-6963. One tap connects, uses the wallet's
   address for refunds, puts the wallet on Base, Arbitrum or Ethereum (adding the chain if needed), checks its USDC,
@@ -76,6 +76,29 @@ On a mainnet trip the pay sheet offers the friend's own wallet before the copy-a
 - **NEAR wallets** through NEAR Connect (`@hot-labs/near-connect`: HOT, Meteor, Intear, MyNearWallet, NEAR Mobile,
   Ledger and more). The wallet sends USDC straight to the bed's own account with one `ft_transfer`; no swap is needed.
 - **No wallet:** the one-time address, the exact amount and a QR that wallets read (EIP-681 on EVM, Solana Pay).
+
+On testnet trips:
+
+- **NEAR wallets** (NEAR Connect on testnet) sign one transaction: the test token's open `mint` to themselves when they
+  hold none, then `ft_transfer` into the bed.
+- **EVM wallets** pay real Base Sepolia test USDC (Circle's) to the trip's deposit address. `POST /testnet/evm-deposit`
+  reads the receipt, checks the USDC `Transfer` to that address for at least the bed price, refuses a reused hash, then
+  credits the bed on NEAR testnet. It stands in for 1Click, which has no testnet.
+- **Judge demo: no wallet.** A secondary button mints test USDC straight into the bed.
+
+**Friends and the booker sign in with NEAR Connect**, every wallet in its manifest included. "Ethereum Wallets" lets a
+MetaMask user act as the NEAR account named by their 0x address; that friend then pays from Base by default, with the
+same address as the refund address. A friend's signed-in account holds the bed. The booker proves the account on
+[/new](https://dibs.larinova.com/new) with NEP-413 `signMessage` over a one-time server nonce (`GET /auth/nonce`,
+10 minutes, single use; the API checks the payload signature and that the key is a full-access key), or, for an
+Ethereum Wallets account, which cannot `signMessage`, an ERC-191 `personal_sign` of the same nonce by that 0x address.
+The payout goes to that account. A passkey on the device is the secondary judge demo everywhere. No Google or email
+sign-in. NEAR Connect's web wallets (Meteor web and others) open as a tab in the same window
+([patch](patches/@hot-labs__near-connect@0.12.0.patch)).
+
+Bed accounts stay keyless and the relayer sponsors holds: that is protocol, not a wallet. Resale is signed by whoever
+holds the bed: the NEAR wallet itself (`list_for_resale` through NEAR Connect), or for the judge demo the passkey key
+through NEP-366, with gas paid by the relayer.
 
 ## How it works
 
@@ -102,7 +125,8 @@ flowchart LR
   methods only), encrypted proof blobs, names, activity.
 - **Inbox** (`services/inbox`, Cloudflare Email Worker): unwraps forwarded-as-attachment emails byte for byte so
   DKIM still verifies.
-- **App** (`apps/web`, React + ReUI): passkey-derived keys (WebAuthn PRF), no wallet, no gas.
+- **App** (`apps/web`, React + ReUI): wallet first (EIP-6963, Wallet Standard, NEAR Connect); passkey-derived bed keys
+  (WebAuthn PRF) with gas paid by the relayer.
 
 ## NEAR doing real work
 
@@ -120,8 +144,9 @@ flowchart LR
 1. `pnpm install && pnpm verify` re-checks everything in the table above against testnet (no keys needed).
 2. Open the [live Lisbon trip](https://dibs.larinova.com/t/lis0312) and the
    [Singapore trip](https://dibs.larinova.com/t/sin1025) → *See the booking proof*.
-3. [Start your own trip](https://dibs.larinova.com/new): the relayer creates it on testnet, holds bed 1
-   for your passkey account and opens `<code>@dibs.larinova.com` as its inbox. Share the link; friends pay with test USDC.
+3. [Start your own trip](https://dibs.larinova.com/new): sign in with a NEAR testnet wallet (or the judge demo passkey);
+   the relayer creates the trip, holds bed 1 for you and opens `<code>@dibs.larinova.com` as its inbox. Share the link;
+   friends pay from a NEAR wallet or Base Sepolia, or with the judge demo faucet.
 4. Run the attack suite: see [JUDGES.md](JUDGES.md) for the sandbox, verifier and API test commands.
 
 ## Run it yourself

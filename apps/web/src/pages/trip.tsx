@@ -18,6 +18,7 @@ import { DrawSheet } from "@/components/trip/draw-sheet";
 import { CardSheet } from "@/components/trip/card-sheet";
 import { deviceKey } from "@/live/passkey";
 import { devAccounts } from "@/live/dev-keys";
+import { rememberedNear } from "@/live/near-wallet";
 import { cn, countdown } from "@/lib/utils";
 
 const VIEWERS = [
@@ -33,17 +34,30 @@ export function TripPage() {
   const [me, setMe] = useState<string | null>(null);
   const [card, setCard] = useState(false);
   const dev = live ? devAccounts() : [];
+  const [wallet, setWallet] = useState(() => (live ? rememberedNear(network) : null));
 
-  // Live: you are your passkey (or device) account. On localhost, demo personas can be picked for filming.
+  // Live: you are the NEAR wallet you signed in with; without one, this device's passkey account (the judge demo).
+  // On localhost, demo personas can be picked for filming.
   useEffect(() => {
     if (!live) return;
-    deviceKey().then((k) => {
-      setMe(k.accountId);
-      setViewer((v) => v || dev[0] || k.accountId);
-    });
+    const signedIn = () => {
+      const w = rememberedNear(network);
+      setWallet(w);
+      if (w) setViewer(w.accountId);
+    };
+    addEventListener("dibs:wallet", signedIn);
+    if (wallet) setViewer((v) => v || dev[0] || wallet.accountId);
+    else
+      deviceKey().then((k) => {
+        setMe(k.accountId);
+        setViewer((v) => v || dev[0] || k.accountId);
+      });
+    return () => removeEventListener("dibs:wallet", signedIn);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [live]);
-  const viewers = live ? [...dev.map((id) => ({ id, role: roleOf(id, trip) })), ...(me ? [{ id: me, role: "this device" }] : [])] : VIEWERS;
+  }, [live, network]);
+  const viewers = live
+    ? [...dev.map((id) => ({ id, role: roleOf(id, trip) })), ...(wallet ? [{ id: wallet.accountId, role: "your wallet" }] : []), ...(me && me !== wallet?.accountId ? [{ id: me, role: "this device" }] : [])]
+    : VIEWERS;
   const [pay, setPay] = useState<number | null>(null);
   const [exit, setExit] = useState<number | null>(null);
   const [proof, setProof] = useState(false);
@@ -99,7 +113,7 @@ export function TripPage() {
                 className="press h-8 shrink-0 gap-1.5 rounded-full border-0 py-1 pl-1 pr-3 text-[13px] text-fg-2 hover:bg-white/[0.05] hover:text-fg data-[state=on]:bg-fg data-[state=on]:text-void"
               >
                 <Face id={v.id} size={22} />
-                <span className="font-semibold">{PEOPLE[v.id]?.name ?? (v.role === "this device" ? "You" : v.id.split(".")[0].replace(/^./, (c) => c.toUpperCase()))}</span>
+                <span className="font-semibold">{PEOPLE[v.id]?.name ?? (v.role === "this device" ? "You" : /^0x[0-9a-f]{40}$/.test(v.id) ? `${v.id.slice(0, 6)}…${v.id.slice(-4)}` : v.id.split(".")[0].replace(/^./, (c) => c.toUpperCase()))}</span>
                 <span className="opacity-60">{v.role}</span>
               </ToggleGroupItem>
             ))}

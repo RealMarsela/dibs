@@ -9,6 +9,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@noble/curves": "1.9.7",
+    "@noble/hashes": "1.8.0",
     "hono": "^4.13.18",
     "near-api-js": "^7.5.3",
     "zod": "^4.6.7"

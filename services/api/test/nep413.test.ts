@@ -110,6 +110,7 @@ describe("GET /auth/nonce", () => {
     expect(r.status).toBe(200);
     expect(b.nonce).toMatch(/^[0-9a-f]{64}$/);
     expect(b).toMatchObject({ recipient: "dibs.larinova.com", message: BOOKER_MESSAGE });
+    expect((b as { erc191_message?: string }).erc191_message).toBe(`Start a Dibs trip as the booker\nApp: dibs.larinova.com\nNonce: ${b.nonce}`);
     expect(Date.parse(b.expires_at)).toBeGreaterThan(Date.now());
     expect((env.BLOBS as unknown as FakeR2).store.has(`auth/nonce/${b.nonce}`)).toBe(true);
   });

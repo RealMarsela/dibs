@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Fingerprint, Loader2 } from "lucide-react";
+import { Fingerprint, Loader2, Wallet } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Sheet } from "@/components/sheet";
 import { ChainTag } from "@/components/bits";
@@ -12,6 +12,7 @@ import { deviceKey } from "@/live/passkey";
 import { devKey } from "@/live/dev-keys";
 import { explorer } from "@/live/api";
 import { LivePay } from "@/components/trip/live-pay";
+import { connectNear, isEthAccount, nearError } from "@/live/near-wallet";
 
 type Step = "passkey" | "chain" | "deposit" | "tracking" | "done";
 const MAINNET_TRACK = ["Deposit seen on your chain", "Swapped by NEAR Intents", "Landed in your bed’s own account", "Counted in the crew DAO"];
@@ -64,32 +65,62 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
     return () => clearTimeout(id);
   }, [step, track, live]);
 
+  /* The bed is claimed by the account that signs in: a NEAR Connect wallet (an Ethereum Wallets sign-in is its 0x
+     address, which then pays from Base by default), or for the judge demo this device's passkey account. */
+  async function withWallet() {
+    setBusy(true);
+    setErr(null);
+    try {
+      const s = await connectNear(network);
+      setMe(s.accountId);
+      setChain(isEthAccount(s.accountId) ? "base" : "near");
+      setStep("chain");
+    } catch (e) {
+      setErr(nearError(e, "your NEAR wallet"));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function withPasskey() {
+    setBusy(true);
+    setErr(null);
+    try {
+      if (mainnet) setMe((await deviceKey()).accountId);
+      else if (live) setMe((devKey(who) ?? (await deviceKey())).accountId);
+      else await new Promise((r) => setTimeout(r, 700));
+      setStep("chain");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const c = CHAINS[chain];
   const send = trip.price * (1 + c.fee);
   const bedAccount = live ? `b${pad2(n ?? 0)}-${code}.${contract}` : `b${pad2(n ?? 0)}-${trip.code.toLowerCase()}.dibs.near`;
 
   return (
     <Sheet open={n !== null} onOpenChange={(o) => !o && onClose()} eyebrow={`Bed ${pad2(n ?? 0)} · ${trip.place}`} title={titles[step]}>
-      {step === "passkey" && (
+      {step === "passkey" && live && (
         <div>
           <p className="text-[15px] leading-relaxed text-fg-2">
-            A passkey on this phone becomes the only key bed {pad2(n ?? 0)} listens to. Next, you pay from your own wallet.
+            Claim bed {pad2(n ?? 0)} with your own NEAR wallet. MetaMask works too: Ethereum Wallets makes its address your NEAR account.
           </p>
-          <button
-            className="pill-light focus-ring mt-6 w-full"
-            disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              try {
-                if (mainnet) setMe((await deviceKey()).accountId);
-                else if (live) setMe((devKey(who) ?? (await deviceKey())).accountId);
-                else await new Promise((r) => setTimeout(r, 700));
-                setStep("chain");
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
+          <button className="pill-light focus-ring mt-6 w-full" disabled={busy} onClick={withWallet}>
+            {busy ? <Loader2 className="size-4 animate-spin" /> : <Wallet className="size-4" />}
+            Connect a NEAR wallet
+          </button>
+          {err && <p className="mt-3 rounded-xl bg-refused/10 px-3 py-2 text-[13.5px] text-refused" role="alert">{err}</p>}
+          <button className="focus-ring mt-3 flex w-full items-center justify-center gap-1.5 rounded-md text-[12.5px] text-fg-3 underline decoration-white/20 underline-offset-4 hover:text-fg" disabled={busy} onClick={withPasskey}>
+            <Fingerprint className="size-3.5" /> Judge demo: no wallet, use a passkey on this device
+          </button>
+        </div>
+      )}
+      {step === "passkey" && !live && (
+        <div>
+          <p className="text-[15px] leading-relaxed text-fg-2">
+            A passkey on this phone becomes the only key bed {pad2(n ?? 0)} listens to. No wallet, no seed phrase, no gas.
+          </p>
+          <button className="pill-light focus-ring mt-6 w-full" disabled={busy} onClick={withPasskey}>
             {busy ? <Loader2 className="size-4 animate-spin" /> : <Fingerprint className="size-4" />}
             Hold bed {pad2(n ?? 0)} with a passkey
           </button>

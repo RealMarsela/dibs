@@ -89,6 +89,23 @@ export async function sendUsdc(w: EvmWallet, c: EvmChain, from: string, to: stri
   return (await w.provider.request({ method: "eth_sendTransaction", params: [{ from, to: CHAIN[c].usdc, data, value: "0x0" }] })) as string;
 }
 
+/** ERC-191 personal_sign by the browser wallet that holds `address` (an Ethereum Wallets NEAR account is that address). */
+export async function signErc191(address: string, message: string): Promise<string> {
+  const wallets = await new Promise<EvmWallet[]>((resolve) => {
+    let list: EvmWallet[] = [];
+    const stop = discoverEvmWallets((w) => (list = w));
+    setTimeout(() => (stop(), resolve(list)), 600);
+  });
+  const want = address.toLowerCase();
+  for (const w of wallets) {
+    const accounts = ((await w.provider.request({ method: "eth_requestAccounts" })) as string[]).map((a) => a.toLowerCase());
+    if (!accounts.includes(want)) continue;
+    const hex = `0x${[...new TextEncoder().encode(message)].map((b) => b.toString(16).padStart(2, "0")).join("")}`;
+    return (await w.provider.request({ method: "personal_sign", params: [hex, want] })) as string;
+  }
+  throw new Error(`No wallet in this browser holds ${address.slice(0, 6)}…${address.slice(-4)}. Open the wallet you signed in with.`);
+}
+
 export async function disconnectEvm(w: EvmWallet): Promise<void> {
   try {
     await w.provider.request({ method: "wallet_revokePermissions", params: [{ eth_accounts: {} }] });

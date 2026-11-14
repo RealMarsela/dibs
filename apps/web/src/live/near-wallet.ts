@@ -20,13 +20,44 @@ export interface NearSession {
   wallet: string;
 }
 
+const REMEMBER = (net: NearNet) => `dibs.near.${net}`;
+/** The NEAR account this browser signed in with, without loading NEAR Connect (for "acting as" and defaults). */
+export function rememberedNear(net: NearNet): NearSession | null {
+  try {
+    return JSON.parse(localStorage.getItem(REMEMBER(net)) ?? "null") as NearSession | null;
+  } catch {
+    return null;
+  }
+}
+function remember(net: NearNet, s: NearSession | null) {
+  try {
+    if (s) localStorage.setItem(REMEMBER(net), JSON.stringify(s));
+    else localStorage.removeItem(REMEMBER(net));
+  } catch {
+    /* private window */
+  }
+  window.dispatchEvent(new Event("dibs:wallet"));
+}
+
+/** Sign in with NEAR Connect. Reuses the wallet already connected in this browser, so paying never asks twice. */
 export async function connectNear(net: NearNet): Promise<NearSession> {
   const c = await get(net);
+  try {
+    const { wallet: w, accounts } = await c.getConnectedWallet();
+    if (accounts[0]?.accountId) return (remember(net, { accountId: accounts[0].accountId, wallet: w.manifest.name }), rememberedNear(net)!);
+  } catch {
+    /* not connected yet */
+  }
   const w = await c.connect();
   const [a] = await w.getAccounts({ network: net });
   if (!a?.accountId) throw new Error("The wallet did not share an account.");
-  return { accountId: a.accountId, wallet: w.manifest.name };
+  const s = { accountId: a.accountId, wallet: w.manifest.name };
+  remember(net, s);
+  return s;
 }
+
+/** An Ethereum Wallets sign-in: the NEAR account id is the wallet's own 0x address. */
+export const isEthAccount = (accountId: string) => /^0x[0-9a-f]{40}$/.test(accountId);
 
 async function wallet(net: NearNet): Promise<NearWalletBase> {
   return (await get(net)).wallet();
@@ -111,7 +142,16 @@ export async function signInNear(net: NearNet, s: NearSession, message: string, 
   return { accountId: out.accountId, publicKey: out.publicKey.startsWith("ed25519:") ? out.publicKey : `ed25519:${out.publicKey}`, signature: signatureBase64(out.signature), nonce: nonceHex, message };
 }
 
+/** One contract call signed by the friend's own NEAR wallet (for actions only the bed's holder may take). */
+export async function callFromNear(net: NearNet, s: NearSession, receiverId: string, methodName: string, args: object, gas = "300000000000000"): Promise<string> {
+  const out = await (await wallet(net)).signAndSendTransaction({ network: net, signerId: s.accountId, receiverId, actions: [{ type: "FunctionCall", params: { methodName, args, gas, deposit: "0" } }] });
+  const hash = (out as { transaction?: { hash?: string } })?.transaction?.hash;
+  if (!hash) throw new Error("The wallet did not return a transaction.");
+  return hash;
+}
+
 export async function disconnectNear(net: NearNet): Promise<void> {
+  remember(net, null);
   try {
     await (await get(net)).disconnect();
   } catch {

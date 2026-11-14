@@ -33,6 +33,10 @@ Key transactions it cites: booking proof accepted `54g9Y2qgKPNFamFeN6tQUgpR1AqU3
 
 https://dibs.larinova.com/t/lis0312
 
+No wallet? Every pay sheet and the start-a-trip page have a secondary **Judge demo: no wallet** route (a passkey on your
+device and the test faucet). With a wallet, [/new](https://dibs.larinova.com/new) signs you in as the booker through
+NEAR Connect (NEP-413), and friends pay from a NEAR testnet wallet or an EVM wallet on Base Sepolia.
+
 ### On mainnet (real money, no wallet needed to look)
 
 https://dibs.larinova.com/t/lismain shows "NEAR mainnet · real USDC". Bed 2 was paid with real USDC on NEAR and swept into

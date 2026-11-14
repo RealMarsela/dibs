@@ -18,8 +18,9 @@ const SOL_USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 export const amount = (base: string) => (Number(base) / 1e6).toFixed(6).replace(/0{1,4}$/, "");
 const validRefund = (c: ChainId, a: string) => (c === "solana" ? /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a) : /^0x[0-9a-fA-F]{40}$/.test(a));
 
-export function ManualStart({ chain, busy, err, onStart }: { chain: ChainId; busy: boolean; err: string | null; onStart: (refundTo: string) => void }) {
-  const [refundTo, setRefundTo] = useState("");
+export function ManualStart({ chain, busy, err, onStart, initial = "" }: { chain: ChainId; busy: boolean; err: string | null; onStart: (refundTo: string) => void; initial?: string }) {
+  // A friend who signed in through Ethereum Wallets refunds to that same 0x address unless they change it.
+  const [refundTo, setRefundTo] = useState(chain !== "solana" ? initial : "");
   return (
     <div>
       {chain !== "near" && (

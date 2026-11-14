@@ -7,7 +7,8 @@ import { DateField, ymd } from "@/components/date-field";
 import { Sweep } from "@/components/motion/sweep";
 import { usd } from "@/lib/utils";
 import { authNonce, createTrip } from "@/live/api";
-import { connectNear, disconnectNear, nearError, signInNear, type NearSession } from "@/live/near-wallet";
+import { signErc191 } from "@/live/evm-wallet";
+import { connectNear, disconnectNear, isEthAccount, nearError, signInNear, type NearSession } from "@/live/near-wallet";
 import { deviceKey } from "@/live/passkey";
 
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
@@ -82,7 +83,10 @@ export function NewTripPage() {
       let r;
       if (booker) {
         const n = await authNonce();
-        const auth = await signInNear("testnet", booker, n.message, n.recipient, n.nonce);
+        // Ethereum Wallets accounts cannot signMessage through NEAR Connect: the same EVM wallet proves the 0x address (ERC-191).
+        const auth = isEthAccount(booker.accountId)
+          ? { address: booker.accountId, signature: await signErc191(booker.accountId, n.erc191_message), nonce: n.nonce, message: n.erc191_message }
+          : await signInNear("testnet", booker, n.message, n.recipient, n.nonce);
         r = await createTrip({ ...base, booker: booker.accountId, auth });
       } else {
         r = await createTrip({ ...base, booker: (await deviceKey()).accountId });
