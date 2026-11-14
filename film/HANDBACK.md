@@ -38,7 +38,7 @@ A clip is used only after `python3 -I scripts/footage-ready.py` has probed it co
 
 ## One-line swaps
 - Voice variant A (mainnet line + receipt): `"variant": "A"` in `voice/placement.json`, then `python3 -I scripts/build-timeline.py`.
-- End-card URL: `FACTS.liveUrl` in `src/tokens.ts` (currently `preview.dibs-trips.pages.dev/t/lis0312`, provisional).
+- End-card URL: `FACTS.liveUrl` in `src/tokens.ts` (`dibs.larinova.com/t/lis0312`, production named by Gabriel 14 Nov).
 - Proof honesty switch: `PROOF_ACCEPTED` in `src/tokens.ts` (true: accepted on chain, tx 54g9Y2qg...).
 - Re-render: `scripts/render.sh vN` (disk check, machine-wide render slot, master, captions), QA: `python3 -I scripts/qa.py out/dibs-film-vN.mp4`.
 

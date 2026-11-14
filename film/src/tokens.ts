@@ -84,9 +84,8 @@ export const FACTS = {
   checksPassed: 46,
   checksTotal: 46,
   attacksRefused: 35,
-  /* The URL on the end card. Provisional (coordinator, 14 Nov): the live app today is preview.dibs-trips.pages.dev and
-     Gabriel has not named production. ONE-LINE SWAP when he does. */
-  liveUrl: "preview.dibs-trips.pages.dev/t/lis0312",
+  /* The URL on the end card. Gabriel named production on 14 Nov: dibs.larinova.com. ONE-LINE SWAP if it changes. */
+  liveUrl: "dibs.larinova.com/t/lis0312",
   repo: "github.com/RealMarsela/dibs",
   /* The proof beat uses a REAL booking (coordinator, 14 Nov): trip sin1025, Gabriel's own booking.com confirmation.
      Redacted: never his name, address or booking reference. */
