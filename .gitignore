@@ -7,3 +7,8 @@ target
 *.local.md
 .DS_Store
 neardev
+
+# project-only secrets (never committed, never in the shared vault)
+.secrets/
+contracts/build/
+contracts/deploy/*.local.json
