@@ -11,7 +11,7 @@ import { cn, pad2, usd } from "@/lib/utils";
 import { deviceKey } from "@/live/passkey";
 import { devKey } from "@/live/dev-keys";
 import { explorer } from "@/live/api";
-import { MainnetPay } from "@/components/trip/mainnet-pay";
+import { LivePay } from "@/components/trip/live-pay";
 
 type Step = "passkey" | "chain" | "deposit" | "tracking" | "done";
 const MAINNET_TRACK = ["Deposit seen on your chain", "Swapped by NEAR Intents", "Landed in your bed’s own account", "Counted in the crew DAO"];
@@ -40,7 +40,7 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
   // The pay call starts as tracking begins; the visual steps advance on their own but the last one waits
   // for the chain, so "Counted in the crew DAO" is only ticked once the contract says Paid.
   useEffect(() => {
-    if (step !== "tracking" || n === null || mainnet) return;
+    if (step !== "tracking" || n === null || live) return;
     let alive = true;
     setErr(null);
     act
@@ -59,7 +59,7 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
   }, [step]);
 
   useEffect(() => {
-    if (step !== "tracking" || track >= TRACK.length - 1 || mainnet) return;
+    if (step !== "tracking" || track >= TRACK.length - 1 || live) return;
     const id = setTimeout(() => setTrack((t) => t + 1), live ? 1400 : 900);
     return () => clearTimeout(id);
   }, [step, track, live]);
@@ -73,7 +73,7 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
       {step === "passkey" && (
         <div>
           <p className="text-[15px] leading-relaxed text-fg-2">
-            A passkey on this phone becomes the only key bed {pad2(n ?? 0)} listens to. No wallet, no seed phrase, no gas.
+            A passkey on this phone becomes the only key bed {pad2(n ?? 0)} listens to. Next, you pay from your own wallet.
           </p>
           <button
             className="pill-light focus-ring mt-6 w-full"
@@ -133,13 +133,13 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
         </div>
       )}
 
-      {mainnet && n !== null && me && (step === "deposit" || step === "tracking" || step === "done") && <MainnetPay n={n} chain={chain} me={me} step={step} setStep={setStep} />}
-      {mainnet && step === "done" && (
+      {live && n !== null && me && (step === "deposit" || step === "tracking" || step === "done") && <LivePay n={n} chain={chain} me={me} step={step} setStep={setStep} />}
+      {live && step === "done" && (
         <button className="pill-light focus-ring mt-6 w-full" onClick={onClose}>
           Back to the trip
         </button>
       )}
-      {!mainnet && step === "deposit" && (
+      {!live && step === "deposit" && (
         <div>
           <div className="flex items-center gap-4 rounded-xl border border-line bg-white/[0.04] p-4">
             <div className="rounded-lg bg-panel p-2">
@@ -152,21 +152,19 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
             </div>
           </div>
           <p className="mt-3 break-all rounded-xl bg-white/[0.06] px-3 py-2 text-[12.5px] leading-relaxed text-fg-2">
-            {live
-              ? "Testnet: NEAR Intents runs on mainnet only, so the test faucet stands in for your deposit and lands the exact amount in your bed's account."
-              : `Preview: the real one-time ${c.name} deposit address appears here.`}
+            {`Preview: the real one-time ${c.name} deposit address appears here.`}
           </p>
           {me && <p className="mt-2 text-[12px] text-fg-3">Your key: {me.length > 24 ? `${me.slice(0, 8)}…${me.slice(-6)}` : me}</p>}
           <p className="mt-4 text-[14px] text-fg-2">
             It arrives in <span className="font-mono text-[13px] text-fg">{bedAccount}</span>, an account with no keys. Its code can only count you in.
           </p>
           <button className="pill-light focus-ring mt-5 w-full" onClick={() => setStep("tracking")}>
-            {live ? "Send the test deposit" : "I’ve sent it"}
+            I’ve sent it
           </button>
         </div>
       )}
 
-      {!mainnet && (step === "tracking" || step === "done") && (
+      {!live && (step === "tracking" || step === "done") && (
         <div>
           <ProgressSteps steps={TRACK.map((title) => ({ title }))} done={step === "done" ? TRACK.length : track} />
           {err && <p className="mt-4 rounded-xl bg-refused/10 px-3 py-2 text-[13.5px] text-refused">{err}</p>}
@@ -175,7 +173,7 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
               Receipt on NEAR ↗
             </a>
           )}
-          {step === "done" && !mainnet && (
+          {step === "done" && (
             <button className="pill-light focus-ring mt-6 w-full" onClick={onClose}>
               Back to the trip
             </button>

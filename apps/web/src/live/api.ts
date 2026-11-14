@@ -107,6 +107,10 @@ export const accountExplorer = (a: string) => `https://${current === "mainnet" ?
 /* Live wiring endpoints (services/api, Lane G) and the trip inbox / card. */
 export const INBOX = (import.meta.env.VITE_DIBS_INBOX as string | undefined)?.replace(/\/$/, "") ?? "";
 
+/** Testnet: a friend's own EVM wallet pays test USDC on Base Sepolia to this address; the API verifies it and credits the bed. */
+export const evmInfo = () => call<{ chainId: number; chain: string; usdc: string; address: string }>("/testnet/evm-info");
+export const evmDeposit = (b: { trip: string; kind: "bed" | "wait"; n: number; txHash: string }) =>
+  post<{ evm_tx: string; from: string; mint_tx: string; sweep_tx: string | null; status: string }>("/testnet/evm-deposit", b);
 export const fund = (b: { trip: string; kind: "bed" | "wait"; n: number }) => post<{ mint_tx?: string; sweep_tx?: string; status?: string }>("/testnet/fund", b);
 export const refundCheck = (b: { trip: string; n: number }) => post<{ code: string; tx_hash?: string }>("/refund-check", b);
 export const draw = (trip: string) => post<{ tx_hash: string }>("/draw", { trip });
@@ -156,5 +160,16 @@ export const cardGet = (trip: string) => call<CardInfo>(`/card/${encodeURICompon
 export const cardSimulate = (trip: string, merchant: "carlton" | "electronics") =>
   post<{ approved: boolean; descriptor: string; reason?: string; result?: string; lithic_request_id?: string }>(`/card/${encodeURIComponent(trip)}/simulate`, { merchant });
 
-export const createTrip = (b: { place: string; stay: string; check_in: string; check_out: string; beds: number; price_usdc: number; booker: string }) =>
+/** A one-time nonce and the exact text a booker's NEAR wallet signs (NEP-413) to start a trip as a named account. */
+export const authNonce = () => call<{ nonce: string; recipient: string; message: string; expires_at: string }>("/auth/nonce");
+export const createTrip = (b: {
+  place: string;
+  stay: string;
+  check_in: string;
+  check_out: string;
+  beds: number;
+  price_usdc: number;
+  booker: string;
+  auth?: { accountId: string; publicKey: string; signature: string; nonce: string; message: string };
+}) =>
   post<{ code: string; url: string; tx_hash: string; hold_tx?: string; inbox?: string | null }>("/trips", b);

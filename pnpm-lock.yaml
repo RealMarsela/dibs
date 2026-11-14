@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@hot-labs/near-connect@0.12.0': 710c5bd72ed31c7e9931cced7365ff035b03e0e7dcb415b1f62ec59765f50067
+
 importers:
 
   .: {}
@@ -24,7 +27,7 @@ importers:
         version: 5.3.0
       '@hot-labs/near-connect':
         specifier: 0.12.0
-        version: 0.12.0
+        version: 0.12.0(patch_hash=710c5bd72ed31c7e9931cced7365ff035b03e0e7dcb415b1f62ec59765f50067)
       '@noble/ed25519':
         specifier: ^3.2.0
         version: 3.2.0
@@ -140,7 +143,7 @@ importers:
         version: 5.1.0(@types/node@24.19.2)(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0))
       wrangler:
         specifier: ^4.161.0
-        version: 4.161.0(@cloudflare/workers-types@5.20261112.1)(@types/node@24.19.2)
+        version: 4.161.0(@cloudflare/workers-types@5.20261112.1)(@types/node@24.19.2)(bufferutil@4.2.0)(utf-8-validate@6.0.6)
 
   services/inbox:
     dependencies:
@@ -168,7 +171,7 @@ importers:
         version: 5.1.0(@types/node@24.19.2)(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0))
       wrangler:
         specifier: ^4.161.0
-        version: 4.161.0(@cloudflare/workers-types@5.20261112.1)(@types/node@24.19.2)
+        version: 4.161.0(@cloudflare/workers-types@5.20261112.1)(@types/node@24.19.2)(bufferutil@4.2.0)(utf-8-validate@6.0.6)
 
 packages:
 
@@ -3063,7 +3066,7 @@ snapshots:
 
   '@fontsource-variable/jetbrains-mono@5.3.0': {}
 
-  '@hot-labs/near-connect@0.12.0': {}
+  '@hot-labs/near-connect@0.12.0(patch_hash=710c5bd72ed31c7e9931cced7365ff035b03e0e7dcb415b1f62ec59765f50067)': {}
 
   '@img/colour@1.1.0': {}
 
@@ -4752,13 +4755,13 @@ snapshots:
       inherits: 2.0.4
       safe-buffer: 5.2.1
 
-  miniflare@5.20261110.2-beta(@types/node@24.19.2):
+  miniflare@5.20261110.2-beta(@types/node@24.19.2)(bufferutil@4.2.0)(utf-8-validate@6.0.6):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       sharp: 0.35.5(@types/node@24.19.2)
       undici: 7.30.1
       workerd: 1.20261110.1
-      ws: 8.21.0
+      ws: 8.21.0(bufferutil@4.2.0)(utf-8-validate@6.0.6)
       youch: 4.1.0-beta.10
     transitivePeerDependencies:
       - '@types/node'
@@ -5293,14 +5296,14 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20261110.1
       '@cloudflare/workerd-windows-64': 1.20261110.1
 
-  wrangler@4.161.0(@cloudflare/workers-types@5.20261112.1)(@types/node@24.19.2):
+  wrangler@4.161.0(@cloudflare/workers-types@5.20261112.1)(@types/node@24.19.2)(bufferutil@4.2.0)(utf-8-validate@6.0.6):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.5.0
       '@cloudflare/unenv-preset': 2.16.2(unenv@2.0.0-rc.24)(workerd@1.20261110.1)
       '@cspotcode/source-map-support': 0.8.1
       blake3-wasm: 2.1.5
       esbuild: 0.28.2
-      miniflare: 5.20261110.2-beta(@types/node@24.19.2)
+      miniflare: 5.20261110.2-beta(@types/node@24.19.2)(bufferutil@4.2.0)(utf-8-validate@6.0.6)
       path-to-regexp: 6.3.0
       unenv: 2.0.0-rc.24
       workerd: 1.20261110.1
@@ -5317,8 +5320,6 @@ snapshots:
     optionalDependencies:
       bufferutil: 4.2.0
       utf-8-validate: 6.0.6
-
-  ws@8.21.0: {}
 
   ws@8.21.0(bufferutil@4.2.0)(utf-8-validate@6.0.6):
     optionalDependencies:

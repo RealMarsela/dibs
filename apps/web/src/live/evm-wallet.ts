@@ -2,7 +2,7 @@
    EIP-6963 to find every installed wallet (MetaMask, Rabby, Coinbase, Brave…), EIP-1193 to talk to it,
    EIP-3326/3085 to put it on the right chain and EIP-2255 to let it go again. No SDK sits in between. */
 
-export type EvmChain = "base" | "arbitrum" | "ethereum";
+export type EvmChain = "base" | "arbitrum" | "ethereum" | "base-sepolia";
 
 interface Eip1193 {
   request(args: { method: string; params?: unknown }): Promise<unknown>;
@@ -18,6 +18,8 @@ const CHAIN: Record<EvmChain, { id: number; usdc: string; name: string; rpc: str
   base: { id: 8453, usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", name: "Base", rpc: "https://mainnet.base.org", explorer: "https://basescan.org" },
   arbitrum: { id: 42161, usdc: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831", name: "Arbitrum One", rpc: "https://arb1.arbitrum.io/rpc", explorer: "https://arbiscan.io" },
   ethereum: { id: 1, usdc: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", name: "Ethereum", rpc: "https://ethereum-rpc.publicnode.com", explorer: "https://etherscan.io" },
+  // Testnet trips: Circle's test USDC on Base Sepolia, verified by the API, which credits the bed on NEAR testnet.
+  "base-sepolia": { id: 84532, usdc: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", name: "Base Sepolia", rpc: "https://sepolia.base.org", explorer: "https://sepolia.basescan.org" },
 };
 
 export const isEvmChain = (c: string): c is EvmChain => c in CHAIN;
@@ -104,5 +106,6 @@ export function evmError(e: unknown, wallet: string, c: EvmChain): string {
   if (code(e) === -32002) return `${wallet} already has a request open. Open ${wallet} and answer it.`;
   if (code(e) === 4100) return `${wallet} is locked or has not allowed this site. Unlock it and try again.`;
   if (/insufficient funds|exceeds balance|gas required/i.test(m)) return `${wallet} needs a little ETH on ${CHAIN[c].name} to pay the network fee.`;
+  if ((e as { code?: string | number })?.code === "E_EVM_TX_FAILED") return `That transaction failed on ${CHAIN[c].name}. Nothing was credited.`;
   return m.length > 160 ? `${wallet} could not send it: ${m.slice(0, 157)}…` : m;
 }

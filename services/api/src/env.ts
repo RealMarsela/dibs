@@ -16,6 +16,9 @@ export interface Env {
   MAIL_DOMAIN?: string;
   /** Override for tests; default https://sandbox.lithic.com */
   LITHIC_BASE?: string;
+  /** Testnet EVM deposit address (Base Sepolia test USDC lands here) and a comma list of Base Sepolia RPC URLs. */
+  TESTNET_EVM_DEPOSIT?: string;
+  BASE_SEPOLIA_RPC_URLS?: string;
   // secrets
   RELAYER_PRIVATE_KEY: string;
   DIBS_BLOB_KEY: string;

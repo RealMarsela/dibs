@@ -4,10 +4,11 @@ import { ApiError, parse, readJson } from "./errors";
 import type { Env } from "./env";
 import { clientIp, GAS_300, NEAR, relayerCall } from "./calls";
 import { ensureImplicitAccount } from "./bootstrap";
-import { nearBalance, view } from "./near";
+import { accountExists, nearBalance, view } from "./near";
 import { recordActivity } from "./activity";
 import { addInboxRule } from "./inboxrule";
 import { tripCode } from "./schemas";
+import { BOOKER_MESSAGE, proofSchema, verifyNep413 } from "./nep413";
 
 export const createRoute = new Hono<{ Bindings: Env }>();
 
@@ -34,6 +35,10 @@ const ymd = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD").refine((s) => 
 const text = (min: number, max: number) =>
   z.string().trim().min(min).max(max).refine((s) => !/[\u0000-\u001f<>]/.test(s), "no control characters or angle brackets");
 
+const IMPLICIT = z.string().regex(/^[0-9a-f]{64}$/);
+const NAMED = /^(?=.{2,64}$)([a-z\d]+[-_])*[a-z\d]+(\.([a-z\d]+[-_])*[a-z\d]+)*$/;
+const isImplicit = (a: string): boolean => /^[0-9a-f]{64}$/.test(a);
+
 export const createBody = z
   .object({
     place: text(2, 40),
@@ -42,7 +47,8 @@ export const createBody = z
     check_out: ymd,
     beds: z.number().int().min(2).max(6),
     price_usdc: z.number().int().min(1).max(50),
-    booker: z.string().regex(/^[0-9a-f]{64}$/, "booker must be a 64-hex implicit account"),
+    booker: z.union([IMPLICIT, z.string().regex(NAMED, "booker must be a 64-hex implicit account or a NEAR account id")]),
+    auth: proofSchema.optional(),
   })
   .strict()
   .superRefine((b, ctx) => {
@@ -73,7 +79,9 @@ createRoute.post("/trips", async (c) => {
   const env = c.env;
   const b = parse(createBody, await readJson(c));
   const dao = env.TRIP_DAO;
+  const named = !isImplicit(b.booker);
   if (!dao) throw new ApiError(503, "E_NOT_CONFIGURED", "trip creation is not enabled on this deployment");
+  if (named && !b.auth) throw new ApiError(401, "E_AUTH_REQUIRED", "a named NEAR account needs a signed NEP-413 proof (auth)");
   const day = new Date().toISOString().slice(0, 10);
   const ip = clientIp(c);
   // Check both counters before bumping either, so a refused request costs the caller nothing.
@@ -82,6 +90,11 @@ createRoute.post("/trips", async (c) => {
   if (Number((await env.NAMES.get(ipKey)) ?? 0) >= PER_IP_PER_DAY) throw new ApiError(429, "E_RATE_LIMIT", "2 trips per person per day");
   if (Number((await env.NAMES.get(dayKey)) ?? 0) >= PER_DAY) throw new ApiError(429, "E_DAILY_CAP", "the demo has reached today's trip limit, try tomorrow");
   if ((await nearBalance(env, env.RELAYER_ACCOUNT_ID)) < MIN_RELAYER) throw new ApiError(503, "E_RELAYER_LOW", "the demo relayer is low on testnet NEAR, try later");
+  if (named) {
+    // Verify only after the cheap quota and balance checks; the proof consumes its nonce.
+    if ((await verifyNep413(env, b.auth!, BOOKER_MESSAGE)) !== b.booker) throw new ApiError(401, "E_AUTH_ACCOUNT", "the proof is for a different account than booker");
+    if (!(await accountExists(env, b.booker))) throw new ApiError(400, "E_ACCOUNT_NOT_FOUND", `account ${b.booker} does not exist`);
+  }
   let code = makeCode(b.place);
   for (let i = 0; i < 4 && (await view(env, env.DIBS_CONTRACT, "get_trip", { trip: code })); i++) code = makeCode(b.place);
   tripCode.parse(code);
@@ -99,7 +112,7 @@ createRoute.post("/trips", async (c) => {
     { deposit: cost + MARGIN, gas: GAS_300, failCode: "E_CREATE_FAILED", failMsg: "the contract refused the trip (dates, code or funds)" },
   );
 
-  await ensureImplicitAccount(env, b.booker);
+  if (!named) await ensureImplicitAccount(env, b.booker);
   const hold_tx = await relayerCall(env, env.DIBS_CONTRACT, "hold", { trip: code, n: 1, holder: b.booker }, { failCode: "E_HOLD_FAILED", failMsg: "trip created but bed 1 could not be held" });
 
   const meta: TripMeta = { code, place: b.place, stay: b.stay, created_at: new Date().toISOString(), creator: b.booker };

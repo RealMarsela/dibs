@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createApp } from "../src/index";
 import { makeCode } from "../src/create";
 import { clearTripCache } from "../src/trip";
-import { json, makeEnv } from "./helpers";
+import { KeyPair } from "near-api-js";
+import { nep413Hash } from "../src/nep413";
+import { json, makeEnv, type FakeR2 } from "./helpers";
 
 const near = vi.hoisted(() => ({ view: vi.fn(), relayerAccount: vi.fn(), accountExists: vi.fn(), nearBalance: vi.fn() }));
 vi.mock("../src/near", async (orig) => ({ ...(await orig<typeof import("../src/near")>()), ...near }));
@@ -68,12 +70,45 @@ describe("POST /trips", () => {
     ["out before in", { check_out: soon(20) }], ["past", { check_in: "2020-01-01", check_out: "2020-01-03" }],
     ["too far", { check_in: soon(900), check_out: soon(903) }], ["1 bed", { beds: 1 }], ["7 beds", { beds: 7 }],
     ["price 0", { price_usdc: 0 }], ["price 51", { price_usdc: 51 }], ["fractional price", { price_usdc: 2.5 }],
-    ["named booker", { booker: "maya.testnet" }], ["extra key", { dao: "evil.testnet" }], ["markup", { place: "<b>Lisbon</b>" }],
+    ["bad booker", { booker: "Maya Q" }], ["extra key", { dao: "evil.testnet" }], ["markup", { place: "<b>Lisbon</b>" }],
   ])("rejects %s with E_BAD_INPUT and sends nothing", async (_n, over) => {
     const r = await post({ ...good(), ...over });
     expect(r.status).toBe(400);
     expect((await err(r)).code).toBe("E_BAD_INPUT");
     expect(call).not.toHaveBeenCalled();
+  });
+  it("named booker without auth is refused with 401 E_AUTH_REQUIRED and sends nothing", async () => {
+    const r = await post({ ...good(), booker: "maya.testnet" });
+    expect(r.status).toBe(401);
+    expect((await err(r)).code).toBe("E_AUTH_REQUIRED");
+    expect(call).not.toHaveBeenCalled();
+  });
+  it("named booker with a proof for a different account is 401 E_AUTH_ACCOUNT", async () => {
+    const e = env();
+    const auth = { accountId: "eve.testnet", publicKey: "ed25519:" + "1".repeat(44), signature: "A".repeat(86) + "==", nonce: "00".repeat(32), message: "Start a Dibs trip as the booker" };
+    const r = await post({ ...good(), booker: "maya.testnet", auth }, e);
+    expect(r.status).toBe(401); // no nonce stored: refused before any chain write
+    expect(call).not.toHaveBeenCalled();
+  });
+  it("named booker with a valid proof creates the trip without bootstrapping an implicit account", async () => {
+    const kp = KeyPair.fromRandom("ed25519");
+    const nonce = "cd".repeat(32);
+    const message = "Start a Dibs trip as the booker";
+    const sig = kp.sign(await nep413Hash(message, nonce)).signature;
+    const auth = { accountId: "maya.testnet", publicKey: kp.getPublicKey().toString(), signature: btoa(String.fromCharCode(...sig)), nonce, message };
+    const e = env();
+    await (e.BLOBS as unknown as FakeR2).put(`auth/nonce/${nonce}`, JSON.stringify({ created_at: Date.now() }));
+    near.accountExists.mockResolvedValue(true);
+    vi.stubGlobal("fetch", vi.fn(async (_u: string, init?: RequestInit) =>
+      new Response(JSON.stringify(String(init?.body).includes("view_access_key") ? { result: { nonce: 1, permission: "FullAccess" } } : { success: true }))));
+    const r = await post({ ...good(), booker: "maya.testnet", auth }, e);
+    expect(r.status).toBe(200);
+    expect(transfer).not.toHaveBeenCalled();
+    const [create, hold] = call.mock.calls.map((c) => c[0]);
+    expect(create.args.booker).toBe("maya.testnet");
+    expect(hold.args.holder).toBe("maya.testnet");
+    // The nonce is single use.
+    expect((await err(await post({ ...good(), booker: "maya.testnet", auth }, e, "3.3.3.3"))).code).toBe("E_AUTH_NONCE");
   });
   it("503 E_NOT_CONFIGURED without a DAO", async () => {
     expect((await err(await post(good(), makeEnv()))).code).toBe("E_NOT_CONFIGURED");

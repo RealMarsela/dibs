@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Loader2, Minus, Plus } from "lucide-react";
+import { Fingerprint, Loader2, Minus, Plus, Wallet } from "lucide-react";
 import { Wordmark } from "@/components/bits";
 import { Input } from "@/components/ui/input";
 import { DateField, ymd } from "@/components/date-field";
 import { Sweep } from "@/components/motion/sweep";
 import { usd } from "@/lib/utils";
-import { createTrip } from "@/live/api";
+import { authNonce, createTrip } from "@/live/api";
+import { connectNear, disconnectNear, nearError, signInNear, type NearSession } from "@/live/near-wallet";
 import { deviceKey } from "@/live/passkey";
 
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
@@ -40,8 +41,9 @@ const today = () => {
   return d;
 };
 
-/* Creates a real trip on NEAR testnet: the API's relayer calls create_trip with this device's passkey account as
-   the booker, holds bed 1 for it, and opens the trip's inbox address. Small trips only, for the hackathon. */
+/* Creates a real trip on NEAR testnet: the API's relayer calls create_trip, holds bed 1 for the booker, and opens the
+   trip's inbox address. The booker signs in with their own NEAR wallet (NEP-413 message, one-time server nonce, no gas)
+   and receives the payout there; a passkey on this device is the judge demo for anyone without a wallet. */
 export function NewTripPage() {
   const nav = useNavigate();
   const [place, setPlace] = useState("");
@@ -52,7 +54,23 @@ export function NewTripPage() {
   const [price, setPrice] = useState(25);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const ready = place.trim().length > 1 && stay.trim().length > 1 && checkIn && checkOut && checkOut > checkIn;
+  const [booker, setBooker] = useState<NearSession | null>(null);
+  const [passkey, setPasskey] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const ready = place.trim().length > 1 && stay.trim().length > 1 && checkIn && checkOut && checkOut > checkIn && (booker || passkey);
+
+  async function connect() {
+    setConnecting(true);
+    setErr(null);
+    try {
+      setBooker(await connectNear("testnet"));
+      setPasskey(false);
+    } catch (e2) {
+      setErr(nearError(e2, "your NEAR wallet"));
+    } finally {
+      setConnecting(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,11 +78,18 @@ export function NewTripPage() {
     setBusy(true);
     setErr(null);
     try {
-      const key = await deviceKey();
-      const r = await createTrip({ place: place.trim(), stay: stay.trim(), check_in: ymd(checkIn), check_out: ymd(checkOut), beds, price_usdc: price, booker: key.accountId });
+      const base = { place: place.trim(), stay: stay.trim(), check_in: ymd(checkIn), check_out: ymd(checkOut), beds, price_usdc: price };
+      let r;
+      if (booker) {
+        const n = await authNonce();
+        const auth = await signInNear("testnet", booker, n.message, n.recipient, n.nonce);
+        r = await createTrip({ ...base, booker: booker.accountId, auth });
+      } else {
+        r = await createTrip({ ...base, booker: (await deviceKey()).accountId });
+      }
       nav(r.url);
     } catch (e2) {
-      setErr(e2 instanceof Error ? e2.message : "Could not create the trip");
+      setErr(booker ? nearError(e2, booker.wallet) : e2 instanceof Error ? e2.message : "Could not create the trip");
       setBusy(false);
     }
   }
@@ -102,10 +127,41 @@ export function NewTripPage() {
           <p className="display text-[18px]">
             {beds} beds × {usd(price, 0)} = {usd(beds * price, 0)}. <span className="tone-2">Held by a crew DAO until the booking is proven. Book within 3 days or everyone is refunded.</span>
           </p>
-          {err && <p className="rounded-xl bg-refused/10 px-3 py-2 text-[13.5px] text-refused">{err}</p>}
+          <Field label="You book it" hint={booker ? "The payout goes to this wallet once a real booking is proven. You sign one message; no gas." : undefined}>
+            {booker ? (
+              <div className="flex h-12 items-center justify-between gap-3 rounded-2xl border border-line bg-white/[0.04] pl-4 pr-1.5">
+                <span className="flex min-w-0 items-center gap-2 text-[14.5px]">
+                  <Wallet className="size-4 shrink-0 text-fg-2" />
+                  <span className="truncate font-semibold">{booker.accountId}</span>
+                  <span className="shrink-0 text-fg-3">{booker.wallet}</span>
+                </span>
+                <button type="button" className="press focus-ring shrink-0 rounded-xl px-3 py-1.5 text-[12.5px] text-fg-3 hover:text-fg" onClick={() => void disconnectNear("testnet").then(() => setBooker(null))}>
+                  Disconnect
+                </button>
+              </div>
+            ) : passkey ? (
+              <div className="flex h-12 items-center justify-between gap-3 rounded-2xl border border-line bg-white/[0.04] pl-4 pr-1.5">
+                <span className="flex items-center gap-2 text-[14.5px]"><Fingerprint className="size-4 text-fg-2" /> A passkey on this device</span>
+                <button type="button" className="press focus-ring rounded-xl px-3 py-1.5 text-[12.5px] text-fg-3 hover:text-fg" onClick={() => setPasskey(false)}>
+                  Use a wallet
+                </button>
+              </div>
+            ) : (
+              <>
+                <button type="button" className="pill-dark focus-ring press h-12 w-full" disabled={connecting} onClick={connect}>
+                  {connecting ? <Loader2 className="size-4 animate-spin" /> : <Wallet className="size-4" />}
+                  Connect a NEAR wallet
+                </button>
+                <button type="button" className="focus-ring mt-2 w-full rounded-md text-center text-[12.5px] text-fg-3 underline decoration-white/20 underline-offset-4 hover:text-fg" onClick={() => setPasskey(true)}>
+                  Judge demo: no wallet, use a passkey on this device
+                </button>
+              </>
+            )}
+          </Field>
+          {err && <p className="rounded-xl bg-refused/10 px-3 py-2 text-[13.5px] text-refused" role="alert">{err}</p>}
           <button type="submit" disabled={!ready || busy} className="pill-light focus-ring press h-11 w-full">
             {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-            {busy ? "Creating it on NEAR…" : "Create the trip"}
+            {busy ? (booker ? "Sign in your wallet, then creating it on NEAR…" : "Creating it on NEAR…") : booker ? "Sign in and create the trip" : "Create the trip"}
           </button>
           <p className="text-center text-[12px] text-fg-3">NEAR testnet · test USDC · up to 6 beds and $50 a bed</p>
         </form>
