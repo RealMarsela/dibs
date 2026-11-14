@@ -8,8 +8,9 @@ verified booking confirmation.
 **[Open the live Lisbon trip](https://dibs.larinova.com/t/lis0312)** ·
 [Five-minute judge path](JUDGES.md) · [Threat model](docs/THREAT_MODEL.md) · `pnpm verify` (reads the chain, no keys)
 
-Built at NEAR HACKATHON, November 2026. Runs on NEAR testnet; card rails are the Lithic sandbox (details in
-[Honest limits](#honest-limits)).
+Built at NEAR HACKATHON, November 2026. The full product runs on NEAR testnet, and the pay-in also runs on
+**NEAR mainnet with real USDC** ([Live on NEAR mainnet](#live-on-near-mainnet-real-usdc)). Card rails are the Lithic
+sandbox (details in [Honest limits](#honest-limits)).
 
 ## The problem
 
@@ -44,6 +45,35 @@ it: now everyone has to trust whoever holds the pot, and whoever books.
 
 Every line above is re-checked by `pnpm verify`.
 
+## Live on NEAR mainnet (real USDC)
+
+The same contracts, deployed to mainnet as `dibsapp.near`, with the crew pot in `dibs-lismain.sputnik-dao.near`. The app
+switches to mainnet for trips [`lismain`](https://dibs.larinova.com/t/lismain) and
+[`lismain2`](https://dibs.larinova.com/t/lismain2); the API serves them at `api.dibs.larinova.com/mainnet`.
+
+| What happened | Evidence |
+|---|---|
+| Contract deployed and initialised; bed accounts carry mainnet USDC in their code | [`A2FUVBt9…`](https://nearblocks.io/txns/A2FUVBt9MDmu1hSWmBPFKeEHjDoCapgWZ8Js2akhzym5) |
+| Trip `lismain` (2 beds at 0.25 USDC) created with its own keyless bed accounts | [`9ozojmPQ…`](https://nearblocks.io/txns/9ozojmPQeaVxggfLG7HzD1UcP1SNhRuUjA6LtcYKGYTM) |
+| Bed 2 paid with **real USDC on NEAR**: held, sent to the bed's own account, swept into the crew DAO | hold [`bSgWocNV…`](https://nearblocks.io/txns/bSgWocNVUk3ce7EXSemN49PA5bTZDvJYGmBZvgniKfY), deposit [`6W5hd6Bu…`](https://nearblocks.io/txns/6W5hd6BUuQUYnACD792DaEVb7osLBXdQNGB1MMSvGZYf), sweep [`GKYgYFwf…`](https://nearblocks.io/txns/GKYgYFwfTdEbqe1wPcaxFQBNDvmM2btG8zb5fE2YPp1N) |
+| Bed 1 held through the app for a live NEAR Intents 1Click quote from Base (0.252579 USDC in, exactly 0.25 out) | awaiting the Base deposit |
+
+Mainnet is deliberately narrow. Its API answers only the pay-in (trip reads, hold, 1Click quote, deposit submit, status
+and sweep); trip creation, proofs, the draw, the card and gasless relays are refused with `E_MAINNET_SCOPE` and run on
+testnet. It has its own relayer, `relayer.dibsapp.near`. All ids: [deploy/mainnet.json](deploy/mainnet.json).
+
+### Pay with your wallet
+
+On a mainnet trip the pay sheet offers the friend's own wallet before the copy-and-send route:
+
+- **EVM wallets** (MetaMask, Rabby, Coinbase, Brave…) found through EIP-6963. One tap connects, uses the wallet's
+  address for refunds, puts the wallet on Base, Arbitrum or Ethereum (adding the chain if needed), checks its USDC,
+  holds the bed, gets the 1Click quote and asks the wallet to send exactly `amountIn` to the deposit address. The
+  transaction hash goes to 1Click's `deposit/submit` so the swap starts sooner.
+- **NEAR wallets** through NEAR Connect (`@hot-labs/near-connect`: HOT, Meteor, Intear, MyNearWallet, NEAR Mobile,
+  Ledger and more). The wallet sends USDC straight to the bed's own account with one `ft_transfer`; no swap is needed.
+- **No wallet:** the one-time address, the exact amount and a QR that wallets read (EIP-681 on EVM, Solana Pay).
+
 ## How it works
 
 ```mermaid
@@ -76,7 +106,8 @@ flowchart LR
 | NEAR piece | Its job here |
 |---|---|
 | Sputnik DAO (+ Trezu view) | Holds each crew's pot; a `trip` role lets only the contract propose and approve the payout |
-| NEAR Intents 1Click | Any-chain pay-in to a bed account, EXACT_OUTPUT quotes |
+| NEAR Intents 1Click | Any-chain pay-in to a bed account, EXACT_OUTPUT quotes, live on mainnet |
+| NEAR Connect | A friend's NEAR wallet pays their bed directly on mainnet |
 | OutLayer | Verifiable compute the contract itself calls: DKIM check, private extraction, VRF, card issuing |
 | NEAR AI Cloud | Reads the booking email inside a GPU enclave (Qwen3.8-27B, TEE-signed responses) |
 | Keyless accounts and NEP-366 | Bed accounts with no keys; friends act through signed delegate actions, gas paid by the relayer |
@@ -105,7 +136,12 @@ Deployed ids are in [deploy/testnet.json](deploy/testnet.json); the deploy log i
 
 ## Honest limits
 
-- **Testnet.** NEAR Intents 1Click runs on mainnet only, so on testnet a faucet stands in for the cross-chain deposit.
+- **Mainnet runs the pay-in only.** Proofs, the draw, the card and resale run on testnet. NEAR Intents 1Click runs on
+  mainnet only, so on testnet trips a faucet stands in for the cross-chain deposit.
+- **Wallets.** Solana pays by address or QR only (no Solana wallet button yet). Mobile EVM wallets over WalletConnect
+  are not wired (they need a WalletConnect project id). The friend's own key stays our WebAuthn-PRF passkey: NEAR Auth
+  (FastAuth) needs approved Auth0 credentials on mainnet, and NEAR Connect's passkey executor creates contract wallets on
+  mainnet only, which our NEP-366 relayer does not sponsor as built.
 - **Card rails are the Lithic sandbox.** The rules are real (single use, hotels only, limit = pot); the card network is simulated.
 - **No FX yet.** The booking total is compared to the USDC cap one to one; the Singapore proof's SGD 226.60 was paid as 226.60 USDC.
 - **VRF** is verifiable but not provably unpredictable to the enclave operator.

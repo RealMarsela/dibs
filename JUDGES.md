@@ -3,6 +3,9 @@
 Dibs is live on NEAR **testnet**. Contract `dibs-0eb9ae.testnet`, trips `lis0312`, `lis0314`, `sin1025`, `drw0001`.
 All ids and transaction hashes: `deploy/testnet.json`. Explorer: https://testnet.nearblocks.io
 
+The pay-in also runs on NEAR **mainnet with real USDC**: contract `dibsapp.near`, crew DAO `dibs-lismain.sputnik-dao.near`,
+trips `lismain` and `lismain2`. Ids and hashes: `deploy/mainnet.json`. Explorer: https://nearblocks.io
+
 ## 1. Verify the live deployment (about 10 seconds, read-only)
 
 ```bash
@@ -29,6 +32,15 @@ Key transactions it cites: booking proof accepted `54g9Y2qgKPNFamFeN6tQUgpR1AqU3
 ## 2. Open the app
 
 https://dibs.larinova.com/t/lis0312
+
+### On mainnet (real money, no wallet needed to look)
+
+https://dibs.larinova.com/t/lismain shows "NEAR mainnet · real USDC". Bed 2 was paid with real USDC on NEAR and swept into
+the crew DAO (hold `bSgWocNVUk3ce7EXSemN49PA5bTZDvJYGmBZvgniKfY`, sweep `GKYgYFwfTdEbqe1wPcaxFQBNDvmM2btG8zb5fE2YPp1N`).
+`curl https://api.dibs.larinova.com/mainnet/trip/lismain` reads the same state from the chain, and
+`curl -X POST https://api.dibs.larinova.com/mainnet/trips` shows the scope guard (`E_MAINNET_SCOPE`).
+On `lismain2`, the pay sheet offers "Pay with your wallet": EIP-6963 EVM wallets and NEAR Connect wallets. Paying it
+spends real USDC (0.25 per bed).
 
 ## 3. What to look at
 
@@ -75,8 +87,10 @@ and gas caps, signature, expiry, rate limit), sweeps are idempotent, blobs are e
 
 ## Honest limits
 
-- **Testnet only.** No mainnet run has been done (`deploy/mainnet.json` does not exist).
-- **1Click is mainnet-only**, so a USDC faucet (open `mint` on a test token) stands in for cross-chain deposits on testnet. The 1Click quote path is exercised against its real API in dry mode only.
+- **Mainnet runs the pay-in only** (hold, 1Click quote, deposit submit, status, sweep into the crew DAO). Trip creation,
+  proofs, the draw, the card and gasless relays are refused there with `E_MAINNET_SCOPE` and shown on testnet.
+- **Solana pays by address or QR only**; there is no Solana wallet button yet. WalletConnect (mobile EVM wallets) is not wired.
+- **1Click is mainnet-only**, so a USDC faucet (open `mint` on a test token) stands in for cross-chain deposits on testnet. On mainnet the 1Click path runs for real: live EXACT_OUTPUT quotes with one-time deposit addresses.
 - **The card is the Lithic sandbox.** No real money moves, and the card's limit is a number equal to the pot, not funded from the DAO.
 - **No FX conversion.** The booking total is compared 1:1 with the USDC cap; `currency` is recorded but not converted (the live proof is SGD 226.60 treated as 226.60).
 - **The OutLayer VRF is verifiable but not provably unpredictable.** The contract checks the TEE signature, not that nobody could have predicted the output.

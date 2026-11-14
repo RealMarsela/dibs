@@ -8,7 +8,7 @@
   "api_url": "https://api.dibs.larinova.com/mainnet",
   "dibs_wasm_sha256": "bdfda04104366b963eb15d7efb775d4a579f898c9c78335c880e141cadd6c120",
   "bed_wasm_sha256": "7c49e62d6aab02e5789bad612d7727636b49a992dd85abb50776fa1ebc1106a6",
-  "scope": "Pay-in only: hold, NEAR Intents 1Click quote, status and sweep into the crew DAO. Proofs, draw, card, resale and trip creation run on testnet.",
+  "scope": "Pay-in only: trip reads, hold, NEAR Intents 1Click quote, deposit submit, status and sweep into the crew DAO. Trip creation, proofs, draw, card, resale and gasless relays run on testnet (E_MAINNET_SCOPE).",
   "txs": {
     "deploy_and_init": "A2FUVBt9MDmu1hSWmBPFKeEHjDoCapgWZ8Js2akhzym5",
     "usdc_registration": "FP98UZo7z6YuMyPcS8sdJeCiB7cpUFHhA9CwW8nWoG8z",
@@ -17,7 +17,12 @@
     "add_relayer": "5LYrpNZqCntjkKyVb7VYPGJDy7pHvwGhZP3HZuV43sn2",
     "bed2_hold": "bSgWocNVUk3ce7EXSemN49PA5bTZDvJYGmBZvgniKfY",
     "bed2_usdc_deposit": "6W5hd6BUuQUYnACD792DaEVb7osLBXdQNGB1MMSvGZYf",
-    "bed2_sweep_to_dao": "GKYgYFwfTdEbqe1wPcaxFQBNDvmM2btG8zb5fE2YPp1N"
+    "bed2_sweep_to_dao": "GKYgYFwfTdEbqe1wPcaxFQBNDvmM2btG8zb5fE2YPp1N",
+    "relayer_topup_1": "FyBiuocjSuKdRLuaALFzSJ6jFCNVkuZquBczhCobcoxC",
+    "relayer_topup_2": "9RasHHhzjPLZ8h6XCkdchWAL5jqJSg2ga6Enc7F6DDHW",
+    "bed1_hold_via_app": "7T8DCg3jtCMb7n4nrRqmxmXmZVeLfQNUq2bpDWxdM1Qo",
+    "owner_topup_for_lismain2": "H2iiqp9rwsb3tJ6GJaEAx1fcbGii8bf4fCDunmpkLDbH",
+    "create_trip_lismain2": "ANqD3MWp5157U49UVvMt5wtGzYeku17Uh7ZDSYfZXNh3"
   },
   "trips": {
     "lismain": {
@@ -28,8 +33,31 @@
       "check_in": "2027-03-12",
       "check_out": "2027-03-15",
       "stay": "Alfama flat with a roof terrace",
-      "bed_accounts": ["b01-lismain.dibsapp.near", "b02-lismain.dibsapp.near"],
-      "state": "bed 2 Paid with USDC on NEAR (DAO holds 0.25 USDC); bed 1 Open for a NEAR Intents payment from Base"
+      "bed_accounts": [
+        "b01-lismain.dibsapp.near",
+        "b02-lismain.dibsapp.near"
+      ],
+      "state": "bed 2 Paid with USDC on NEAR (DAO holds 0.25 USDC); bed 1 Held via the app, 1Click quote from Base: deposit 0xfdF223c4438053E9F84B9342CCd56575ae4039D2, 0.252579 USDC in, 0.25 out; awaiting the deposit"
+    },
+    "lismain2": {
+      "dao": "dibs-lismain.sputnik-dao.near",
+      "price": "250000",
+      "n_beds": 2,
+      "n_wait": 0,
+      "check_in": "2027-03-15",
+      "check_out": "2027-03-18",
+      "stay": "Graça flat with a view over the river",
+      "bed_accounts": [
+        "b01-lismain2.dibsapp.near",
+        "b02-lismain2.dibsapp.near"
+      ],
+      "purpose": "live wallet payments (EIP-6963 EVM wallet, NEAR Connect wallet)",
+      "state": "both beds Open"
     }
+  },
+  "gas": {
+    "hold_tgas": 60,
+    "sweep_tgas": 100,
+    "why": "mainnet reserves attached gas at about 10x the base price up front; bed 2's hold burned 27 Tgas and its sweep 58 Tgas"
   }
 }

@@ -50,7 +50,7 @@ the release condition (research/competition: 0 of ~600 entries).
 | 1:52 | Close | stack lockup, dibs wordmark, repo + live trip URL, honest line | - |
 
 ## Proof callouts (traceable)
-- Mainnet: Leo's $0.25 from Base via 1Click into bed 03 (tx shown, nearblocks).
+- Mainnet (deploy/mainnet.json): trip `lismain` on `dibsapp.near`. Bed 2 paid with real USDC on NEAR, swept into the crew DAO (sweep GKYgYFwf…). Bed 1 held via the app (7T8DCg3j…) with a live 1Click quote from Base, 0.252579 USDC in for exactly 0.25 out; the Base deposit and its sweep are pending. The film shows bed 01's real sheet, so a claim of "bed 03" on mainnet is wrong.
 - Testnet: VRF draw tx gADA3SGt..., refusals E_NO_REFUND / E_BAD_SIG (DEPLOY-HANDBACK.md).
 - "46 of 46" from contracts/judge-report.json; real booking.com DKIM PASS (dkimpy True).
 - Lithic sandbox approve/decline request ids (card lane handback).
