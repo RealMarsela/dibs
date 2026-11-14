@@ -5,6 +5,7 @@ import type { Env } from "./env";
 import { rateLimit } from "./ratelimit";
 import { tripCode } from "./schemas";
 import { simulate, type SimResult } from "./cardsim";
+import { runCardOp } from "./cardrun";
 
 /* The trip's virtual card. The dibs-verifier TEE issues it (op `card`) and signs
    `dibs-card:v1:{trip,card_token,last4,spend_limit,mcc,sealed_hex}`. This API stores only what that signature covers,
@@ -58,18 +59,14 @@ async function load(env: Env, trip: string): Promise<CardRecord | null> {
 
 const publicView = (r: CardRecord) => ({ last4: r.last4, spend_limit: r.spend_limit, mcc: r.mcc, sealed_hex: r.sealed_hex, issued_at: r.issued_at, simulations: r.simulations });
 
-/** Post the OutLayer `card` output ({message, signature}); stored once per trip. */
-cardRoute.post("/card/:trip/issued", async (c) => {
-  const env = c.env;
-  const trip = parse(tripCode, c.req.param("trip"));
-  const b = parse(signedBody, await readJson(c));
-  rateLimit(`card:issued:${c.req.header("cf-connecting-ip") ?? "anon"}`, 20, 60_000);
+/** Verify and store a signed `card` output; shared by /issued and /issue. */
+async function storeIssued(env: Env, trip: string, message: string, signature: string) {
   if (!env.VERIFIER_PUBLIC_KEY || !hex(64).test(env.VERIFIER_PUBLIC_KEY)) throw new ApiError(503, "E_VERIFIER_UNCONFIGURED", "verifier key is not configured");
-  if (!b.message.startsWith(CARD_PREFIX)) throw new ApiError(400, "E_BAD_PREFIX", "not a dibs-card message");
-  if (!(await verifyIssued(env.VERIFIER_PUBLIC_KEY, b.message, b.signature))) throw new ApiError(403, "E_BAD_SIG", "signature does not verify against the verifier key");
+  if (!message.startsWith(CARD_PREFIX)) throw new ApiError(400, "E_BAD_PREFIX", "not a dibs-card message");
+  if (!(await verifyIssued(env.VERIFIER_PUBLIC_KEY, message, signature))) throw new ApiError(403, "E_BAD_SIG", "signature does not verify against the verifier key");
   let f: z.infer<typeof facts>;
   try {
-    f = parse(facts, JSON.parse(b.message.slice(CARD_PREFIX.length)));
+    f = parse(facts, JSON.parse(message.slice(CARD_PREFIX.length)));
   } catch (e) {
     if (e instanceof ApiError) throw e;
     throw new ApiError(400, "E_BAD_FACTS", "message body is not valid JSON");
@@ -77,13 +74,34 @@ cardRoute.post("/card/:trip/issued", async (c) => {
   if (f.trip !== trip) throw new ApiError(400, "E_TRIP_MISMATCH", "message is for another trip");
   const have = await load(env, trip);
   if (have) {
-    if (have.card_token === f.card_token) return c.json({ ...publicView(have), stored: false });
+    if (have.card_token === f.card_token) return { ...publicView(have), stored: false };
     throw new ApiError(409, "E_CARD_EXISTS", "this trip already has a different card");
   }
   const rec: CardRecord = { ...f, issued_at: new Date().toISOString(), simulations: [] };
   const put = await env.BLOBS.put(recordKey(trip), JSON.stringify(rec), { onlyIf: { etagDoesNotMatch: "*" } });
   if (put === null) throw new ApiError(409, "E_CARD_EXISTS", "this trip already has a card");
-  return c.json({ ...publicView(rec), stored: true });
+  return { ...publicView(rec), stored: true };
+}
+
+/** Post the OutLayer `card` output ({message, signature}); stored once per trip. */
+cardRoute.post("/card/:trip/issued", async (c) => {
+  const trip = parse(tripCode, c.req.param("trip"));
+  const b = parse(signedBody, await readJson(c));
+  rateLimit(`card:issued:${c.req.header("cf-connecting-ip") ?? "anon"}`, 20, 60_000);
+  return c.json(await storeIssued(c.env, trip, b.message, b.signature));
+});
+
+/** Trigger the TEE `card` op (relayer -> OutLayer request_execution), then store the result through the same verification. */
+cardRoute.post("/card/:trip/issue", async (c) => {
+  const env = c.env;
+  const trip = parse(tripCode, c.req.param("trip"));
+  rateLimit(`card:issue:ip:${c.req.header("cf-connecting-ip") ?? "anon"}`, 6, 60_000);
+  rateLimit(`card:issue:${trip}`, 3, 60_000);
+  const existing = await load(env, trip);
+  if (existing) return c.json({ last4: existing.last4, spend_limit: existing.spend_limit, mcc: existing.mcc });
+  const out = await runCardOp(env, trip);
+  const r = await storeIssued(env, trip, out.message, out.signature);
+  return c.json({ last4: r.last4, spend_limit: r.spend_limit, mcc: r.mcc });
 });
 
 cardRoute.get("/card/:trip", async (c) => {

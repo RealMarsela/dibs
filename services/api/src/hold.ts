@@ -5,6 +5,8 @@ import type { Env } from "./env";
 import { relayerAccount } from "./near";
 import { txHashOf } from "./sweep";
 import { rateLimit } from "./ratelimit";
+import { ensureImplicitAccount } from "./bootstrap";
+import { recordActivity } from "./activity";
 import { bedIndex, tripCode } from "./schemas";
 
 export const holdRoute = new Hono<{ Bindings: Env }>();
@@ -24,6 +26,7 @@ holdRoute.post("/hold", async (c) => {
   const b = parse(holdBody, await readJson(c));
   rateLimit(`hold:ip:${c.req.header("cf-connecting-ip") ?? "anon"}`, 12, 60_000);
   rateLimit(`hold:${b.holder}`, 6, 60_000);
+  const boot = await ensureImplicitAccount(env, b.holder);
   try {
     const res = await relayerAccount(env).callFunctionRaw({
       contractId: env.DIBS_CONTRACT,
@@ -33,7 +36,9 @@ holdRoute.post("/hold", async (c) => {
       deposit: HOLD_DEPOSIT,
       waitUntil: "EXECUTED_OPTIMISTIC",
     });
-    return c.json({ tx_hash: txHashOf(res), trip: b.trip, kind: b.kind, n: b.n, holder: b.holder });
+    const tx_hash = txHashOf(res);
+    await recordActivity(env, b.trip, { kind: "hold", text: `${b.kind === "bed" ? "Bed" : "Waitlist slot"} ${b.n} held`, tx: tx_hash });
+    return c.json({ tx_hash, trip: b.trip, kind: b.kind, n: b.n, holder: b.holder, bootstrap_tx: boot.tx_hash });
   } catch (e) {
     if (e instanceof ApiError) throw e;
     throw new ApiError(502, "E_HOLD_FAILED", "hold transaction was rejected (bed not open, or relayer not registered on the contract)");

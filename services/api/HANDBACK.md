@@ -60,3 +60,20 @@ Local R2 blob upload then GET: served bytes hash equals the returned `blob_sha25
 - Solana refunds cost about $0.21: the UI should warn (preflight decision); the API does not block.
 - Repo-level: `pnpm-workspace.yaml` got `workerd: true` under `allowBuilds` (needed to install wrangler) and `pnpm-lock.yaml` changed. Both are outside Lane C
   paths and left uncommitted for the coordinator.
+
+## Live wiring (Lane G, testnet, deployed as dibs-api; 78 tests pass, tsc clean)
+New bindings: KV `NAMES` (namespace DIBS_NAMES, id 80abbc4f...; display names and the per-trip activity log). New var `VERIFIER_PUBLIC_KEY`; secret `LITHIC_SIM_KEY`.
+Endpoints (errors are `{error, code}`):
+- `POST /testnet/fund {trip, kind:"bed"|"wait", n}` -> `{mint_tx, sweep_tx, status}`. 404 on mainnet; 409 E_NOT_HELD; 8 per 10 min per IP.
+- `POST /account/bootstrap {account:<64 hex>}` -> `{account, created, tx_hash, exists}`; 0.01 NEAR exactly, only if the account is missing. `/hold` does the same first and adds `bootstrap_tx`.
+- `PUT /names {account, name, ts, sig}` (sig hex or base64 over `dibs-name:v1:<account>:<name>:<ts>`; 401 E_BAD_SIG, 400 E_STALE) -> `{account, name}`; `GET /names?accounts=a,b` -> `{account: name}`; the nine demo friends are fixed.
+- `POST /proof/submit {trip, blob_url, blob_sha256}` -> `{tx_hash}` (0.025 NEAR, 300 Tgas; blob_url must be one of our /blob URLs).
+- `POST /draw {trip}` -> `{tx_hash}` (request_draw, 0.025 NEAR, 3 per min per trip). `POST /refund-check {trip, n}` -> `{code:"E_NO_REFUND", error, tx_hash, refused:true}`.
+- `GET /trip/:code` now also has top-level `proof_pending, proof, payout, last_error`.
+- `GET /trip/:code/activity` -> up to 20 `{at, kind, text, tx, chain?}`, newest first, 15 s cache, `[]` on failure. The dibs contract only logs refusals, and nearblocks gives no call arguments, so the feed is the API's own KV log of hold, deposit, proof, draw and refund-check calls plus contract-state events (refusal, proof accepted, payout done). Txs sent by users directly (not through the API) do not appear.
+- `POST /card/:trip/issue` -> `{last4, spend_limit, mcc}`: relayer calls `outlayer.testnet request_execution` (0.02 NEAR, waits FINAL), decodes the op result, stores it through the /issued verification. Refusals pass through (E_NOT_FULL 409 etc.).
+Verifier v5 (`dibs-verifier-testnet-v5.wasm`, sha256 d18d2946...da1c9) deployed; `public_key` op still 706445d7...06bf (tx 8QqWtkb1nok4n789UGxeztoa3g9GwfmrXh74KxS4Vw7x). Card op now seals a named booker (maya...) to its first FullAccess ed25519 key via view_access_key_list (tests added). Secrets: `LITHIC_API_KEY` added with `secrets update` (profile default, DIBS_BLOB_KEY kept).
+Live txs: bootstrap a792f927... `95e88L62edHLgkYDDU8fpDUkkMfwC62Ug4SLup6vf995` (second call created:false); hold wait 1 sin1025 `13wPsJRCaHxrxKqWxoeRmzzi1hk7TVpTFikt2LhosJMU`; fund mint `DM3gJJ7iT8xiPoe6QizzZP5NBGmuH6nAe5XzieEeHTbW`, sweep `Fbs3M4gzqZMrVgMTKV14TjjHUXNdCobcGUbxJneVK2nB`; refund-check `J6aDm4oGLZmdghs1ewZ5ttMXpY9Q6qUCm7ZHZN9jnRrR` (E_NO_REFUND); submit_proof `GCqrapGpUEehTdPo73ufvSVq9pw2XXzM2BhtSK3X9jzt` (reached the verifier, stored E_NO_RESULT: no NEAR_AI_KEY yet); names PUT 200; /draw on drw0001 refused (already drawn), not proven with a new tx.
+Card on drw0001 (limit $2.00, last4 3218, mcc 7011): electronics DECLINED PROGRAM_USAGE_RESTRICTION, Lithic id c76438be-c51e-4394-a4ce-c7918f75a175; carlton APPROVED, id c683d858-1459-4a49-85f2-236e0ccd8b23.
+Bug fixed: `accountExists` misread RPC UNKNOWN_ACCOUNT as an RPC failure (now a raw view_account query).
+Left: NEAR_AI_KEY (no .secrets/near-ai.env, inbox for sin1025 empty, so no accepted booking proof); /draw live success needs an undrawn paid trip.

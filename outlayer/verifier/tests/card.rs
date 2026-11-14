@@ -159,7 +159,7 @@ fn refuses_bad_network_contract_booker_and_issuer_failure() {
     let mut t = paid4();
     t["booker"] = json!("alice.testnet");
     let f = fake(t);
-    assert_eq!(run(&f, "testnet", None).unwrap_err().0, "E_BOOKER");
+    assert_eq!(run(&f, "testnet", None).unwrap_err().0, "E_BOOKER"); // the fake RPC lists no keys
     assert!(f.calls.borrow().iter().all(|c| c.0.contains("fastnear")), "no card is minted for an unsealable booker");
     let mut f = fake(paid4());
     f.fail_lithic = true;
@@ -207,4 +207,63 @@ fn golden_vector_made_by_libsodium_opens_in_rust() {
     let eph: [u8; 32] = hex::decode(g["eph_seed_hex"].as_str().unwrap()).unwrap().try_into().unwrap();
     let mine = seal::seal(g["plaintext"].as_str().unwrap().as_bytes(), &x, eph).unwrap();
     assert_eq!(hex::encode(mine), g["rust_sealed_hex"].as_str().unwrap());
+}
+
+#[test]
+fn base58_and_near_key_decode() {
+    assert_eq!(seal::near_key_bytes(&format!("ed25519:{}", "1".repeat(32))).unwrap(), [0u8; 32]);
+    assert_eq!(seal::base58_decode("2g").unwrap(), vec![b'a']);
+    assert!(seal::near_key_bytes("secp256k1:abc").is_err());
+}
+
+fn b58(bytes: &[u8]) -> String {
+    const A: &[u8] = b"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    let mut digits: Vec<u8> = vec![];
+    for &b in bytes {
+        let mut carry = b as u32;
+        for d in digits.iter_mut() {
+            carry += (*d as u32) << 8;
+            *d = (carry % 58) as u8;
+            carry /= 58;
+        }
+        while carry > 0 {
+            digits.push((carry % 58) as u8);
+            carry /= 58;
+        }
+    }
+    let mut s: String = bytes.iter().take_while(|&&b| b == 0).map(|_| '1').collect();
+    s.extend(digits.iter().rev().map(|&d| A[d as usize] as char));
+    s
+}
+
+struct Named {
+    inner: Fake,
+    key: String,
+}
+impl Http for Named {
+    fn get(&self, u: &str, h: &[(&str, &str)]) -> Result<Vec<u8>, String> {
+        self.inner.get(u, h)
+    }
+    fn post(&self, u: &str, h: &[(&str, &str)], b: &[u8]) -> Result<Vec<u8>, String> {
+        if String::from_utf8_lossy(b).contains("view_access_key_list") {
+            let keys = json!([
+                {"public_key": "ed25519:11111111111111111111111111111111", "access_key": {"nonce": 1, "permission": {"FunctionCall": {}}}},
+                {"public_key": self.key, "access_key": {"nonce": 1, "permission": "FullAccess"}}]);
+            return Ok(json!({"result": {"keys": keys}}).to_string().into_bytes());
+        }
+        self.inner.post(u, h, b)
+    }
+}
+
+#[test]
+fn named_booker_is_sealed_to_its_first_full_access_key() {
+    let pk = SigningKey::from_bytes(&BOOKER_SEED).verifying_key().to_bytes();
+    let mut t = paid4();
+    t["booker"] = json!("maya.own-0eb9ae.testnet");
+    let n = Named { inner: fake(t), key: format!("ed25519:{}", b58(&pk)) };
+    let env = CardEnv { http: &n, lithic_key: "sk-test", lithic_root: "https://sandbox.lithic.com", rpc: "https://test.rpc.fastnear.com" };
+    let i = CardInput { trip: "lis0312".into(), network: "testnet".into(), contract: None };
+    let out = card_op(&i, &env, &Key(SigningKey::from_bytes(&[9u8; 32]))).unwrap();
+    let sealed = hex::decode(out["sealed_hex"].as_str().unwrap()).unwrap();
+    assert!(seal::open(&sealed, &BOOKER_SEED).is_ok());
 }

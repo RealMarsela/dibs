@@ -56,6 +56,30 @@ pub fn view_trip(http: &dyn Http, rpc: &str, contract: &str, trip: &str) -> Resu
     Ok(t)
 }
 
+/// The key to seal to: an implicit booker's own key, else the first FullAccess ed25519 key on a named account.
+pub fn booker_x25519(http: &dyn Http, rpc: &str, booker: &str) -> Result<[u8; 32], CardErr> {
+    if let Ok(x) = seal::implicit_to_x25519(booker) {
+        return Ok(x);
+    }
+    let req = json!({"jsonrpc": "2.0", "id": "dibs", "method": "query", "params": {
+        "request_type": "view_access_key_list", "finality": "final", "account_id": booker}});
+    let raw = http.post(rpc, &[("Content-Type", "application/json")], req.to_string().as_bytes()).map_err(|e| CardErr { code: "E_RPC", message: e })?;
+    let v: Value = serde_json::from_slice(&raw).or_else(|e| err("E_RPC", format!("rpc json: {e}")))?;
+    let keys = v["result"]["keys"].as_array().map(Vec::as_slice).unwrap_or(&[]);
+    for k in keys {
+        if k["access_key"]["permission"].as_str() != Some("FullAccess") {
+            continue;
+        }
+        let Some(pk) = k["public_key"].as_str() else { continue };
+        if let Ok(raw) = seal::near_key_bytes(pk) {
+            if let Ok(x) = seal::ed_to_x25519(raw) {
+                return Ok(x);
+            }
+        }
+    }
+    err("E_BOOKER", "booker has no usable FullAccess ed25519 key")
+}
+
 pub struct Plan {
     pub booker: String,
     pub cents: u64,
@@ -115,7 +139,7 @@ pub fn card_op(i: &CardInput, env: &CardEnv, s: &dyn Signer) -> Result<Value, Ca
         return err("E_SECRET", "LITHIC_API_KEY is not set");
     }
     let plan = check_trip(&view_trip(env.http, env.rpc, contract, &i.trip)?)?;
-    let booker_x = seal::implicit_to_x25519(&plan.booker).or_else(|m| err("E_BOOKER", m))?;
+    let booker_x = booker_x25519(env.http, env.rpc, &plan.booker)?;
     let li = Lithic { http: env.http, key: env.lithic_key, root: env.lithic_root };
     let card = li.create_card(&i.trip, plan.cents).or_else(|m| err("E_ISSUER", m))?;
     li.lodging_only(&card.token, &i.trip).or_else(|m| err("E_ISSUER", m))?;

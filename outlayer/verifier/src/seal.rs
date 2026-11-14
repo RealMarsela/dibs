@@ -15,6 +15,37 @@ pub fn implicit_to_x25519(account_id: &str) -> Result<[u8; 32], String> {
         return Err("booker is not an implicit account (64 lowercase hex)".into());
     }
     let raw: [u8; 32] = hex::decode(account_id).map_err(|e| e.to_string())?.try_into().map_err(|_| "length".to_string())?;
+    ed_to_x25519(raw)
+}
+
+/// Base58 (bitcoin alphabet) decode, enough for NEAR public keys.
+pub fn base58_decode(s: &str) -> Result<Vec<u8>, String> {
+    const A: &[u8] = b"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    let mut out: Vec<u8> = Vec::new();
+    for ch in s.bytes() {
+        let mut carry = A.iter().position(|&a| a == ch).ok_or("bad base58 character")? as u32;
+        for b in out.iter_mut() {
+            carry += (*b as u32) * 58;
+            *b = (carry & 0xff) as u8;
+            carry >>= 8;
+        }
+        while carry > 0 {
+            out.push((carry & 0xff) as u8);
+            carry >>= 8;
+        }
+    }
+    out.extend(std::iter::repeat(0).take(s.bytes().take_while(|&c| c == b'1').count()));
+    out.reverse();
+    Ok(out)
+}
+
+/// `ed25519:<base58>` NEAR public key to its 32 raw bytes.
+pub fn near_key_bytes(k: &str) -> Result<[u8; 32], String> {
+    let b58 = k.strip_prefix("ed25519:").ok_or("not an ed25519 key")?;
+    base58_decode(b58)?.try_into().map_err(|_| "ed25519 key is not 32 bytes".to_string())
+}
+
+pub fn ed_to_x25519(raw: [u8; 32]) -> Result<[u8; 32], String> {
     let vk = VerifyingKey::from_bytes(&raw).map_err(|e| format!("booker key is not a valid ed25519 point: {e}"))?;
     if vk.is_weak() {
         return Err("booker key is a small-order point".into());

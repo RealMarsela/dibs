@@ -26,6 +26,18 @@ export class FakeR2 {
   }
 }
 
+export class FakeKV {
+  store = new Map<string, string>();
+  async get(key: string, type?: string) {
+    const v = this.store.get(key);
+    if (v === undefined) return null;
+    return type === "json" ? JSON.parse(v) : v;
+  }
+  async put(key: string, value: string) {
+    this.store.set(key, value);
+  }
+}
+
 export function makeEnv(over: Partial<Env> = {}): Env {
   return {
     NEAR_NETWORK: "testnet",
@@ -37,6 +49,7 @@ export function makeEnv(over: Partial<Env> = {}): Env {
     RELAYER_PRIVATE_KEY: KeyPair.fromRandom("ed25519").toString(),
     DIBS_BLOB_KEY: "00".repeat(31) + "2a",
     BLOBS: new FakeR2() as unknown as R2Bucket,
+    NAMES: new FakeKV() as unknown as KVNamespace,
     ...over,
   };
 }

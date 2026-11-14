@@ -33,18 +33,26 @@ export async function view<T>(env: Env, contractId: string, method: string, args
 }
 
 function isMissingAccount(e: unknown): boolean {
-  const s = String((e as { type?: string; message?: string })?.type ?? "") + String((e as Error)?.message ?? "");
-  return /AccountDoesNotExist|does not exist while viewing/i.test(s);
+  const x = e as { type?: string; name?: string; message?: string };
+  return /AccountDoesNotExist|does not exist/i.test(`${x?.type ?? ""} ${x?.name ?? ""} ${x?.message ?? ""}`);
 }
 
 export async function accountExists(env: Env, accountId: string): Promise<boolean> {
-  try {
-    await provider(env).viewAccount({ accountId });
-    return true;
-  } catch (e) {
-    if (isMissingAccount(e)) return false;
-    throw new ApiError(502, "E_RPC", "NEAR RPC account lookup failed");
+  for (const url of rpcUrls(env)) {
+    try {
+      const r = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: "dibs", method: "query", params: { request_type: "view_account", finality: "optimistic", account_id: accountId } }),
+      });
+      const j = (await r.json()) as { result?: unknown; error?: { cause?: { name?: string } } };
+      if (j.result) return true;
+      if (j.error?.cause?.name === "UNKNOWN_ACCOUNT") return false;
+    } catch {
+      /* try the next RPC */
+    }
   }
+  throw new ApiError(502, "E_RPC", "NEAR RPC account lookup failed");
 }
 
 export interface TripView {

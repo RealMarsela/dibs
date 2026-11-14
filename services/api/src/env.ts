@@ -18,6 +18,8 @@ export interface Env {
   /** Lithic SANDBOX key, used only by POST /card/:trip/simulate. */
   LITHIC_SIM_KEY?: string;
   BLOBS: R2Bucket;
+  /** Display names and the per-trip activity log. */
+  NAMES: KVNamespace;
 }
 
 export const isTestnet = (env: Env): boolean => env.NEAR_NETWORK !== "mainnet";

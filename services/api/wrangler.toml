@@ -15,10 +15,15 @@ RELAYER_ACCOUNT_ID = "relayer.dao-0eb9ae.testnet"
 ALLOWED_ORIGIN = "https://preview.dibs-trips.pages.dev,http://localhost:4321"
 # Public base URL used to build blob capability URLs (no trailing slash). Empty = request origin.
 PUBLIC_BASE_URL = "https://dibs-api.gabrielaxy.workers.dev"
+VERIFIER_PUBLIC_KEY = "706445d7daa364e38ea0f410fc3279c83b6200c5cfd89983546b8fecbb3706bf"
 
 [[r2_buckets]]
 binding = "BLOBS"
 bucket_name = "dibs-proof-blobs"
+
+[[kv_namespaces]]
+binding = "NAMES"
+id = "80abbc4f85b24a17ac7bfda76a188df6"
 
 [env.mainnet]
 name = "dibs-api-mainnet"

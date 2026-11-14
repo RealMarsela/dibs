@@ -1,7 +1,12 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { blobRoute } from "./blob";
+import { activityRoute } from "./activity";
+import { bootstrapRoute } from "./bootstrap";
 import { cardRoute } from "./card";
+import { fundRoute } from "./fund";
+import { namesRoute } from "./names";
+import { proofRoute } from "./proof";
 import type { Env } from "./env";
 import { onError } from "./errors";
 import { holdRoute } from "./hold";
@@ -29,6 +34,11 @@ export function createApp() {
   app.route("/", blobRoute);
   app.route("/", tripRoute);
   app.route("/", cardRoute);
+  app.route("/", activityRoute);
+  app.route("/", bootstrapRoute);
+  app.route("/", fundRoute);
+  app.route("/", namesRoute);
+  app.route("/", proofRoute);
   app.notFound((c) => c.json({ error: "not found", code: "E_NOT_FOUND" }, 404));
   app.onError(onError);
   return app;
