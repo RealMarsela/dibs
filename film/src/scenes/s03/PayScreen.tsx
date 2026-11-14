@@ -15,6 +15,7 @@ const HEAD = 105; // padding 28 + eyebrow 16 + gap 14 + title 27 + mb 20
 export const H_PK = 246;
 export const H_CH = 680;
 export const H_TR = 288;
+export const H_DONE = 387; // "You're in": 346-733 on the clip
 const top = (h: number) => 540 - h / 2;
 const ROW = 71;
 const ROW_GAP = 10;
@@ -34,11 +35,17 @@ const TRACK = ["Deposit seen on your chain", "Swapped by NEAR Intents", "Landed 
 /** The crop (screen CSS px) at local frame f, shared by footage and placeholder. 450 wide (the 440 dialog + 5 a side), so
     the slot shows it at x2.56; its height keeps the slot's aspect and the window face shows the middle of it. The visible
     centre: passkey 540; chain 360 (title to Base, cut in the gap before Solana) panning to 604 (Base to Ethereum, cut
-    before the button); tracking 540. */
+    before the button); tracking 544 (from the dialog's top edge, no page text above it); "You're in" (variant B) 540
+    (eyebrow to "Back to the trip"). */
 const CROP_W = 450;
 const CROP_H = (CROP_W * WIN.h) / WIN.w;
 export function cropAt(f: number, t: T): Crop {
-  const c = kf(f, [t.chain0, t.chain0 + 10, t.pan0, t.pan1, t.track0, t.track0 + 10], [540, 360, 360, 604, 604, 540], IN_OUT_STRONG);
+  const c = kf(
+    f,
+    [t.chain0, t.chain0 + 10, t.pan0, t.pan1, t.track0, t.track0 + 10, t.tail.youIn, t.tail.youIn + 10],
+    [540, 360, 360, 604, 604, 544, 544, 540],
+    IN_OUT_STRONG,
+  );
   return { x: 960 - CROP_W / 2, y: c - CROP_H / 2, w: CROP_W, h: CROP_H };
 }
 
@@ -150,9 +157,11 @@ function ChainStep({ f, t }: { f: number; t: T }) {
 /** f = scene-local frame (passed in, because the slot sits in a Sequence); off = that Sequence's start, for Steps. */
 export function PayScreen({ f, t, crop, off }: { f: number; t: T; crop: Crop; off: number }) {
   const S = WIN.w / crop.w;
-  const pk = 1 - prog(f, t.chain0, 8);
-  const ch = prog(f, t.chain0 + 2, 8) * (1 - prog(f, t.track0, 8));
-  const tr = prog(f, t.track0 + 2, 8);
+  // hard cuts between steps, like the app swapping the sheet's content (never two steps visible at once)
+  const pk = f < t.chain0 ? 1 : 0;
+  const ch = f >= t.chain0 && f < t.track0 ? 1 : 0;
+  const tr = f >= t.track0 && f < t.tail.youIn ? 1 : 0;
+  const done = f >= t.tail.youIn ? 1 : 0;
   return (
     <div style={{ position: "absolute", left: 0, top: 0, width: 1920, height: 1080, transformOrigin: "0 0", transform: `scale(${S}) translate(${-crop.x}px, ${-crop.y}px)`, background: C.void }}>
       {/* the trip page under the dialog's dim overlay */}
@@ -166,6 +175,11 @@ export function PayScreen({ f, t, crop, off }: { f: number; t: T; crop: Crop; of
       </Dialog>
       <Dialog h={H_TR} title="Your money is on its way" opacity={tr}>
         <Steps s={1} steps={TRACK.map((title) => ({ title }))} doneAt={[t.deposit - off, t.swapped - off, t.landed - off, t.dao - off]} />
+      </Dialog>
+      <Dialog h={H_DONE} title="You’re in" opacity={done}>
+        <Steps s={1} steps={TRACK.map((title) => ({ title }))} doneAt={[0, 0, 0, 0]} />
+        <div style={{ marginTop: 16, fontSize: 13, lineHeight: "20px", color: C.fg2, textDecoration: "underline", textDecorationColor: "rgba(255,255,255,0.2)", textUnderlineOffset: 4 }}>Receipt on NEAR ↗</div>
+        <LightPill style={{ marginTop: 24 }}>Back to the trip</LightPill>
       </Dialog>
     </div>
   );

@@ -7,7 +7,7 @@ import { kf, lerp, prog } from "../../lib/anim";
 import { useScene } from "../../scene";
 import { cellX, MY } from "./HoleMeter";
 import { FACE_SPOT } from "./Ticket";
-import { ANA_OUT, ANA_SIZE_OUT, bez, CHIP_AT, COIN_CTRL, PLUS_AT, PRIYA_AT, PRIYA_SIZE, toScreen } from "./geo";
+import { ANA_OUT, ANA_SIZE_OUT, bez, CHIP_AT, COIN_CTRL, PLUS_AT, poseScreen, PRIYA_AT, PRIYA_SIZE, ticketPose, TICKET_ROT, toScreen } from "./geo";
 import { ROW_FACE, rowFace } from "./List";
 import type { TT } from "./time";
 
@@ -46,17 +46,19 @@ const Place = ({ x, y, o = 1, children, z }: { x: number; y: number; o?: number;
 export function Swap({ T }: { T: TT }) {
   const { f } = T;
   const { A } = useScene();
-  const spot = toScreen(FACE_SPOT.x, FACE_SPOT.y, f);
+  const pose = ticketPose(T, f);
+  const spot = poseScreen(pose, FACE_SPOT.x, FACE_SPOT.y);
 
   /* Ana */
   const meterPos = { x: cellX(3), y: MY - 62 };
   const lift = prog(f, T.hole, 12) * (1 - prog(f, T.refill, 12));
-  const toTicket = prog(f, T.morph, 22, IN_OUT_STRONG);
   const out = prog(f, T.anaOut, 18, EASE);
-  let ana = { x: lerp(meterPos.x, spot.x, toTicket), y: lerp(meterPos.y - 30 * lift, spot.y, toTicket) - Math.sin(Math.PI * toTicket) * 48, s: lerp(56, FACE_SPOT.size, toTicket) };
-  if (out > 0) ana = { x: lerp(spot.x, ANA_OUT.x, out), y: lerp(spot.y, ANA_OUT.y, out) - Math.sin(Math.PI * out) * 60, s: lerp(FACE_SPOT.size, ANA_SIZE_OUT, out) };
-  const anaO = prog(f, T.meterIn + 6, 14) * (1 - 0.45 * lift) * (1 - prog(f, T.pull, 16));
-  const anaIdle = idle(A, "ana", toTicket > 0.99 && out < 0.01 ? 0.25 : 1);
+  // above her meter cell; as the cell lifts into the ticket she drops into it (the ticket draws her while docked)
+  const sink = prog(f, T.morph - 2, 8, IN_OUT_STRONG);
+  let ana = { x: meterPos.x, y: lerp(meterPos.y - 30 * lift, pose.y, sink), s: lerp(56, 30, sink) };
+  if (f >= T.anaOut) ana = { x: lerp(spot.x, ANA_OUT.x, out), y: lerp(spot.y, ANA_OUT.y, out) - Math.sin(Math.PI * out) * 60, s: lerp(FACE_SPOT.size, ANA_SIZE_OUT, out) };
+  const anaO = prog(f, T.meterIn + 6, 14) * (1 - 0.45 * lift) * (1 - prog(f, T.morph + 2, 4)) + (f >= T.anaOut ? 1 - prog(f, T.pull, 16) : 0);
+  const anaIdle = f >= T.anaOut ? `${idle(A, "ana", out)} rotate(${TICKET_ROT * (1 - out)}deg)` : idle(A, "ana");
   const anaDrift = prog(f, T.pull, 16) * -24;
 
   /* Priya */
@@ -87,7 +89,7 @@ export function Swap({ T }: { T: TT }) {
 
   return (
     <AbsoluteFill>
-      {f >= T.meterIn && f < T.pull + 18 && (
+      {f >= T.meterIn && f < T.pull + 18 && anaO > 0 && (
         <Place x={anaDocked.x} y={anaDocked.y} o={anaO}>
           <div style={{ transform: `${anaIdle} scale(${anaBump})` }}>
             <Face id="ana" size={ana.s} />

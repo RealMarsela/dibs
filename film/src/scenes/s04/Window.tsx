@@ -39,7 +39,9 @@ export function WindowGroup({ T }: { T: TT }) {
   const bh = lerp(ROW_HS * PUSH_S, WIN_H_ASK, grow);
   const br = lerp(22 * LIST_SCALE * PUSH_S, WIN_R, grow);
   const boxA = prog(f, T.win, 10);
-  const winO = prog(f, T.win + 10, 6);
+  const winO = prog(f, T.win + 1, 6);
+  // the window's UI is visible from the first frame of the morph, revealed by the growing box
+  const ix = Math.max(0, (WIN_W - bw) / 2);
 
   const jump = T.step + 24;
   const winH = lerp(WIN_H_ASK, WIN_H_REF, prog(f, T.step - 1, 6, OUT_STRONG));
@@ -53,7 +55,7 @@ export function WindowGroup({ T }: { T: TT }) {
         filter: blur > 0.05 ? `blur(${blur}px)` : undefined,
       }}
     >
-      {winO < 1 && (
+      {f < T.win + 22 && (
         <div
           style={{
             position: "absolute",
@@ -68,8 +70,16 @@ export function WindowGroup({ T }: { T: TT }) {
           }}
         />
       )}
-      {f >= T.win + 9 && (
-        <div style={{ position: "absolute", left: 960 - WIN_W / 2, top: 540 - winH / 2, opacity: winO }}>
+      {f >= T.win && (
+        <div
+          style={{
+            position: "absolute",
+            left: 960 - WIN_W / 2,
+            top: 540 - winH / 2,
+            opacity: winO,
+            clipPath: f < T.win + 22 ? `inset(${Math.max(0, (winH - bh) / 2)}px ${ix}px round ${br}px)` : undefined,
+          }}
+        >
           <AppWindow width={WIN_W} height={winH} radius={WIN_R}>
             <Sequence from={T.win} durationInFrames={jump - T.win} layout="none">
               <FootageSlot id="resale" width={WIN_W} height={winH} crop={cropFor(winH)} startFrom={CLIP_REFUSED - (T.step - T.win)} placeholder={<ResaleSheet T={T} winH={winH} />} />

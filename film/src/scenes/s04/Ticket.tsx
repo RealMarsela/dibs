@@ -1,5 +1,6 @@
 import React from "react";
 import { C, FONT, MONO } from "../../tokens";
+import { Face } from "../../components/LetterFace";
 import { GEO, K, TH, TS, TW, type TearState } from "./tear";
 
 /* The resale sheet's tear ticket (resale-sheet.tsx "tear" step: background #232322, stub #2c2c2b, ink #ececea,
@@ -17,6 +18,7 @@ export function Ticket({
   ana = 1,
   priya = 0,
   ring = 0,
+  anaFace = 0,
   stub = 1,
   flight,
   body = 1,
@@ -26,6 +28,8 @@ export function Ticket({
   ana?: number;
   priya?: number;
   ring?: number;
+  /** Ana's face drawn in the slot (she rides inside the ticket while it forms, until she steps out) */
+  anaFace?: number;
   stub?: number;
   flight?: Flight;
   body?: number;
@@ -69,8 +73,11 @@ export function Ticket({
                   boxSizing: "border-box",
                   border: `${2}px dashed rgba(255,255,255,${0.28 * ring})`,
                   flexShrink: 0,
+                  position: "relative",
                 }}
-              />
+              >
+                {anaFace > 0 && <Face id="ana" size={22 * K} style={{ position: "absolute", left: 0, top: 0, opacity: anaFace }} />}
+              </div>
               <div style={{ position: "relative", fontSize: 14 * K, fontWeight: 600, lineHeight: 1 }}>
                 <span style={{ opacity: ana }}>Ana</span>
                 <span style={{ position: "absolute", left: 0, top: 0, opacity: priya }}>Priya</span>

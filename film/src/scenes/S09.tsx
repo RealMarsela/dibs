@@ -6,12 +6,12 @@ import { Mono, Pill, Wordmark } from "../components/Surfaces";
 import { Sweep } from "../components/Sweep";
 import { Centre, H8 } from "../handoffs";
 import { useScene } from "../scene";
-import { C, EASE, FONT, OE, SPRING } from "../tokens";
+import { C, EASE, FONT, OE, SPRING, FACTS } from "../tokens";
 import { kf, prog } from "../lib/anim";
 import { Crowd } from "./s09/crowd";
 
 /* The live trip link on the lockup. Provisional: the coordinator may change it; keep it a single const. */
-const LIVE_URL = "dibs-trips.pages.dev/t/lis0312";
+const LIVE_URL = FACTS.liveUrl; // single constant lives in tokens.ts
 const REPO = "github.com/RealMarsela/dibs";
 const CREDIT = "Built at NEAR HACKATHON · runs on NEAR testnet · card rails: Lithic sandbox";
 

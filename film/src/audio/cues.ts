@@ -39,10 +39,17 @@ export const CUES: Cue[] = [
   c("S03", 284, "whoosh-2.mp3", 0.3, 3, "$40.42 lifts out as the coin"),
   c("S03", 318, "sound-3.mp3", 0.3, 9, "coin flips to NEAR inside the NEAR Intents ring"),
   c("S03", 352, "cash-ting.mp3", 0.45, 7, "lands in b03, tile lights"),
-  c("S03", 374, "paper-slide-03.mp3", 0.35, 5, "window turns over"),
   ...(VARIANT === "B"
-    ? [c("S03", 396, "es-suction-pop-5-sfx-producer.mp3", 0.2, 3, "testnet chip appears"), c("S03", 573, "mixkit-warping-slide-1531.mp3", 0.18, 6, "card shrinks into row 03")]
-    : [c("S03", 439, "pop-1.mp3", 0.3, 1, "yellow mainnet pill lands"), c("S03", 502, "mixkit-warping-slide-1531.mp3", 0.18, 6, "receipt shrinks into row 03")]),
+    ? [
+        c("S03", 396, "pop-1.mp3", 0.2, 1, "testnet chip enters under the live payment"),
+        c("S03", 480, "quick-win.mp3", 0.2, 3, "You're in: all four steps ticked"),
+        c("S03", 573, "mixkit-warping-slide-1531.mp3", 0.18, 6, "window shrinks into row 03"),
+      ]
+    : [
+        c("S03", 374, "paper-slide-03.mp3", 0.35, 5, "window turns over to the mainnet receipt"),
+        c("S03", 439, "pop-1.mp3", 0.3, 1, "yellow mainnet pill lands"),
+        c("S03", 502, "mixkit-warping-slide-1531.mp3", 0.18, 6, "receipt shrinks into row 03"),
+      ]),
   // S04 can't make it
   c("S04", 98, "rm-click-2.mp3", 0.45, 1, "Get my $40 back clicked"),
   c("S04", 143, "fp-stamp.wav", 0.6, 3, "REFUSED stamp lands"),

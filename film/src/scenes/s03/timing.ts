@@ -9,7 +9,9 @@ export const K = 1.5; // Leo's single-row card scale (BedRow is already film px)
 /** The pay-base slot box: 1150 wide (crop 450 CSS px -> x2.56), as tall as the 96 px margins allow. */
 export const WIN = { w: 1150, h: 888 };
 /** The window hugs each PaySheet step (the slot stays WIN-sized and centred, so this only trims the crop vertically). */
-export const FRONT_H = { passkey: 670, chain: 859, track: 777 }; // CSS 262 / 336 / 304 tall at x2.556
+export const FRONT_H = { passkey: 670, chain: 859, track: 757, done: 869 }; // CSS 262 / 336 / 296 / 340 tall at x2.556
+/** Variant B: the window's pose while the testnet chip sits under it (stage y, scale). */
+export const TAIL_POSE = { y: -40, s: 0.9 };
 export const BACK = VARIANT === "A" ? { w: 1150, h: 736 } : { w: 1200, h: 560 };
 /** Row 03 of H3's bed list, in stage coords (centre origin). The page renders border-box (measured), so each row is 842 x 84
     at 1x (centre 126 px above the list centre); H3 scales the list by LIST_SCALE about the frame centre. */
@@ -30,16 +32,14 @@ export function timing(cue: Cue) {
   const near = c("near");
   const swaps = c("swaps");
   const three = c("three");
+  /* A: the window turns over to the mainnet receipt; the yellow pill lands on "mainnet".
+     B: no turn-over. The real payment keeps running ("You're in" lands just after "deposit") and a testnet chip
+        sits under the window from "testnet" until the shrink. NEVER: a far-future frame for the unused variant's events. */
+  const NEVER = 1e6;
   const tail =
     VARIANT === "A"
-      ? { start: cue(TAIL, "we"), mainnet: cue(TAIL, "mainnet"), words: [] as number[], grey: 0 }
-      : {
-          start: cue(TAIL, "on"),
-          mainnet: cue(TAIL, "mainnet"),
-          // "On testnet, a faucet stands in for the deposit." timed to "On testnet, a faucet stands in for that deposit"
-          words: ["on", "testnet", "a", "faucet", "stands", "in", "for", "that", "deposit"].map((w) => cue(TAIL, w)),
-          grey: cue(TAIL, "deposit") + 8,
-        };
+      ? { mainnet: cue(TAIL, "mainnet"), chipAt: NEVER, youIn: NEVER }
+      : { mainnet: NEVER, chipAt: cue(TAIL, "testnet"), youIn: cue(TAIL, "deposit") + 8 };
   return {
     D,
     lineOut: 2,
@@ -64,7 +64,7 @@ export function timing(cue: Cue) {
     deposit: swaps + 2,
     swapped: swaps + 14,
     landed: three,
-    dao: three + 10,
+    dao: VARIANT === "A" ? three + 10 : tail.youIn,
     lands: c("lands"),
     flip0: three + 16,
     flip1: three + 40,
@@ -83,7 +83,9 @@ export function winPose(f: number, t: T): Pose {
   const pullIn = kf(f, [t.pull0, t.pull1], [0, 1], EASE);
   const pullOut = kf(f, [t.flip0 - 4, t.flip1], [0, 1], IN_OUT_STRONG);
   const pull = pullIn * (1 - pullOut);
-  const flip = kf(f, [t.flip0, t.flip1], [0, 1], IN_OUT_STRONG);
+  const isA = VARIANT === "A";
+  const flip = isA ? kf(f, [t.flip0, t.flip1], [0, 1], IN_OUT_STRONG) : 0;
+  const tailP = isA ? 0 : pullOut; // B settles into TAIL_POSE as it returns from the lift-out
   const shrink = kf(f, [t.shrink0, t.shrink1], [0, 1], IN_OUT_STRONG);
   const push = kf(f, [t.flip1, t.shrink0], [0, 1], EASE);
   const still = 1 - shrink;
@@ -91,12 +93,17 @@ export function winPose(f: number, t: T): Pose {
   const x = lerp(PILL.x, 0, open) + PULL.x * pull + Math.sin(f / 52) * 6 * drift;
   // the face reaches row 03's height first, then finishes shrinking in place (nothing slides across the other rows)
   const shrinkY = kf(f, [t.shrink0, t.shrink0 + (t.shrink1 - t.shrink0) * 0.6], [0, 1], IN_OUT_STRONG);
-  const y = lerp(Math.sin(f / 38) * 4 * drift, ROW3.y, shrinkY);
+  const y = lerp(Math.sin(f / 38) * 4 * drift + TAIL_POSE.y * tailP, ROW3.y, shrinkY);
   const z = -150 * Math.sin(flip * Math.PI);
-  const s = lerp(1, PULL.s, pull) * (1 + 0.04 * push * still);
+  const s = lerp(1, PULL.s, pull) * (isA ? 1 + 0.04 * push * still : lerp(1, TAIL_POSE.s, tailP * still));
   const rx = lerp(14, 0, kf(f, [t.win0, t.win0 + 30], [0, 1], EASE));
   const ry = flip * 180 + Math.sin(f / 70) * 1.6 * drift * (1 - Math.min(1, flip * 4)) * (1 - pull);
-  const fh = kf(f, [t.chain0, t.chain0 + 10, t.track0, t.track0 + 10], [FRONT_H.passkey, FRONT_H.chain, FRONT_H.chain, FRONT_H.track], IN_OUT_STRONG);
+  const fh = kf(
+    f,
+    [t.chain0, t.chain0 + 10, t.track0, t.track0 + 10, t.tail.youIn, t.tail.youIn + 10],
+    [FRONT_H.passkey, FRONT_H.chain, FRONT_H.chain, FRONT_H.track, FRONT_H.track, FRONT_H.done],
+    IN_OUT_STRONG,
+  );
   const w = lerp(lerp(WIN.w, BACK.w, flip), ROW3.w, shrink);
   const h = lerp(lerp(fh, BACK.h, flip), ROW3.h, shrink);
   return { x, y, z, s, rx, ry, open, flip, shrink, w, h };

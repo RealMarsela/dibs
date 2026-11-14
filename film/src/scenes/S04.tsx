@@ -8,10 +8,10 @@ import { kf, lerp, prog } from "../lib/anim";
 import { useT, type TT } from "./s04/time";
 import { List, ROW_HS, ROW_W, rowY } from "./s04/List";
 import { PUSH_S, WindowGroup } from "./s04/Window";
-import { CH, CW, cellX, HoleMeter, meterState, MY } from "./s04/HoleMeter";
+import { CH, HoleMeter, meterState } from "./s04/HoleMeter";
 import { Ticket, type Flight } from "./s04/Ticket";
 import { K, stubPoint, tearAt, TH, TS, TW } from "./s04/tear";
-import { PRIYA_AT, TC, TICKET_ROT, toLocal, toScreen } from "./s04/geo";
+import { PRIYA_AT, ticketPose, TICKET_ROT, toLocal, toScreen } from "./s04/geo";
 import { Swap } from "./s04/Swap";
 import { mixHex } from "./s04/Sheet";
 
@@ -34,7 +34,7 @@ export const S04: React.FC = () => {
       {f >= T.win && f < T.away + 30 && <WindowGroup T={T} />}
       {f >= T.meterIn && f < T.morph + 20 && <HoleMeter T={T} />}
       {f >= T.morph && f < T.morph + 24 && <CellToTicket T={T} />}
-      {f >= T.morph + 16 && f < T.pull + 6 && <TicketOnStage T={T} />}
+      {f >= T.morph + 3 && f < T.pull + 6 && <TicketOnStage T={T} />}
       {f >= T.pull && <TicketToRow T={T} />}
       {f >= T.meterIn && <Swap T={T} />}
     </World>
@@ -47,7 +47,7 @@ function OpeningList({ T }: { T: TT }) {
   const dim = prog(f, T.dim, 24);
   const p = kf(f, [T.push, T.push + 46], [0, 1], PUSH_EASE);
   const gone = prog(f, T.win, 14);
-  const rowOut = prog(f, T.win, 8);
+  const rowOut = prog(f, T.win, 6);
   return (
     <List
       rows={ROWS_ALL_PAID}
@@ -80,16 +80,12 @@ function ClosingList({ T }: { T: TT }) {
 function CellToTicket({ T }: { T: TT }) {
   const { f } = T;
   const m = prog(f, T.morph, 22, IN_OUT_STRONG);
-  const c = TC(f);
+  const { x, y, w, h } = ticketPose(T, f);
   const { green } = meterState(T);
   const cell = mixHex(C.fg, C.paid, green);
-  const k = prog(f, T.morph + 2, 14);
+  const k = prog(f, T.morph + 2, 10);
   const col = k <= 0 ? cell : mixHex(C.paid, BG, k);
-  const x = lerp(cellX(3), c.x, m);
-  const y = lerp(MY, c.y, m);
-  const w = lerp(CW, TW, m);
-  const h = lerp(CH, TH, m);
-  const o = 1 - prog(f, T.morph + 18, 5);
+  const o = 1 - prog(f, T.morph + 8, 8);
   return (
     <div
       style={{
@@ -113,9 +109,9 @@ function CellToTicket({ T }: { T: TT }) {
 function TicketOnStage({ T }: { T: TT }) {
   const { f } = T;
   const st = tearAt(f - T.tear);
-  const c = TC(f);
-  const ink = prog(f, T.morph + 16, 12) * (1 - prog(f, T.pull - 6, 10));
-  const show = prog(f, T.morph + 16, 6);
+  const pose = ticketPose(T, f);
+  const ink = 1 - prog(f, T.pull - 6, 10);
+  const show = prog(f, T.morph + 3, 8);
   // stub flight to Priya, in ticket-local space
   const fp = prog(f, T.stubFly, 18, IN_OUT_STRONG);
   let flight: Flight | undefined;
@@ -129,9 +125,9 @@ function TicketOnStage({ T }: { T: TT }) {
     <div
       style={{
         position: "absolute",
-        left: c.x - TW / 2,
-        top: c.y - TH / 2,
-        transform: `rotate(${TICKET_ROT}deg)`,
+        left: pose.x - TW / 2,
+        top: pose.y - TH / 2,
+        transform: `rotate(${pose.rot}deg) scale(${pose.sc})`,
         opacity: show,
       }}
     >
@@ -141,6 +137,7 @@ function TicketOnStage({ T }: { T: TT }) {
         ana={1 - prog(f, T.anaOut, 8)}
         priya={prog(f, T.seat + 22, 8)}
         ring={ring}
+        anaFace={f < T.anaOut ? 1 : 0}
         stub={f < T.stubFly + 19 ? 1 : 0}
         flight={flight}
         body={1 - prog(f, T.pull + 2, 4)}
