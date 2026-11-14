@@ -3,7 +3,7 @@ import { C, FONT, LIST_SCALE } from "../../tokens";
 import { lerp, prog } from "../../lib/anim";
 import { At } from "../../components/Stage";
 import { ROWS_ALL_PAID, BedRow } from "../../components/Trip";
-import { BACK, K, PILL, ROW_1X, WIN, type Pose, type T } from "./timing";
+import { BACK, FRONT_H, K, PILL, ROW_1X, WIN, type Pose, type T } from "./timing";
 import { cropAt } from "./PayScreen";
 import { PayFront } from "./PayFront";
 import { BackContent, BackPill, windowSurface } from "./Back";
@@ -44,16 +44,21 @@ export function PayWindow({ f, t, P }: { f: number; t: T; P: Pose }) {
   const surf = 1 - prog(P.shrink, 0.5, 0.5);
   const radius = lerp(28, 22 * LIST_SCALE, P.shrink);
   const frontFinal = V === "B";
+  // B: the box is never empty. "You're in" stays visible and scales down with the box for the first half of the shrink,
+  // then crossfades straight into Leo's paid row, which is already centred where row 03 lands.
+  const frontScale = frontFinal ? Math.min(1, h / FRONT_H.done) : 1;
+  const frontOut = frontFinal ? prog(P.shrink, 0.32, 0.26) : 0;
+  const frontRow = prog(P.shrink, 0.32, 0.26);
   return (
     <At x={P.x} y={P.y} z={P.z} rx={P.rx} ry={P.ry} s={P.s} style={{ width: w, height: h }}>
       {showFront && (
         <div style={{ ...hide, position: "absolute", inset: 0, clipPath: reveal, WebkitClipPath: reveal }}>
           <div style={{ position: "absolute", inset: 0, boxSizing: "border-box", borderRadius: radius, overflow: "hidden", ...windowSurface(frontFinal ? surf : 1) }}>
-            <div style={{ position: "absolute", left: (w - WIN.w) / 2, top: (h - WIN.h) / 2, opacity: frontFinal ? 1 - fade : 1 }}>
+            <div style={{ position: "absolute", left: (w - WIN.w) / 2, top: (h - WIN.h) / 2, opacity: 1 - frontOut, transform: `scale(${frontScale})` }}>
               <PayFront f={f} t={t} crop={crop} />
             </div>
             <div style={{ position: "absolute", inset: 0, background: SHEEN, opacity: frontFinal ? surf : 1 }} />
-            {frontFinal && <LeoRow o={row} />}
+            {frontFinal && <LeoRow o={frontRow} />}
           </div>
           {cover > 0 && (
             <div style={{ position: "absolute", inset: 0, borderRadius: 28, background: C.fg, opacity: cover, display: "grid", placeItems: "center" }}>
