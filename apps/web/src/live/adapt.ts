@@ -48,7 +48,7 @@ export function register(account: string, names: Record<string, string>): string
 
 export function toTrip(view: TripView, names: Record<string, string>, activity: Activity[]): Trip {
   const t = view.trip;
-  const meta = PLACES[view.code] ?? { place: view.code.toUpperCase(), country: "", beds: t.beds.map((_, i) => `Bed ${i + 1}`) };
+  const meta = PLACES[view.code] ?? { place: view.meta?.place ?? view.code.toUpperCase(), country: view.meta?.country ?? "", beds: t.beds.map((_, i) => `Bed ${i + 1}`) };
   const price = Number(t.price) / 1e6;
   const drawn = Array.isArray(t.drawn) && t.drawn.length === t.beds.length ? t.drawn : null;
   const spots: Spot[] = t.beds.map((b, i) => {

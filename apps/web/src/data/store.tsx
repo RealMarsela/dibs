@@ -45,7 +45,7 @@ const TripCtx = createContext<Ctx | null>(null);
 const noop = async () => ({});
 
 export function TripProvider({ code, children }: { code: string; children: ReactNode }) {
-  const live = LIVE_TRIPS.includes(code.toLowerCase());
+  const live = code.toLowerCase() !== "demo" && (LIVE_TRIPS.includes(code.toLowerCase()) || /^[a-z0-9]{3,12}$/.test(code.toLowerCase()));
   const [sample, dispatch] = useReducer(reduce, undefined, sampleTrip);
   const liveTrip = useLiveTrip(code.toLowerCase(), live);
   const trip = live ? liveTrip.trip : sample;

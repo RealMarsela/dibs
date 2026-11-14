@@ -43,6 +43,7 @@ export interface RawTrip {
   last_error?: string | null;
 }
 export interface TripView {
+  meta?: { place?: string; country?: string; stay?: string } | null;
   code: string;
   network: string;
   contract: string;
@@ -136,3 +137,6 @@ export const cardIssue = (trip: string) => post<{ last4: string; spend_limit: st
 export const cardGet = (trip: string) => call<CardInfo>(`/card/${encodeURIComponent(trip)}`);
 export const cardSimulate = (trip: string, merchant: "carlton" | "electronics") =>
   post<{ approved: boolean; descriptor: string; reason?: string; result?: string; lithic_request_id?: string }>(`/card/${encodeURIComponent(trip)}/simulate`, { merchant });
+
+export const createTrip = (b: { place: string; stay: string; check_in: string; check_out: string; beds: number; price_usdc: number; booker: string }) =>
+  post<{ code: string; url: string; tx_hash: string; hold_tx?: string; inbox?: string | null }>("/trips", b);
