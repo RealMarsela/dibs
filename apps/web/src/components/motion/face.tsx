@@ -43,7 +43,7 @@ export function LetterFace({
   const [e1, e2] = initials(name);
   const small = size < 36;
   const k = 2 + (h % 3); // blinks every 2, 3 or 4 beats
-  const phase = (h >> 3) % 4; // on which beat
+  const phase = (h >>> 3) % 4; // on which beat
   return (
     <span
       role="img"
@@ -65,7 +65,7 @@ export function LetterFace({
             {e2}
           </text>
         </g>
-        <path d={MOUTHS[(h >> 7) % MOUTHS.length]} stroke="#0e0e0e" strokeWidth={small ? 2.4 : 2} fill="none" strokeLinecap="round" />
+        <path d={MOUTHS[(h >>> 7) % MOUTHS.length]} stroke="#0e0e0e" strokeWidth={small ? 2.4 : 2} fill="none" strokeLinecap="round" />
       </svg>
     </span>
   );
