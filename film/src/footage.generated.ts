@@ -6,6 +6,12 @@ export const FOOTAGE_READY: Record<string, { w: number; h: number; fps: number; 
   "fps": 24.0,
   "seconds": 33.167
  },
+ "journey-testnet-meteor": {
+  "w": 1440,
+  "h": 810,
+  "fps": 30.0,
+  "seconds": 645.333
+ },
  "mainnet-lismain-paid": {
   "w": 2880,
   "h": 1620,

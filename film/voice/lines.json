@@ -33,6 +33,13 @@
       "note": "option (a) for Gabriel (wallet-first app, 15 Nov): replaces the L03 head; not in the cut unless he picks (a)"
     },
     {
+      "id": "L03J",
+      "beat": "journey",
+      "variant": "J",
+      "text": "Now here is the real app on NEAR testnet. The booker creates the trip and signs it in Meteor, then invites the crew. She takes a bed and approves forty test USDC in Meteor. It lands in the bed's own account, and soon every bed is paid.",
+      "note": "journey line (15 Nov 03:2x); generate ONLY after the coordinator relays Gabriel's go (258 chars with tag)"
+    },
+    {
       "id": "L03A",
       "beat": "pay-tail",
       "variant": "A",

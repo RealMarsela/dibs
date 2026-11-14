@@ -6,6 +6,8 @@ import { ROWS_ALL_PAID, BedRow } from "../../components/Trip";
 import { BACK, FRONT_H, K, PILL, ROW_1X, WIN, type Pose, type T } from "./timing";
 import { cropAt } from "./PayScreen";
 import { PayFront } from "./PayFront";
+import { Journey } from "./Journey";
+import { JOURNEY } from "../../timeline.generated";
 import { BackContent, BackPill, windowSurface } from "./Back";
 import { V } from "./variant";
 
@@ -58,7 +60,7 @@ export function PayWindow({ f, t, P }: { f: number; t: T; P: Pose }) {
         <div style={{ ...hide, position: "absolute", inset: 0, clipPath: reveal, WebkitClipPath: reveal }}>
           <div style={{ position: "absolute", inset: 0, boxSizing: "border-box", borderRadius: radius, overflow: "hidden", ...windowSurface(frontFinal ? surf : 1) }}>
             <div style={{ position: "absolute", left: (w - WIN.w) / 2, top: (h - WIN.h) / 2, opacity: 1 - frontOut, transform: `scale(${frontScale})` }}>
-              <PayFront f={f} t={t} crop={crop} />
+              {JOURNEY ? <Journey t={t} /> : <PayFront f={f} t={t} crop={crop} />}
             </div>
             <div style={{ position: "absolute", inset: 0, background: SHEEN, opacity: frontFinal ? surf : 1 }} />
             {frontFinal && <LeoRow o={frontRow} />}

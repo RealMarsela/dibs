@@ -1,5 +1,5 @@
 import { SCENES } from "../../scene";
-import { HEAD, TAIL } from "../../timeline.generated";
+import { HEAD, JOURNEY, TAIL } from "../../timeline.generated";
 import { V as VARIANT } from "./variant";
 import { kf, lerp } from "../../lib/anim";
 import { EASE, IN_OUT_STRONG, LIST_SCALE, OUT_STRONG } from "../../tokens";
@@ -24,7 +24,16 @@ export const PULL = { x: -200, s: 0.84 };
 type Cue = (line: string, word: string, nth?: number) => number;
 
 export function timing(cue: Cue) {
-  const c = (w: string, n = 0) => cue("L03", w, n);
+  // Journey mode (real Meteor journey footage): the L03 words of the older takes do not exist; every old cue is NEVER and
+  // the journey's own anchors come from the journey line when it has them.
+  const c = (w: string, n = 0) => (JOURNEY ? 1e6 : cue("L03", w, n));
+  const opt = (w: string) => {
+    try {
+      return cue("L03", w);
+    } catch {
+      return undefined;
+    }
+  };
   const D = SCENES.S03.to - SCENES.S03.from;
   const pays = c("pays");
   const gas = HEAD === "L03W" ? c("none") : c("gas"); // wallet-first take: "...or with a passkey if he has none."
@@ -40,7 +49,7 @@ export function timing(cue: Cue) {
     VARIANT === "A"
       ? { mainnet: cue(TAIL, "mainnet"), chipAt: NEVER, youIn: NEVER }
       : { mainnet: NEVER, chipAt: cue(TAIL, "testnet"), youIn: cue(TAIL, "deposit") + 8 };
-  return {
+  const base0 = {
     D,
     lineOut: 2,
     morph0: 2,
@@ -73,7 +82,14 @@ export function timing(cue: Cue) {
     tail,
     shrink0: D - 32,
     shrink1: D - 4,
+    janchors: [] as (number | undefined)[],
   };
+  if (!JOURNEY) return base0;
+  // Journey: H2 out, the pill opens into the window early, the journey runs to the mainnet tail, then the turn-over.
+  const flip0 = VARIANT === "A" ? cue(TAIL, "we") - 12 : D - 120;
+  const anchors = ["creates", "invites", "takes", "", "approves", "lands", "paid"].map((w) => (w ? opt(w) : undefined));
+  if (anchors[2] !== undefined) anchors[3] = anchors[2] + 40;
+  return { ...base0, morph1: 14, press: 10, win0: 16, win1: 40, flip0, flip1: flip0 + 24, janchors: anchors };
 }
 export type T = ReturnType<typeof timing>;
 
@@ -100,7 +116,7 @@ export function winPose(f: number, t: T): Pose {
   const s = lerp(1, PULL.s, pull) * (isA ? 1 + 0.04 * push * still : lerp(1, TAIL_POSE.s, tailP * still));
   const rx = lerp(14, 0, kf(f, [t.win0, t.win0 + 30], [0, 1], EASE));
   const ry = flip * 180 + Math.sin(f / 70) * 1.6 * drift * (1 - Math.min(1, flip * 4)) * (1 - pull);
-  const fh = kf(
+  const fh = JOURNEY ? WIN.h : kf(
     f,
     [t.chain0, t.chain0 + 10, t.track0, t.track0 + 10, t.tail.youIn, t.tail.youIn + 10],
     [FRONT_H.passkey, FRONT_H.chain, FRONT_H.chain, FRONT_H.track, FRONT_H.track, FRONT_H.done],

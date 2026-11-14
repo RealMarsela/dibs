@@ -3,7 +3,7 @@
 import json, re, sys, os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src = open(os.path.join(ROOT, "src/timeline.generated.ts")).read()
-W = json.loads(re.search(r"WORDS: Word\[\] = (\[.*\]);", src).group(1))
+W = [w for w in json.loads(re.search(r"WORDS: Word\[\] = (\[.*\]);", src).group(1)) if w["w"] != "·"]  # silent placeholder lines carry no caption
 fps = 30
 def ts(f):
     s = f / fps; h = int(s // 3600); m = int(s % 3600 // 60); sec = s % 60
