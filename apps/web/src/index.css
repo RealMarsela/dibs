@@ -131,8 +131,10 @@ body {
   background: var(--color-glass);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-glass);
-  backdrop-filter: blur(24px) saturate(1.2);
+  /* Prefixed first, standard last: the CSS minifier merges the pair and keeps the last one, and Chrome reads only the
+     standard property (with only -webkit- left, the glass rendered unfrosted). */
   -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  backdrop-filter: blur(24px) saturate(1.2);
   box-shadow:
     0 1px 0 rgb(255 255 255 / 0.05) inset,
     0 24px 60px -24px rgb(0 0 0 / 0.7);

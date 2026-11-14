@@ -111,7 +111,7 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
           </button>
           {err && <p className="mt-3 rounded-xl bg-refused/10 px-3 py-2 text-[13.5px] text-refused" role="alert">{err}</p>}
           <button className="focus-ring mt-3 flex w-full items-center justify-center gap-1.5 rounded-md text-[12.5px] text-fg-3 underline decoration-white/20 underline-offset-4 hover:text-fg" disabled={busy} onClick={withPasskey}>
-            <Fingerprint className="size-3.5" /> Judge demo: no wallet, use a passkey on this device
+            <Fingerprint className="size-3.5" /> {mainnet ? "No NEAR wallet? Hold it with a passkey, then pay from MetaMask or any wallet" : "Judge demo: no wallet, use a passkey on this device"}
           </button>
         </div>
       )}
