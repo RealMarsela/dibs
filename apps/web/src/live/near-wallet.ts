@@ -1,4 +1,5 @@
 import type { NearConnector, NearWalletBase } from "@hot-labs/near-connect";
+import { NEAR_RPCS, nearRpc } from "@/live/near-rpc";
 
 /* Paying a bed from a NEAR wallet through NEAR Connect, the official connector (HOT, Meteor, MyNearWallet, Intear,
    NEAR Mobile, Ledger). USDC on NEAR needs no swap: the wallet sends it straight to the bed's own keyless account,
@@ -7,11 +8,10 @@ import type { NearConnector, NearWalletBase } from "@hot-labs/near-connect";
 export type NearNet = "mainnet" | "testnet";
 /* Mainnet: native USDC. Testnet: the trip contract's test USDC, whose open `mint` lets a wallet fund itself first. */
 export const NEAR_USDC: Record<NearNet, string> = { mainnet: "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1", testnet: "usdc.own-0eb9ae.testnet" };
-const RPC: Record<NearNet, string> = { mainnet: "https://rpc.mainnet.fastnear.com", testnet: "https://rpc.testnet.fastnear.com" };
-
 const connectors: Partial<Record<NearNet, Promise<NearConnector>>> = {};
 function get(net: NearNet): Promise<NearConnector> {
-  connectors[net] ??= import("@hot-labs/near-connect").then(({ NearConnector }) => new NearConnector({ network: net }));
+  // NEAR Connect gets the same fallback list the app uses, so its own reads survive a rate-limited endpoint.
+  connectors[net] ??= import("@hot-labs/near-connect").then(({ NearConnector }) => new NearConnector({ network: net, providers: NEAR_RPCS }));
   return connectors[net]!;
 }
 
@@ -65,13 +65,7 @@ async function wallet(net: NearNet): Promise<NearWalletBase> {
 
 export async function nearUsdcBalance(net: NearNet, accountId: string): Promise<bigint> {
   const args = btoa(JSON.stringify({ account_id: accountId }));
-  const r = (await (
-    await fetch(RPC[net], {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ jsonrpc: "2.0", id: "dibs", method: "query", params: { request_type: "call_function", finality: "final", account_id: NEAR_USDC[net], method_name: "ft_balance_of", args_base64: args } }),
-    })
-  ).json()) as { result?: { result?: number[] } };
+  const r = await nearRpc<{ result?: number[] }>(net, "query", { request_type: "call_function", finality: "final", account_id: NEAR_USDC[net], method_name: "ft_balance_of", args_base64: args });
   const bytes = r.result?.result;
   return bytes ? BigInt(JSON.parse(new TextDecoder().decode(Uint8Array.from(bytes))) as string) : 0n;
 }
