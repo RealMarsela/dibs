@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-/* Render several frames of one composition with ONE bundle and ONE browser (cheap on RAM).
-   Usage: scripts/stills.sh <CompositionId> <frame,frame,...> <outDir> [--scale=0.5]
-   Frames are local to the composition. Writes <outDir>/<CompositionId>-<frame>.jpg */
-import { bundle } from "@remotion/bundler";
+/* Render several frames of one composition from the shared bundle in out/bundle (never re-bundles; run
+   scripts/bundle.mjs first, stills.sh does) with ONE browser. Usage: scripts/stills.sh <Comp> <f1,f2,...> <outDir> [--scale=0.5]
+   Frames are local to the composition. Writes <outDir>/<Comp>-<frame>.jpg */
 import { renderStill, selectComposition, openBrowser } from "@remotion/renderer";
 import path from "node:path";
 import fs from "node:fs";
@@ -14,8 +13,12 @@ if (!comp || !framesArg || !outDir) {
 }
 const scale = Number((rest.find((a) => a.startsWith("--scale=")) ?? "--scale=1").split("=")[1]);
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const serveUrl = path.join(root, "out/bundle");
+if (!fs.existsSync(path.join(serveUrl, "index.html"))) {
+  console.error("no bundle: run node scripts/bundle.mjs first");
+  process.exit(1);
+}
 fs.mkdirSync(outDir, { recursive: true });
-const serveUrl = await bundle({ entryPoint: path.join(root, "src/index.ts"), publicDir: path.join(root, "public") });
 const browser = await openBrowser("chrome", { chromiumOptions: { gl: "angle" } });
 const composition = await selectComposition({ serveUrl, id: comp, inputProps: {}, puppeteerInstance: browser });
 for (const f of framesArg.split(",").map((x) => Number(x.trim()))) {
