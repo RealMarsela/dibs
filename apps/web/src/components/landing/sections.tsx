@@ -85,7 +85,7 @@ export function Terms() {
 const HOOD = [
   ["Sputnik DAO.", "The crew’s pot lives in its own DAO. The booker’s payout is a DAO proposal you can open in Trezu."],
   ["Keyless bed accounts.", "Every bed is a NEAR account with no keys at all. Its one job: hand your payment to the trip, tagged with your bed."],
-  ["NEAR Intents.", "Pay from Base, Solana, Arbitrum or Ethereum. Resale money goes back out to the chain you came from."],
+  ["NEAR Intents.", "Pay from Base, Solana, Arbitrum or Ethereum. Your bed’s own NEAR account receives exactly the bed price in USDC."],
   ["OutLayer.", "The trip contract itself asks an Intel TDX enclave whether the booking email is real, then checks the signed answer."],
   ["NEAR AI Cloud.", "Reads the email inside a GPU enclave. Friends see dates, guests and the total. Never names, address or card."],
   ["A fair draw.", "A verifiable random number decides who sleeps where."],
