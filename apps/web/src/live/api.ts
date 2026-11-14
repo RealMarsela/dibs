@@ -101,7 +101,8 @@ export async function uploadProof(file: File): Promise<{ blob_url: string; blob_
   return call("/proof-blob", { method: "POST", body: fd });
 }
 
-export const explorer = (tx: string) => `https://${current === "mainnet" ? "" : "testnet."}nearblocks.io/txns/${tx}`;
+// near.rocks: NEAR's own listed explorer, which opens for everyone (no bot wall).
+export const explorer = (tx: string) => `https://${current === "mainnet" ? "" : "testnet."}near.rocks/tx/${tx}`;
 export const accountExplorer = (a: string) => `https://${current === "mainnet" ? "" : "testnet."}nearblocks.io/address/${a}`;
 
 /* Live wiring endpoints (services/api, Lane G) and the trip inbox / card. */
