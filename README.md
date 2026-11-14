@@ -60,7 +60,8 @@ switches to mainnet for trips [`lismain`](https://dibs.larinova.com/t/lismain) a
 
 Mainnet is deliberately narrow. Its API answers only the pay-in (trip reads, hold, 1Click quote, deposit submit, status
 and sweep); trip creation, proofs, the draw, the card and gasless relays are refused with `E_MAINNET_SCOPE` and run on
-testnet. It has its own relayer, `relayer.dibsapp.near`. All ids: [deploy/mainnet.json](deploy/mainnet.json).
+testnet. It has its own relayer, `relayer.dibsapp.near`. All ids: [deploy/mainnet.json](deploy/mainnet.json). `pnpm verify`
+re-checks the mainnet contract's code hash, both Paid beds and the DAO's USDC (checks m1–m3).
 
 ### Pay with your wallet
 

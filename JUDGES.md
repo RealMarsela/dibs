@@ -25,6 +25,7 @@ evidence and tx links, and exits non-zero if any check fails. It proves, against
 | f | a recorded `request_refund` tx failed with `E_NO_REFUND` (it is a call, not a view, so the proof is the failed tx) |
 | g | the verifier key pinned in the contract equals the OutLayer project key in `deploy/testnet.json` |
 | h, i | the API answers, and the trip card on `lis0312` shows last4 and MCC 7011, approved at a hotel and declined at an electronics store (Lithic sandbox) |
+| m1–m3 | mainnet: `dibsapp.near` runs the wasm pinned in `deploy/mainnet.json`, both beds of `lismain` are Paid, and the crew DAO holds the real USDC |
 
 Key transactions it cites: booking proof accepted `54g9Y2qgKPNFamFeN6tQUgpR1AqU322F1J184LB8mYKr`, VRF draw
 `3RDs4qUK27Jfthi1NhNz7hsoYJtmh5N6j5o1BtjQfBSV`, refusal `J6aDm4oGLZmdghs1ewZ5ttMXpY9Q6qUCm7ZHZN9jnRrR`.

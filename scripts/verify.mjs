@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { b58ToHex, view, viewAccount, txStatus, txLink, getJson } from './lib/near.mjs';
+import { mainnetAccount, mainnetView, mainnetLink } from './lib/mainnet.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const cfg = JSON.parse(readFileSync(join(root, 'deploy/testnet.json'), 'utf8'));
@@ -138,8 +139,28 @@ await check('i. card on lis0312: last4 and mcc 7011', async () => {
   return `last4 ${c.last4}, mcc ${c.mcc}; hotel ${hotel.result}, electronics ${shop.result} (${shop.reason})`;
 });
 
+// Mainnet: the same contracts with real USDC (deploy/mainnet.json). Read-only.
+const main = JSON.parse(readFileSync(join(root, 'deploy/mainnet.json'), 'utf8'));
+await check('m1. mainnet contract runs the pinned wasm', async () => {
+  const hex = b58ToHex((await mainnetAccount(main.dibs)).code_hash);
+  must(hex === main.dibs_wasm_sha256, `code hash ${hex} != ${main.dibs_wasm_sha256}`);
+  return `${main.dibs} sha256 ${hex.slice(0, 16)}... matches deploy/mainnet.json`;
+});
+await check('m2. mainnet lismain: every bed Paid', async () => {
+  const t = await mainnetView(main.dibs, 'get_trip', { trip: 'lismain' });
+  const st = t.beds.map((b) => b.status);
+  must(st.length === 2 && st.every((s) => s === 'Paid'), `beds ${st.join(',')}`);
+  return `2 beds Paid (bed 1 from Base via 1Click, bed 2 USDC on NEAR); sweep ${mainnetLink(main.txs.bed1_sweep_to_dao)}`;
+});
+await check('m3. mainnet crew DAO holds the real USDC', async () => {
+  const dao = main.trips.lismain.dao;
+  const bal = BigInt(await mainnetView(main.usdc, 'ft_balance_of', { account_id: dao }));
+  must(bal >= 500000n, `${dao} holds ${bal}`);
+  return `${dao} holds ${(Number(bal) / 1e6).toFixed(2)} USDC (native USDC on NEAR)`;
+});
+
 const w = Math.max(...rows.map((r) => r.name.length));
-console.log(`Dibs live verification on NEAR testnet (${DIBS})\n`);
+console.log(`Dibs live verification on NEAR testnet (${DIBS}) and mainnet (${main.dibs})\n`);
 for (const r of rows) console.log(`${r.ok ? '✓' : '✗'} ${r.name.padEnd(w)}  ${r.evidence}`);
 const failed = rows.filter((r) => !r.ok).length;
 console.log(`\n${rows.length - failed}/${rows.length} checks passed`);
