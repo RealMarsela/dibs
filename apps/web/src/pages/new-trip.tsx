@@ -58,6 +58,10 @@ export function NewTripPage() {
   const [booker, setBooker] = useState<NearSession | null>(null);
   const [passkey, setPasskey] = useState(false);
   const [connecting, setConnecting] = useState(false);
+  // Fetched as soon as the wallet connects, so the tap on "Sign in and create" opens the wallet's signing tab at once
+  // (browsers block window.open once a tap is followed by network round trips).
+  const [nonce, setNonce] = useState<Awaited<ReturnType<typeof authNonce>> | null>(null);
+  const freshNonce = () => authNonce().then(setNonce, () => setNonce(null));
   const ready = place.trim().length > 1 && stay.trim().length > 1 && checkIn && checkOut && checkOut > checkIn && (booker || passkey);
 
   async function connect() {
@@ -66,6 +70,7 @@ export function NewTripPage() {
     try {
       setBooker(await connectNear("testnet"));
       setPasskey(false);
+      void freshNonce();
     } catch (e2) {
       setErr(nearError(e2, "your NEAR wallet"));
     } finally {
@@ -82,7 +87,8 @@ export function NewTripPage() {
       const base = { place: place.trim(), stay: stay.trim(), check_in: ymd(checkIn), check_out: ymd(checkOut), beds, price_usdc: price };
       let r;
       if (booker) {
-        const n = await authNonce();
+        const n = nonce ?? (await authNonce());
+        setNonce(null);
         // Ethereum Wallets accounts cannot signMessage through NEAR Connect: the same EVM wallet proves the 0x address (ERC-191).
         const auth = isEthAccount(booker.accountId)
           ? { address: booker.accountId, signature: await signErc191(booker.accountId, n.erc191_message), nonce: n.nonce, message: n.erc191_message }
@@ -95,6 +101,7 @@ export function NewTripPage() {
     } catch (e2) {
       setErr(booker ? nearError(e2, booker.wallet) : e2 instanceof Error ? e2.message : "Could not create the trip");
       setBusy(false);
+      if (booker) void freshNonce(); // a nonce is single use; the retry needs a new one
     }
   }
 

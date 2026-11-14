@@ -99,6 +99,10 @@ export function WalletPay({ chain, network, price, pay, getQuote, onSent, compac
       onSent(p, sig, w.name);
     }, (e) => solError(e, w.name));
 
+  /* Two taps for NEAR wallets: the first connects, checks and holds the bed; the second signs. Web wallets (Meteor Web
+     and others) open their signing tab with window.open, which browsers only allow right after a tap, so the signing
+     call must start straight from that second tap rather than after the hold's network round trips. */
+  const [ready, setReady] = useState<{ p: Pay; s: NearSession; mint: boolean } | null>(null);
   let nearName = "your NEAR wallet";
   const payNear = () =>
     run("near", "NEAR Connect", async () => {
@@ -110,9 +114,22 @@ export function WalletPay({ chain, network, price, pay, getQuote, onSent, compac
       if (bal < floor && !testnet) throw new Error(`${short(s.accountId)} has ${usdc(bal)} USDC on NEAR. This bed needs ${usdc(floor)}.`);
       if (!pay) setPhase("Holding your bed…");
       const p = pay ?? (await getQuote(s.accountId));
-      setPhase(`Confirm ${usdc(BigInt(p.amountIn))} ${unit} in ${s.wallet}…`);
-      onSent(p, await payBedFromNear(network, s, p.depositAddress, p.amountIn, testnet && bal < BigInt(p.amountIn)), s.wallet);
+      setReady({ p, s, mint: testnet && bal < BigInt(p.amountIn) });
     }, (e) => nearError(e, nearName));
+  function approveNear() {
+    if (!ready) return;
+    const { p, s, mint } = ready;
+    setBusy("near");
+    setErr(null);
+    setPhase(`Confirm ${usdc(BigInt(p.amountIn))} ${unit} in ${s.wallet}…`);
+    payBedFromNear(network, s, p.depositAddress, p.amountIn, mint)
+      .then((tx) => onSent(p, tx, s.wallet))
+      .catch((e) => setErr(nearError(e, s.wallet)))
+      .finally(() => {
+        setBusy(null);
+        setPhase("");
+      });
+  }
 
   async function disconnect() {
     if (conn?.w) await disconnectEvm(conn.w);
@@ -154,6 +171,17 @@ export function WalletPay({ chain, network, price, pay, getQuote, onSent, compac
           </button>
         ))}
       </div>
+      {ready && (
+        <div className="mt-3">
+          <button className="pill-light focus-ring w-full" disabled={busy !== null} onClick={approveNear}>
+            {busy === "near" ? <Loader2 className="size-4 animate-spin" /> : <Wallet className="size-4" />}
+            Approve {usdc(BigInt(ready.p.amountIn))} {unit} in {ready.s.wallet}
+          </button>
+          <p className="mt-2 text-center text-[12px] text-fg-3">
+            Bed held for {short(ready.s.accountId)}. {ready.mint ? "One transaction mints test USDC to you and pays the bed." : "One transaction pays the bed."}
+          </p>
+        </div>
+      )}
       {phase && <p className="mt-3 flex items-center gap-2 text-[13.5px] text-fg-2" aria-live="polite"><Loader2 className="size-3.5 animate-spin" /> {phase}</p>}
       {err && <p className="mt-3 rounded-xl bg-refused/10 px-3 py-2 text-[13.5px] text-refused" role="alert">{err}</p>}
       {conn && busy === null && (
