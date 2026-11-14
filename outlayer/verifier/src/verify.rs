@@ -3,7 +3,7 @@ use crate::canon::{parse_minor_units, sha256_hex, valid_date, valid_trip, Facts}
 use crate::dkim::{self, DnsTxt};
 use crate::http::Http;
 use crate::nearai::{Attestation, Extractor};
-use crate::{blob, mime, msg};
+use crate::{blob, mime, msg, recipient};
 use serde::{Deserialize, Deserializer};
 
 #[derive(Deserialize, Debug)]
@@ -83,7 +83,7 @@ fn total_appears(text: &str, cents: u64) -> bool {
     forms.iter().any(|f| text.contains(f.as_str()))
 }
 
-pub fn verify_booking(input: &BookingInput, ctx: &Ctx) -> Result<(Facts, Option<Attestation>), VerifyError> {
+pub fn verify_booking(input: &BookingInput, ctx: &Ctx) -> Result<(Facts, Option<Attestation>, bool), VerifyError> {
     if !valid_trip(&input.trip) {
         return err("E_INPUT", "bad trip code");
     }
@@ -149,5 +149,6 @@ pub fn verify_booking(input: &BookingInput, ctx: &Ctx) -> Result<(Facts, Option<
         eml_sha256: sha256_hex(&eml),
         booking_ref_hash: sha256_hex(f.booking_ref.trim().as_bytes()),
     };
-    Ok((facts, ex.attestation))
+    // Extra output only (not signed): the verified message was addressed to this trip's inbox.
+    Ok((facts, ex.attestation, recipient::addressed_to_trip(&message, &input.trip)))
 }

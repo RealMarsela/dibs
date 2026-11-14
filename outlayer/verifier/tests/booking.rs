@@ -164,3 +164,28 @@ fn unknown_dns_key_and_bad_input_are_refused() {
     assert_eq!(code(run(&eml, good_facts(), ALLOWED_TEST, |i| i.trip = "Lis:03".into())), "E_INPUT");
     assert_eq!(code(run(&eml, good_facts(), ALLOWED_TEST, |i| i.blob_url = "http://x".into())), "E_INPUT");
 }
+
+fn to_trip_for(to: &str) -> bool {
+    let eml = signed_eml_to(TEST_DOMAIN, TEST_DOMAIN, to, "Booking confirmation for Hotel Alfama Patio", BODY);
+    let blob = encrypt(&eml, &AES_KEY);
+    let inp = input(&blob);
+    let (http, dns, ex) = (FakeHttp(blob), Dns::fixture(TEST_DOMAIN), MockExtractor(good_facts()));
+    let ctx = Ctx { http: &http, dns: &dns, extractor: &ex, blob_key: AES_KEY, allowed_domains: ALLOWED_TEST };
+    verify_booking(&inp, &ctx).expect("verifies").2
+}
+
+#[test]
+fn to_trip_is_set_only_when_the_verified_message_was_addressed_to_the_trips_inbox() {
+    assert!(to_trip_for("Crew <lis0312@dibs.larinova.com>"));
+    assert!(!to_trip_for("crew@example.org"));
+    assert!(!to_trip_for("par0101@dibs.larinova.com")); // another trip's inbox
+    assert!(!to_trip_for("lis0312@dibs.larinova.com.evil.example"));
+}
+
+#[test]
+fn to_trip_is_not_part_of_the_signed_message() {
+    let facts = run(&valid_eml(), good_facts(), ALLOWED_TEST, |_| {}).unwrap();
+    let out = ops::booking_op(&facts, None, &TestSigner::new()).unwrap();
+    assert!(out.get("to_trip").is_none(), "added by the entrypoint, outside the signed bytes");
+    assert!(!out["message"].as_str().unwrap().contains("to_trip"));
+}

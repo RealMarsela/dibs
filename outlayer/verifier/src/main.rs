@@ -85,11 +85,20 @@ fn run(raw: &str) -> Result<Value, String> {
             let http = Wasi;
             let doh = DohResolver { http: &http, url: DOH_URL };
             let dns: &dyn DnsTxt = &FixtureThenDns { fixture: config::fixture_record(), inner: &doh };
-            let ai = NearAi { http: &http, api_key: secret("NEAR_AI_KEY")?, base: BASE_URL.into() };
+            let ai = NearAi { http: &http, api_key: std::env::var("NEAR_AI_KEY").unwrap_or_default(), base: BASE_URL.into() };
             let allowed = config::allowed_domains();
             let ctx = Ctx { http: &http, dns, extractor: &ai, blob_key, allowed_domains: &allowed };
-            let (facts, att) = verify_booking(&i, &ctx).map_err(|e| fail(e.code, e.message))?;
-            ops::booking_op(&facts, att.as_ref(), &HostSigner).map_err(|e| fail("E_SIGN", e))
+            let (facts, att, to_trip) = verify_booking(&i, &ctx).map_err(|e| fail(e.code, e.message))?;
+            let mut out = ops::booking_op(&facts, att.as_ref(), &HostSigner).map_err(|e| fail("E_SIGN", e))?;
+            out["to_trip"] = json!(to_trip);
+            Ok(out)
+        }
+        "card" => {
+            use dibs_verifier::card::{card_op, default_root, CardEnv, CardInput, RPC_TESTNET};
+            let i: CardInput = serde_json::from_str(raw).map_err(|e| fail("E_INPUT", e.to_string()))?;
+            let key = std::env::var("LITHIC_API_KEY").unwrap_or_default();
+            let env = CardEnv { http: &Wasi, lithic_key: &key, lithic_root: default_root(), rpc: RPC_TESTNET };
+            card_op(&i, &env, &HostSigner).map_err(|e| fail(e.code, e.message))
         }
         other => Err(fail("E_INPUT", format!("unknown op {other:?}"))),
     }

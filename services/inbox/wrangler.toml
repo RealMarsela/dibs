@@ -1,0 +1,28 @@
+name = "dibs-inbox"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Default = testnet. Secrets: DIBS_BLOB_KEY (same value as dibs-api and the OutLayer secret), RELAYER_PRIVATE_KEY.
+[vars]
+NEAR_NETWORK = "testnet"
+NEAR_RPC_URLS = "https://test.rpc.fastnear.com,https://rpc.testnet.near.org"
+DIBS_CONTRACT = "dibs-0eb9ae.testnet"
+RELAYER_ACCOUNT_ID = "relayer.dao-0eb9ae.testnet"
+MAIL_DOMAIN = "dibs.larinova.com"
+# Blob capability URLs point at the API worker, which already serves blobs/<id> from the shared bucket.
+PUBLIC_BASE_URL = "https://dibs-api.gabrielaxy.workers.dev"
+ALLOWED_ORIGIN = "*"
+# Testnet only: also auto-submit mail DKIM-signed by the published test domain.
+ALLOW_TEST_DOMAIN = "1"
+# 1 = after storing, call submit_proof through the relayer (needs the contract's relayer permission).
+AUTO_SUBMIT = "1"
+
+[[r2_buckets]]
+binding = "BLOBS"
+bucket_name = "dibs-proof-blobs"
+
+# Encryption and blob storage go through dibs-api's POST /proof-blob, so the key lives in one place.
+[[services]]
+binding = "API"
+service = "dibs-api"

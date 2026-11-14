@@ -48,8 +48,13 @@ fn relaxed(name: &str, value: &str) -> String {
 
 /// A DKIM-signed (relaxed/relaxed, rsa-sha256) message from `from_domain`, signed as `d=`.
 pub fn signed_eml(d: &str, from_domain: &str, subject: &str, body: &str) -> Vec<u8> {
+    signed_eml_to(d, from_domain, "crew@example.org", subject, body)
+}
+
+/// Same, with a chosen To header (covered by the signature).
+pub fn signed_eml_to(d: &str, from_domain: &str, to: &str, subject: &str, body: &str) -> Vec<u8> {
     let headers = format!(
-        "From: Reservations <noreply@{from_domain}>\r\nTo: crew@example.org\r\nSubject: {subject}\r\nDate: Mon, 14 Sep 2026 10:00:00 +0000\r\nMessage-ID: <abc123@{from_domain}>\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n"
+        "From: Reservations <noreply@{from_domain}>\r\nTo: {to}\r\nSubject: {subject}\r\nDate: Mon, 14 Sep 2026 10:00:00 +0000\r\nMessage-ID: <abc123@{from_domain}>\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n"
     );
     let bh = STANDARD.encode(Sha256::digest(body.as_bytes()));
     let sig_hdr = format!("v=1; a=rsa-sha256; c=relaxed/relaxed; d={d}; s=t1; h=from:to:subject:date:message-id; bh={bh}; b=");
