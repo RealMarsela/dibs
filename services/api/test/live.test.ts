@@ -38,8 +38,8 @@ describe("POST /testnet/fund", () => {
     expect(callFunctionRaw.mock.calls[0][0]).toMatchObject({ contractId: USDC, methodName: "mint", args: { account_id: `b01-lis0312.${DIBS}`, amount: "40000000" } });
     expect(callFunctionRaw.mock.calls[1][0]).toMatchObject({ methodName: "sweep" });
   });
-  it("404 on mainnet, 409 when the bed is not held, 400 out of range", async () => {
-    expect((await app.fetch(json("/testnet/fund", { trip: "lis0312", kind: "bed", n: 1 }), mainnetEnv())).status).toBe(404);
+  it("refused on mainnet (scope guard), 409 when the bed is not held, 400 out of range", async () => {
+    expect((await app.fetch(json("/testnet/fund", { trip: "lis0312", kind: "bed", n: 1 }), mainnetEnv())).status).toBe(403);
     expect((await app.fetch(json("/testnet/fund", { trip: "lis0312", kind: "bed", n: 2 }), makeEnv())).status).toBe(409);
     expect((await app.fetch(json("/testnet/fund", { trip: "lis0312", kind: "bed", n: 9 }), makeEnv())).status).toBe(400);
     expect(callFunctionRaw).not.toHaveBeenCalled();

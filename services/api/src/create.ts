@@ -13,8 +13,11 @@ import { type Erc191Proof, erc191ProofSchema, verifyErc191 } from "./erc191";
 
 export const createRoute = new Hono<{ Bindings: Env }>();
 
-export const PER_IP_PER_DAY = 2;
-export const PER_DAY = 20;
+// Judges often share one venue network, so the per-IP quota is generous; the daily cap and the relayer balance
+// check below are what bound the testnet NEAR this demo can spend.
+export const PER_IP_PER_DAY = 10;
+export const PER_DAY = 80;
+const IP_MSG = `${PER_IP_PER_DAY} trips per network per day, try tomorrow`;
 export const MIN_RELAYER = NEAR; // refuse below 1 NEAR
 const MARGIN = 2n * 10n ** 22n; // 0.02 NEAR on top of create_cost; the contract refunds the excess
 const BOOK_BY_MS = 3 * 24 * 3600 * 1000;
@@ -94,7 +97,7 @@ createRoute.post("/trips", async (c) => {
   // Check both counters before bumping either, so a refused request costs the caller nothing.
   const ipKey = `rl/trip/ip/${ip}/${day}`;
   const dayKey = `rl/trip/day/${day}`;
-  if (Number((await env.NAMES.get(ipKey)) ?? 0) >= PER_IP_PER_DAY) throw new ApiError(429, "E_RATE_LIMIT", "2 trips per person per day");
+  if (Number((await env.NAMES.get(ipKey)) ?? 0) >= PER_IP_PER_DAY) throw new ApiError(429, "E_RATE_LIMIT", IP_MSG);
   if (Number((await env.NAMES.get(dayKey)) ?? 0) >= PER_DAY) throw new ApiError(429, "E_DAILY_CAP", "the demo has reached today's trip limit, try tomorrow");
   if ((await nearBalance(env, env.RELAYER_ACCOUNT_ID)) < MIN_RELAYER) throw new ApiError(503, "E_RELAYER_LOW", "the demo relayer is low on testnet NEAR, try later");
   if (named) {
@@ -113,7 +116,7 @@ createRoute.post("/trips", async (c) => {
   const cost = BigInt((await view<string>(env, env.DIBS_CONTRACT, "create_cost", { n_beds: b.beds, n_wait: 2 })) ?? "0");
   if (cost === 0n) throw new ApiError(502, "E_RPC", "could not read the trip cost");
   // Reads are done; only now spend the caller's quota, so an RPC hiccup before this line costs them nothing.
-  await bump(env, ipKey, PER_IP_PER_DAY, "E_RATE_LIMIT", "2 trips per person per day");
+  await bump(env, ipKey, PER_IP_PER_DAY, "E_RATE_LIMIT", IP_MSG);
   await bump(env, dayKey, PER_DAY, "E_DAILY_CAP", "the demo has reached today's trip limit, try tomorrow");
 
   const book_by = String((Date.now() + BOOK_BY_MS) * 1_000_000);

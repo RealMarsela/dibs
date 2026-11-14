@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createApp } from "../src/index";
-import { makeCode } from "../src/create";
+import { makeCode, PER_DAY, PER_IP_PER_DAY } from "../src/create";
 import { clearTripCache } from "../src/trip";
 import { KeyPair } from "near-api-js";
 import { nep413Hash } from "../src/nep413";
@@ -123,20 +123,19 @@ describe("POST /trips", () => {
     near.nearBalance.mockResolvedValue(5n * 10n ** 24n);
     expect((await post(good(), e)).status).toBe(200);
   });
-  it("2 trips per IP per day, then 429; another IP still works", async () => {
+  it("PER_IP_PER_DAY trips per IP per day, then 429; another IP still works", async () => {
     const e = env();
-    expect((await post(good(), e)).status).toBe(200);
-    expect((await post(good(), e)).status).toBe(200);
+    for (let i = 0; i < PER_IP_PER_DAY; i++) expect((await post(good(), e)).status).toBe(200);
     const r = await post(good(), e);
     expect(r.status).toBe(429);
     expect((await err(r)).code).toBe("E_RATE_LIMIT");
-    expect(call).toHaveBeenCalledTimes(4);
+    expect(call).toHaveBeenCalledTimes(PER_IP_PER_DAY * 2);
     expect((await post(good(), e, "9.9.9.9")).status).toBe(200);
   });
-  it("20 trips per day globally, then E_DAILY_CAP", async () => {
+  it("PER_DAY trips per day globally, then E_DAILY_CAP", async () => {
     const e = env();
-    for (let i = 0; i < 20; i++) expect((await post(good(), e, `10.0.0.${i}`)).status).toBe(200);
-    const r = await post(good(), e, "10.0.1.1");
+    for (let i = 0; i < PER_DAY; i++) expect((await post(good(), e, `10.0.${i >> 8}.${i & 255}`)).status).toBe(200);
+    const r = await post(good(), e, "10.9.9.9");
     expect(r.status).toBe(429);
     expect((await err(r)).code).toBe("E_DAILY_CAP");
   });
