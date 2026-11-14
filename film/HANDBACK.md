@@ -4,6 +4,7 @@
 |---|---|
 | Final | `film/out/dibs-film-FINAL.mp4` (+ `dibs-film-FINAL.srt`, 39 caption cues); identical to `out/dibs-film-v6.mp4` |
 | Duration | 2:08.1 (3,840 frames at 30 fps); hard cap 2:15 |
+| sha256 | FINAL.mp4 `d4cbdddac66bcc5eb6561d097e11b9edf28b04d8069f8b086c666358655ab248`; FINAL.srt `5423720646c92162213e342807911c1f59510578c0530c50ce18b83cc1f53082`; 22,987,675 bytes |
 | Composition | `Film` (scenes `Scene01`-`Scene09`, seam poses `Handoffs`) |
 | Studio | http://localhost:3017 |
 | Technical QA (ffprobe + full decode + ebur128) | 1920x1080, H.264 yuv420p, tv range, BT.709 primaries/transfer/matrix, AAC 48 kHz stereo; 0 decode errors; -14.3 LUFS integrated, true peak -1.8 dBTP, LRA 3.1; 1.44 Mb/s; all 8 seams identical across the cut (b-6, b-2, b, b+2, b+6) |
@@ -33,7 +34,7 @@ from Gabriel's Drive library copies (`public/audio/sfx/`, cue sheet `src/audio/c
 ## Footage (all real; `python3 -I scripts/footage-ready.py` gates every clip)
 | Slot / clip | Used for |
 |---|---|
-| `s03-wallet-first` | S03 first step (live testnet trip lisiwutm): "This bed is yours", tap Connect a NEAR wallet; frozen at 6.0 s before NEAR Connect's picker (third-party logos) |
+| `s03-wallet-first` (recorded by the coordinator on dibs.larinova.com, 15 Nov) | S03 first step (live testnet trip lisiwutm): "This bed is yours", tap Connect a NEAR wallet; frozen at 6.0 s before NEAR Connect's picker (third-party logos) |
 | `pay-base` (label-patched, see PROVENANCE) | S03 chain list (variant A never shows its testnet tracking steps) |
 | `mainnet-pay-a`, `mainnet-receipt-intents`, `mainnet-lismain-paid` | S03 mainnet back face (crops avoid the explorer logo, incident banner, sender wallet and "Bed 01" eyebrow) |
 | `resale` (take 2) | S04 refund refused, E_NO_REFUND from chain |
@@ -51,4 +52,7 @@ Unused: `mainnet-receipt-sweep` (third-party explorer branding), `wallet-near-te
 - Mix not listened to by me.
 - S03 shows a $40 Lisbon story trip (testnet UI) and then the real $0.25 mainnet payment on trip lismain; the narration says "We ran this same payment on NEAR mainnet, with real money."
 - The proof beat is a different real trip (SIN-1025); the narration and a chip say so. SGD is compared 1:1 to the USDC cap (no FX); the film claims no conversion.
-- `out/bundle` (61 MB) is deleted once the coordinator accepts the FINAL.
+- Kept until Gabriel accepts FINAL: `out/bundle` (61 MB) and the review renders (v1-v6, raw-*); then the bundle is deleted and the
+  superseded renders go to Dropbox via `~/.agents/bin/media-offload`, keeping only FINAL locally.
+- The wallet-first VO line (193 characters) was generated at 02:08 IST, before the coordinator's go reached me; Gabriel had approved
+  ~130 characters at 01:32. One generation, no retries. No further paid generation without an explicit go with its size.
