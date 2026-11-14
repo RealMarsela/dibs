@@ -89,7 +89,7 @@ export function TripPage() {
       </header>
 
       <main className="mx-auto max-w-[1120px] px-5">
-        <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+        <div className={cn("mt-3 flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none]", live && viewers.length === 0 && "invisible")}>
           <span className="shrink-0 text-[12px] text-fg-3">{live ? "Acting as" : "Preview as"}</span>
           <ToggleGroup type="single" value={viewer} onValueChange={(v) => v && setViewer(v)} className="gap-1">
             {viewers.map((v) => (

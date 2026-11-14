@@ -11,7 +11,8 @@ const MAIN = {
   MAINNET_RELAYER_PRIVATE_KEY: "",
 };
 const ctx = { waitUntil: () => undefined, passThroughOnException: () => undefined } as unknown as ExecutionContext;
-const call = (req: Request, env = { ...makeEnv(), ...MAIN }) => worker.fetch(req, env, ctx);
+const call = (req: Request, env: Parameters<typeof worker.fetch>[1] = { ...makeEnv(), ...MAIN }) => worker.fetch(req, env, ctx);
+const code = async (res: Response) => ((await res.json()) as { code?: string }).code;
 
 describe("mainnet path", () => {
   it("swaps every network value and drops testnet-only secrets", () => {
@@ -26,7 +27,7 @@ describe("mainnet path", () => {
   it("is unconfigured without the mainnet vars", async () => {
     const res = await call(new Request("http://api.test/mainnet/health"), makeEnv());
     expect(res.status).toBe(503);
-    expect((await res.json()).code).toBe("E_MAINNET_UNCONFIGURED");
+    expect(await code(res)).toBe("E_MAINNET_UNCONFIGURED");
   });
 
   it("serves health as mainnet", async () => {
@@ -47,7 +48,7 @@ describe("mainnet path", () => {
     ] as const) {
       const res = await call(json(path, body));
       expect(res.status, path).toBe(403);
-      expect((await res.json()).code, path).toBe("E_MAINNET_SCOPE");
+      expect(await code(res), path).toBe("E_MAINNET_SCOPE");
     }
   });
 

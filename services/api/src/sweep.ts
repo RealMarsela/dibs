@@ -2,7 +2,8 @@ import { ApiError } from "./errors";
 import { type Env, receiptRegex } from "./env";
 import { ftBalance, getTrip, relayerAccount } from "./near";
 
-const SWEEP_GAS = 300_000_000_000_000n;
+/* 100 Tgas on mainnet (bed 2's sweep burned 58), where attached gas is reserved at about 10x the base price. */
+const sweepGas = (env: Env) => (env.NEAR_NETWORK === "mainnet" ? 100_000_000_000_000n : 300_000_000_000_000n);
 const CLAIM_STALE_MS = 90_000;
 const DONE_DEBOUNCE_MS = 120_000;
 
@@ -68,7 +69,7 @@ export async function sweepReceipt(env: Env, depositAddress: string, receipt: st
       contractId: receipt,
       methodName: "sweep",
       args: { amount: price.toString() },
-      gas: SWEEP_GAS,
+      gas: sweepGas(env),
       deposit: 0n,
       waitUntil: "EXECUTED_OPTIMISTIC",
     });

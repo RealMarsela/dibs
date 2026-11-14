@@ -13,7 +13,9 @@ export const holdRoute = new Hono<{ Bindings: Env }>();
 
 /** hold / reserve_wait are not payable: the dibs contract pays the USDC registration from its own balance. */
 const HOLD_DEPOSIT = 0n;
-const GAS = 100_000_000_000_000n;
+/* Mainnet reserves attached gas at about 10x the base price up front (0.1 NEAR for 100 Tgas), so the relayer attaches
+   what a hold needs there: 60 Tgas, of which bed 2's hold on mainnet burned 27. */
+const gasFor = (env: Env) => (env.NEAR_NETWORK === "mainnet" ? 60_000_000_000_000n : 100_000_000_000_000n);
 
 const accountId = z.string().min(2).max(64).regex(/^[a-z0-9]([a-z0-9._-]*[a-z0-9])?$/);
 const holdBody = z
@@ -32,7 +34,7 @@ holdRoute.post("/hold", async (c) => {
       contractId: env.DIBS_CONTRACT,
       methodName: b.kind === "bed" ? "hold" : "reserve_wait",
       args: b.kind === "bed" ? { trip: b.trip, n: b.n, holder: b.holder } : { trip: b.trip, slot: b.n, buyer: b.holder },
-      gas: GAS,
+      gas: gasFor(env),
       deposit: HOLD_DEPOSIT,
       waitUntil: "EXECUTED_OPTIMISTIC",
     });
