@@ -1,16 +1,16 @@
 {
   "fps": 30,
-  "total_seconds": 126.0,
+  "total_seconds": 128.0,
   "starts": {
     "L01": 0.5,
     "L02": 7.6,
     "L03": 19.0,
-    "L04": 36.8,
-    "L05": 50.7,
-    "L06": 59.4,
-    "L07": 80.1,
-    "L08": 105.1,
-    "L09": 114.7,
+    "L04": 38.8,
+    "L05": 52.7,
+    "L06": 61.4,
+    "L07": 82.1,
+    "L08": 107.1,
+    "L09": 116.7,
     "L03A": 31.55,
     "L03B": 31.8
   },
@@ -20,5 +20,6 @@
     "L03A": 3.69,
     "L03B": 5.81
   },
-  "note2": "v2: L07 re-voiced (real sin1025 booking), 2.0 s longer; L08/L09 and total moved +2.0 s."
+  "note2": "v2: L07 re-voiced (real sin1025 booking), 2.0 s longer; L08/L09 and total moved +2.0 s.",
+  "note3": "v4+: L04-L09 and total moved +2.0 s so the pay beat can show the real mainnet receipts after 'with real money'."
 }

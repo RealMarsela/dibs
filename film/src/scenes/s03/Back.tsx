@@ -1,5 +1,5 @@
 import React from "react";
-import { Sequence, useCurrentFrame } from "remotion";
+import { Freeze, Sequence, useCurrentFrame } from "remotion";
 import { C, DISPLAY, FONT } from "../../tokens";
 import { kf, prog } from "../../lib/anim";
 import { FootageSlot, hasFootage } from "../../components/Footage";
@@ -38,17 +38,22 @@ function ReceiptPlaceholder() {
   );
 }
 
-/* The real mainnet payment (coordinator, 14 Nov): mainnet-pay-a.mp4 (2880x1620 @30, CSS 1920x1080 at dsf 1.5), the
-   "One address, one amount" sheet on trip lismain: QR, "Send exactly 0.252579 USDC on Base" and the one-time 1Click
-   deposit address. The dialog spans CSS x 667-1253; the crop starts under the "Bed 01" eyebrow (y 266-280) and ends above
-   the line the cursor rests on (y 660+). From clip 28 s the sheet is still. Swap the id/start here if a better take lands. */
-const MAINNET = { id: "mainnet-pay-a", startS: 28 };
-/* Clip B (when it lands): the live mainnet tracking screen, steps ticking to "Receipt on NEAR mainnet". The back face
-   shows clip A's deposit sheet first, then hard-cuts to clip B at `cutAt` frames after the turn, played from `startS`
-   (measure both when the clip lands). Until then hasFootage("mainnet-pay-b") is false and only clip A plays. */
-const MAINNET_B = { id: "mainnet-pay-b", startS: 0, cutAt: 46, crop: { x: 667, y: 284, w: 586, h: 0 } };
-MAINNET_B.crop.h = (MAINNET_B.crop.w * BACK.h) / BACK.w;
-const RECEIPT_CROP = { x: 667, y: 284, w: 586, h: (586 * BACK.h) / BACK.w };
+/* The real mainnet payment (coordinator, 15 Nov 00:41 IST: lismain bed 1 paid 0.25 USDC from Base through NEAR Intents,
+   swept into the crew DAO). The back face plays three real clips back to back, hard cuts, each cropped to BACK's aspect
+   (CSS px of a 1920x1080 page; all clips 2880x1620):
+     1. mainnet-pay-a: the "One address, one amount" sheet (QR, "Send exactly 0.252579 USDC on Base", the one-time 1Click
+        address); crop starts under the "Bed 01" eyebrow and ends above the line the cursor rests on.
+     2. mainnet-receipt-intents: the NEAR Intents explorer, Deposit Completed -> Processed -> Withdrawn "Transferred to
+        b01-li…p.near", held on its first still frame (before it scrolls to the sender's wallet address).
+     3. mainnet-lismain-paid: dibs.larinova.com/t/lismain, "Trip LISMAIN · NEAR mainnet · real USDC", "Lisbon",
+        "Every bed is paid. $0.50 sits in the crew's DAO."
+   `at` = frames after the turn-over starts (t.flip0); `freezeS` holds that clip second. */
+const cropFor = (x: number, y: number, w: number) => ({ x, y, w, h: (w * BACK.h) / BACK.w });
+const SEGMENTS = [
+  { id: "mainnet-pay-a", at: 0, startS: 28, freezeS: undefined as number | undefined, crop: cropFor(667, 284, 586) },
+  { id: "mainnet-receipt-intents", at: 52, startS: 1.0, freezeS: 1.2, crop: cropFor(330, 372, 910) },
+  { id: "mainnet-lismain-paid", at: 118, startS: 0.4, freezeS: undefined as number | undefined, crop: cropFor(230, 140, 900) },
+];
 
 function YellowPill({ at }: { at: number }) {
   const f = useCurrentFrame();
@@ -87,16 +92,20 @@ export function BackContent({ t, fade }: { t: T; fade: number }) {
   if (VARIANT !== "A") return null;
   return (
     <div style={{ position: "relative", width: BACK.w, height: BACK.h, opacity: 1 - fade }}>
-      <Sequence from={t.flip0} durationInFrames={hasFootage(MAINNET_B.id) ? MAINNET_B.cutAt : undefined} layout="none">
-        <FootageSlot id={MAINNET.id} width={BACK.w} height={BACK.h} crop={RECEIPT_CROP} startFrom={MAINNET.startS * 30} placeholder={<ReceiptPlaceholder />} />
-      </Sequence>
-      {hasFootage(MAINNET_B.id) && (
-        <Sequence from={t.flip0 + MAINNET_B.cutAt} layout="none">
-          <div style={{ position: "absolute", inset: 0 }}>
-            <FootageSlot id={MAINNET_B.id} width={BACK.w} height={BACK.h} crop={MAINNET_B.crop} startFrom={Math.round(MAINNET_B.startS * 30)} placeholder={null} />
-          </div>
-        </Sequence>
-      )}
+      {SEGMENTS.map((g, i) => {
+        const next = SEGMENTS.slice(i + 1).find((n) => hasFootage(n.id));
+        if (i > 0 && !hasFootage(g.id)) return null;
+        const startFrom = Math.round(g.startS * 30);
+        const slot = <FootageSlot id={g.id} width={BACK.w} height={BACK.h} crop={g.crop} startFrom={startFrom} placeholder={i === 0 ? <ReceiptPlaceholder /> : null} />;
+        const hold = g.freezeS === undefined ? null : Math.round((g.freezeS - g.startS) * 30);
+        return (
+          <Sequence key={g.id} from={t.flip0 + g.at} durationInFrames={next ? next.at - g.at : undefined} layout="none">
+            <div style={{ position: "absolute", inset: 0 }}>
+              {hold === null ? slot : <Freeze frame={hold} active={(fr: number) => fr >= hold}>{slot}</Freeze>}
+            </div>
+          </Sequence>
+        );
+      })}
     </div>
   );
 }

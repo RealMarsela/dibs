@@ -39,8 +39,11 @@ export function PayWindow({ f, t, P }: { f: number; t: T; P: Pose }) {
   const showFront = P.flip < 0.6;
   const showBack = V === "A" && P.flip > 0.4;
   // the shrink into row 03: content out first, then Leo's row in, then the surface dissolves into the list
-  const fade = prog(f, t.shrink0, 7);
-  const row = prog(P.shrink, 0.55, 0.45);
+  // A (like B): the back face is never an empty box. Its real mainnet footage scales down with the box for the first
+  // part of the shrink, then crossfades straight into Leo's paid row.
+  const fade = V === "A" ? prog(P.shrink, 0.32, 0.26) : prog(f, t.shrink0, 7);
+  const row = V === "A" ? prog(P.shrink, 0.32, 0.26) : prog(P.shrink, 0.55, 0.45);
+  const backScale = V === "A" ? Math.min(1, h / BACK.h) : 1;
   const surf = 1 - prog(P.shrink, 0.5, 0.5);
   const radius = lerp(28, 22 * LIST_SCALE, P.shrink);
   const frontFinal = V === "B";
@@ -70,7 +73,7 @@ export function PayWindow({ f, t, P }: { f: number; t: T; P: Pose }) {
       {showBack && (
         <div style={{ ...hide, position: "absolute", inset: 0, transform: "rotateY(180deg)" }}>
           <div style={{ position: "absolute", inset: 0, boxSizing: "border-box", borderRadius: radius, overflow: "hidden", ...windowSurface(surf) }}>
-            <div style={{ position: "absolute", left: (w - BACK.w) / 2, top: (h - BACK.h) / 2 }}>
+            <div style={{ position: "absolute", left: (w - BACK.w) / 2, top: (h - BACK.h) / 2, transform: `scale(${backScale})` }}>
               <BackContent t={t} fade={fade} />
             </div>
             <LeoRow o={row} />

@@ -48,7 +48,8 @@ export const CUES: Cue[] = [
     : [
         c("S03", 374, "paper-slide-03.mp3", 0.35, 5, "window turns over to the mainnet receipt"),
         c("S03", 439, "pop-1.mp3", 0.3, 1, "yellow mainnet pill lands"),
-        c("S03", 502, "mixkit-warping-slide-1531.mp3", 0.18, 6, "receipt shrinks into row 03"),
+        c("S03", 492, "quick-win.mp3", 0.16, 3, "mainnet trip page: every bed is paid, $0.50 in the crew's DAO"),
+        c("S03", 562, "mixkit-warping-slide-1531.mp3", 0.18, 6, "mainnet receipts shrink into row 03"),
       ]),
   // S04 can't make it
   c("S04", 98, "rm-click-2.mp3", 0.45, 1, "Get my $40 back clicked"),

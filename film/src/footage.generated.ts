@@ -6,11 +6,29 @@ export const FOOTAGE_READY: Record<string, { w: number; h: number; fps: number; 
   "fps": 24.0,
   "seconds": 33.167
  },
+ "mainnet-lismain-paid": {
+  "w": 2880,
+  "h": 1620,
+  "fps": 24.0,
+  "seconds": 4.625
+ },
  "mainnet-pay-a": {
   "w": 2880,
   "h": 1620,
   "fps": 30.0,
   "seconds": 35.467
+ },
+ "mainnet-receipt-intents": {
+  "w": 2880,
+  "h": 1620,
+  "fps": 24.0,
+  "seconds": 7.333
+ },
+ "mainnet-receipt-sweep": {
+  "w": 2880,
+  "h": 1620,
+  "fps": 24.0,
+  "seconds": 4.708
  },
  "pay-base-orig": {
   "w": 2880,
@@ -47,5 +65,11 @@ export const FOOTAGE_READY: Record<string, { w: number; h: number; fps: number; 
   "h": 1620,
   "fps": 24.0,
   "seconds": 11.542
+ },
+ "wallet-near-testnet-take1": {
+  "w": 2880,
+  "h": 1620,
+  "fps": 24.0,
+  "seconds": 118.542
  }
 };
