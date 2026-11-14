@@ -85,7 +85,7 @@ export const FACTS = {
   checksTotal: 46,
   attacksRefused: 35,
   /* The URL on the end card. Gabriel named production on 14 Nov: dibs.larinova.com. ONE-LINE SWAP if it changes. */
-  liveUrl: "dibs.larinova.com/t/lis0312",
+  liveUrl: "dibs.larinova.com", // Gabriel 15 Nov 04:50: every try-it URL points to the root
   repo: "github.com/RealMarsela/dibs",
   /* The proof beat uses a REAL booking (coordinator, 14 Nov): trip sin1025, Gabriel's own booking.com confirmation.
      Redacted: never his name, address or booking reference. */

@@ -11,7 +11,9 @@ import { LINES } from "../timeline.generated";
    (journey-testnet-meteor.mp4, 1440x810 -> 1920x1080, ~2 fps app burst, smooth Meteor frames), in order, with a cut to the
    REAL explorer page after each transaction and back to the same app frame. Then the real mainnet receipts, the card,
    the booking proof, the close. No crops, no frames around the UI. Existing VO lines only. */
-type Clip = { kind: "clip"; file: string; startS: number; rate?: number; hold?: boolean; dur: number; label?: string; crop?: { x: number; y: number; w: number; h: number; bg: string } };
+/** cur: the overlay cursor arrives at `to` (comp px) at frame `at` of this clip; `click` only where a real click happened. */
+type Cur = { to: [number, number]; at: number; click?: boolean };
+type Clip = { kind: "clip"; file: string; startS: number; rate?: number; hold?: boolean; dur: number; label?: string; url?: string; cur?: Cur; crop?: { x: number; y: number; w: number; h: number; bg: string } };
 type Scene = { kind: "scene"; id: "S01" | "S02" | "S09"; dur: number };
 type Seg = Clip | Scene;
 
@@ -31,37 +33,43 @@ const explorer = (all: string[], any: string[] = [""]) => {
   });
   return hits.find((n) => n.includes("nearrocks")) ?? hits[0]; // near.rocks (NEAR's own explorer) first, RPC logs as fallback
 };
-const NR = (y: number, h: number) => ({ x: 262, y, w: 816, h, bg: "rgb(7,10,16)" });
-const ex = (all: string[], any: string[], dur: number, label: string, crop?: Clip["crop"]): Clip[] => {
+const ex = (all: string[], any: string[], dur: number, label: string, url: string, crop?: Clip["crop"]): Clip[] => {
   const f = explorer(all, any);
-  return f ? [{ kind: "clip", file: f, startS: 0.3, rate: 1, dur, label, crop }] : [];
+  return f ? [{ kind: "clip", file: f, startS: 0.3, rate: 1, dur, label, url, crop }] : [];
 };
+const URL_CREATE = "testnet.near.rocks/tx/J3UJBx8xTynvxLcWZUoiXmVJiF9xvAqdssfS6MqGE6bb";
+const URL_PAY = "testnet.near.rocks/tx/DSX9QnWAAu9P3Vwg58SEMbhi8zSC3gfWvsgiKWKTBcUa";
+const URL_INTENTS = "explorer.near-intents.org/transactions/0xfdF223c4438053E9F84B9342CCd56575ae4039D2";
+const URL_SWEEP = "near.rocks/tx/9nPPmuaZcBv6YYrB77d6jjNaHGzkbeTY3Fu5CzqMQ7YU";
+/* Base: Blockscout is dropped (sponsored ad on every load, tabs still syncing). The NEAR Intents page proves the Base
+   deposit 0x6141…b973bf, the swap and the withdrawal to the bed, with no ad and no wallet address. */
 
 const OPENING: Seg[] = [
   { kind: "scene", id: "S01", dur: SCENES.S01.to - SCENES.S01.from },
   { kind: "scene", id: "S02", dur: SCENES.S02.to - SCENES.S02.from },
 ];
 const JOURNEY: Seg[] = [
-  { kind: "clip", file: J, startS: 182.0, hold: true, dur: 45 },
-  { kind: "clip", file: J, startS: 370.4, rate: 1.5, dur: 85 },
+  // /new, filled. Its "Sign in and create the trip" button sits below the fold in every recorded frame, so no click is drawn.
+  { kind: "clip", file: J, startS: 182.0, hold: true, dur: 55, cur: { to: [1180, 930], at: 0 } },
+  { kind: "clip", file: J, startS: 370.4, rate: 1.5, dur: 85, cur: { to: [1078, 916], at: 78, click: true } }, // Meteor: Sign Message (374.3 s)
   { kind: "clip", file: J, startS: 388.4, hold: true, dur: 40 },
-  ...ex(["testnet"], ["create", "j3ujb"], 75, "NEAR testnet · near.rocks · create_trip · J3UJBx8x…", NR(28, 600)),
-  { kind: "clip", file: J, startS: 388.4, hold: true, dur: 20 },
-  { kind: "clip", file: J, startS: 456.4, hold: true, dur: 40 },
-  { kind: "clip", file: J, startS: 461.6, hold: true, dur: 28 },
-  { kind: "clip", file: J, startS: 490.0, hold: true, dur: 30 },
-  { kind: "clip", file: J, startS: 502.0, rate: 1.4, dur: 120 },
-  ...ex(["testnet"], ["pay", "dsx9"], 75, "NEAR testnet · near.rocks · 40 USDC from Meteor · DSX9QnWA…", NR(28, 600)),
-  { kind: "clip", file: J, startS: 507.4, hold: true, dur: 16 },
-  { kind: "clip", file: J, startS: 518.2, hold: true, dur: 60 },
-  { kind: "clip", file: J, startS: 521.0, rate: 26, dur: 135 },
+  ...ex(["testnet"], ["create", "j3ujb"], 75, "NEAR testnet · near.rocks · create_trip · J3UJBx8x…", URL_CREATE),
+  { kind: "clip", file: J, startS: 388.4, hold: true, dur: 26, cur: { to: [1360, 486], at: 22, click: true } }, // Pay $40 from any chain
+  { kind: "clip", file: J, startS: 456.4, hold: true, dur: 34, cur: { to: [960, 583], at: 26, click: true } }, // Connect a NEAR wallet
+  { kind: "clip", file: J, startS: 461.6, hold: true, dur: 26, cur: { to: [960, 888], at: 20, click: true } }, // Get my NEAR address
+  { kind: "clip", file: J, startS: 463.6, hold: true, dur: 22, cur: { to: [894, 514], at: 16, click: true } }, // Pay with a NEAR wallet
+  { kind: "clip", file: J, startS: 490.0, hold: true, dur: 24, cur: { to: [959, 529], at: 18, click: true } }, // Approve 40.00 test USDC in Meteor Wallet
+  { kind: "clip", file: J, startS: 502.0, rate: 1.4, dur: 110, cur: { to: [1078, 916], at: 71, click: true } }, // Meteor: Approve (505.3 s), then Executing
+  { kind: "clip", file: J, startS: 518.2, hold: true, dur: 40, cur: { to: [900, 639], at: 32, click: true } }, // "Sent from Meteor Wallet · DSX9…" link
+  ...ex(["testnet"], ["pay", "dsx9"], 75, "NEAR testnet · near.rocks · 40 USDC from Meteor · DSX9QnWA…", URL_PAY),
+  { kind: "clip", file: J, startS: 518.2, hold: true, dur: 22 },
+  { kind: "clip", file: J, startS: 521.0, rate: 26, dur: 135, cur: { to: [1560, 960], at: 30 } },
   { kind: "clip", file: J, startS: 640.5, hold: true, dur: 45 },
 ];
 const TAIL: Seg[] = [
   { kind: "clip", file: "footage/mainnet-pay-a.mp4", startS: 28.0, hold: true, dur: 66, label: "NEAR mainnet · real USDC from Base" },
-  ...ex(["mainnet"], ["base", "0x6141", "blockscout"], 75, "Base mainnet · USDC sent to NEAR Intents · tx 0x6141…73bf", { x: 240, y: 160, w: 1060, h: 400, bg: "rgb(16,17,18)" }),
-  { kind: "clip", file: explorer(["mainnet"], ["intents"]) ?? "footage/mainnet-receipt-intents.mp4", startS: 0.5, hold: true, dur: 75, label: "NEAR Intents · landed in b01-lismain.dibsapp.near" },
-  { kind: "clip", file: explorer(["mainnet"], ["sweep", "9nppm"]) ?? "footage/mainnet-receipt-sweep.mp4", startS: 0.6, hold: true, dur: 70, label: "NEAR mainnet · near.rocks · swept into the crew DAO · 9nPPmuaZ…", crop: NR(28, 560) },
+  { kind: "clip", file: explorer(["mainnet"], ["intents"]) ?? "footage/mainnet-receipt-intents.mp4", startS: 0.5, hold: true, dur: 90, label: "NEAR Intents · Base deposit 0x6141…b973bf → b01-lismain.dibsapp.near", url: URL_INTENTS },
+  { kind: "clip", file: explorer(["mainnet"], ["sweep", "9nppm"]) ?? "footage/mainnet-receipt-sweep.mp4", startS: 0.6, hold: true, dur: 70, label: "NEAR mainnet · near.rocks · swept into the crew DAO · 9nPPmuaZ…", url: URL_SWEEP },
   { kind: "clip", file: "footage/mainnet-lismain-paid.mp4", startS: 0.4, dur: 66 },
 ];
 const CARD: Seg[] = [
@@ -99,15 +107,29 @@ const VO: [string, number][] = [
 ];
 const voDur = (id: string) => Math.ceil((line(id).dur + 0.6) * 30);
 
-function Still({ file, crop }: { file: string; crop?: Clip["crop"] }) {
-  const f = useCurrentFrame();
-  if (!crop) return <Img src={staticFile(file)} style={{ width: 1920, height: 1080, objectFit: "cover", transform: `scale(${1 + f * 0.0006})` }} />;
-  // Only the cropped block (keeps out ads and personal rows), scaled to 1600 wide on the page's own background.
-  const k = Math.min(1600 / crop.w, 940 / crop.h);
+const BAR = 50;
+/** A real explorer capture, whole and unzoomed, under a thin browser bar that shows its real URL. */
+function Browser({ file, url, crop }: { file: string; url?: string; crop?: Clip["crop"] }) {
+  const k = (1080 - BAR) / 1080; // the full 1920x1080 capture, fitted below the bar
   return (
-    <AbsoluteFill style={{ background: crop.bg, alignItems: "center", justifyContent: "center" }}>
-      <div style={{ width: crop.w * k, height: crop.h * k, overflow: "hidden", position: "relative", transform: `scale(${1 + f * 0.0006})` }}>
-        <Img src={staticFile(file)} style={{ position: "absolute", left: -crop.x * k, top: -crop.y * k, width: 1920 * k, height: 1080 * k }} />
+    <AbsoluteFill style={{ background: "#202124" }}>
+      <div style={{ position: "absolute", left: 0, top: 0, width: 1920, height: BAR, display: "flex", alignItems: "center", gap: 14, padding: "0 22px" }}>
+        {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
+          <div key={c} style={{ width: 13, height: 13, borderRadius: 7, background: c }} />
+        ))}
+        <div style={{ marginLeft: 18, flex: 1, height: 32, borderRadius: 16, background: "#35363a", display: "flex", alignItems: "center", padding: "0 16px", gap: 10, fontFamily: MONO, fontSize: 19, color: "#e8eaed", whiteSpace: "nowrap", overflow: "hidden" }}>
+          <svg width="13" height="15" viewBox="0 0 13 15"><rect x="1" y="6.5" width="11" height="8" rx="1.6" fill="#9aa0a6" /><path d="M3.5 6.5V4.6a3 3 0 0 1 6 0v1.9" stroke="#9aa0a6" strokeWidth="1.6" fill="none" /></svg>
+          {url}
+        </div>
+      </div>
+      <div style={{ position: "absolute", top: BAR, left: (1920 - 1920 * k) / 2, width: 1920 * k, height: 1080 * k, overflow: "hidden", background: crop?.bg ?? "#000" }}>
+        {crop ? (
+          <div style={{ position: "absolute", left: crop.x * k, top: crop.y * k, width: crop.w * k, height: crop.h * k, overflow: "hidden" }}>
+            <Img src={staticFile(file)} style={{ position: "absolute", left: -crop.x * k, top: -crop.y * k, width: 1920 * k, height: 1080 * k }} />
+          </div>
+        ) : (
+          <Img src={staticFile(file)} style={{ width: 1920 * k, height: 1080 * k }} />
+        )}
       </div>
     </AbsoluteFill>
   );
@@ -117,7 +139,7 @@ function ClipView({ g }: { g: Clip }) {
   if (/\.(png|jpe?g)$/i.test(g.file)) {
     return (
       <AbsoluteFill style={{ background: C.void }}>
-        <Still file={g.file} crop={g.crop} />
+        <Browser file={g.file} url={g.url} crop={g.crop} />
         {g.label && <Chip text={g.label} />}
       </AbsoluteFill>
     );
@@ -128,6 +150,62 @@ function ClipView({ g }: { g: Clip }) {
     <AbsoluteFill style={{ background: C.void }}>
       {g.hold ? <Freeze frame={0}>{v}</Freeze> : v}
       {g.label && <Chip text={g.label} />}
+    </AbsoluteFill>
+  );
+}
+
+/* Overlay cursor across the app journey: keyframes from each clip's `cur`, eased 16-frame moves, a ripple only on real
+   clicks. Hidden on explorer pages; it returns where it left. */
+type K = { f: number; x: number; y: number; click: boolean };
+const MOVE = 16;
+function cursorTrack(): { keys: K[]; app: [number, number][] } {
+  const keys: K[] = [];
+  const app: [number, number][] = [];
+  let t = 0;
+  for (const g of ALL) {
+    if (g.kind === "clip" && g.file === J) {
+      app.push([t, t + g.dur]);
+      if (g.cur) keys.push({ f: t + g.cur.at, x: g.cur.to[0], y: g.cur.to[1], click: !!g.cur.click });
+    }
+    t += g.dur;
+  }
+  return { keys, app };
+}
+const TRACK = cursorTrack();
+const ease = (u: number) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+
+function Cursor() {
+  const f = useCurrentFrame();
+  if (!TRACK.app.some(([a, b]) => f >= a && f < b)) return null;
+  const { keys } = TRACK;
+  let i = keys.findIndex((k) => k.f > f) - 1;
+  if (i === -2) i = keys.length - 1;
+  let x: number, y: number;
+  if (i < 0) {
+    x = keys[0].x;
+    y = keys[0].y;
+  } else {
+    const a = keys[i];
+    const b = keys[i + 1];
+    x = a.x;
+    y = a.y;
+    if (b && f > b.f - MOVE) {
+      const u = ease(Math.min(1, (f - Math.max(a.f, b.f - MOVE)) / Math.max(1, b.f - Math.max(a.f, b.f - MOVE))));
+      x = a.x + (b.x - a.x) * u;
+      y = a.y + (b.y - a.y) * u;
+    }
+  }
+  const last = [...keys].reverse().find((k) => k.click && f >= k.f && f < k.f + 14);
+  const p = last ? (f - last.f) / 14 : 0;
+  const press = last && f - last.f < 4 ? 0.86 : 1;
+  return (
+    <AbsoluteFill style={{ pointerEvents: "none" }}>
+      {last && (
+        <div style={{ position: "absolute", left: last.x - 10 - 34 * p, top: last.y - 10 - 34 * p, width: 20 + 68 * p, height: 20 + 68 * p, borderRadius: "50%", border: "3px solid rgba(255,255,255,0.9)", background: "rgba(255,255,255,0.18)", opacity: 1 - p }} />
+      )}
+      <svg width="34" height="46" viewBox="0 0 17 23" style={{ position: "absolute", left: x - 2, top: y - 2, transform: `scale(${press})`, transformOrigin: "2px 2px", filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.5))" }}>
+        <path d="M1 1 L1 18 L5.2 14.2 L8.2 21 L11 19.8 L8.1 13.2 L14 13.2 Z" fill="#fff" stroke="#000" strokeWidth="1.1" strokeLinejoin="round" />
+      </svg>
     </AbsoluteFill>
   );
 }
@@ -163,6 +241,7 @@ export const FilmJ: React.FC = () => {
           </Sequence>
         );
       })}
+      <Cursor />
       {VO.map(([id, from]) => (
         <Sequence key={id} from={from} durationInFrames={voDur(id)} layout="none">
           <Audio src={staticFile(`audio/vo/${line(id).file}.mp3`)} />

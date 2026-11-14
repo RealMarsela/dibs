@@ -1,4 +1,20 @@
-# Dibs demo film: handback (FINAL v7 journey cut, 15 Nov 2026, 03:35 IST)
+# Dibs demo film: handback (FINAL v10 full-screen journey, 15 Nov 2026, IST)
+
+## v10 (Gabriel 04:25 and 04:40 notes): composition `FilmJ`, `src/journey/FilmJ.tsx`
+- Final: `out/dibs-film-FINAL.mp4` (+ `.srt`) = `out/dibs-film-v10.mp4`. Kept: `dibs-film-FINAL-v9.mp4` (near.rocks, zoomed
+  crops), `-v8` (RPC logs), `-v7` (cropped journey), `-v6`.
+- Opening S01+S02 (19.0 s), then journey-testnet-meteor.mp4 full screen (1440x810 -> 1920x1080), in order, holds on the
+  ~2 fps app frames, Meteor Sign/Approve at speed. Overlay cursor moves to each real click target (positions read from the
+  footage frames) with a ripple only on real clicks: Sign Message, Pay $40 from any chain, Connect a NEAR wallet, Get my
+  NEAR address, Pay with a NEAR wallet, Approve 40.00 test USDC, Meteor Approve, and the "Sent from Meteor Wallet · DSX9…"
+  link. "Sign in and create the trip" is below the fold in every recorded frame, so no click is drawn for it.
+- Proofs, each 2.5-3 s, full 1920x1080 page under a thin browser bar with the real URL: near.rocks create J3UJBx8x… (no
+  click: no tx link on the trip frame), near.rocks pay DSX9QnWA… (after the link click on "You're in", then back to it),
+  NEAR Intents explorer (Base deposit 0x6141…b973bf -> swap -> withdrawn to b01-lismain), near.rocks sweep 9nPPmuaZ….
+  Blockscout dropped (sponsored ad on every load, tabs syncing).
+- Resale, draw and attacks cut. Existing VO only (L01, L02, L03A, L06, L07, L09). Captions written by an inline script from
+  the FilmJ placement.
+
 
 | | |
 |---|---|
