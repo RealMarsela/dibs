@@ -99,7 +99,7 @@ export function BedList({ rows, highlightRow, style }: { rows: Row[]; highlightR
 }
 
 /** The trip's own card (trip/card-sheet.tsx), at 640 x 404 by default. */
-export function TripCard({ width = 640, last4 = "8087", style }: { width?: number; last4?: string; style?: React.CSSProperties }) {
+export function TripCard({ width = 640, last4 = "0810", style }: { width?: number; last4?: string; style?: React.CSSProperties }) {
   const k = width / 400; // app card is ~400 css px wide inside the 440 sheet
   return (
     <div

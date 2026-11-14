@@ -5,7 +5,11 @@ import { CUES } from "./cues";
 
 /* Narration on top, music ducked under it, SFX on their cues. Final loudness (-14 LUFS, -1 dBTP) is set in the
    mastering pass (scripts/master.sh), so these are relative levels. */
-export const MUSIC = { file: "audio/music/mixkit-1168.mp3", title: "Coffee or Tea", at: 66, base: 0.34, duck: 0.13, fadeIn: 30, fadeOut: 45 };
+/* The track's content lasts ~121.8 s (3654 f); it starts so that its natural ending lands on the film's last frame. */
+export const MUSIC = { file: "audio/music/mixkit-1168.mp3", title: "Coffee or Tea", at: TOTAL - 3654, base: 0.34, duck: 0.13, fadeIn: 30, fadeOut: 45 };
+
+/** Overall SFX level under the narration (scene owners proposed relative levels; measured, not heard). */
+export const SFX_GAIN = 0.75;
 
 function vo(frame: number): number {
   // 1 while any line speaks (with 6-frame ramps), else 0
@@ -36,7 +40,7 @@ export const Mix: React.FC = () => (
     </Sequence>
     {CUES.map((c, i) => (
       <Sequence key={i} from={Math.max(0, c.at - (c.lead ?? 0))} durationInFrames={c.trim ?? 90} layout="none">
-        <Audio src={staticFile(`audio/sfx/${c.file}`)} volume={c.vol} />
+        <Audio src={staticFile(`audio/sfx/${c.file}`)} volume={c.vol * SFX_GAIN} />
       </Sequence>
     ))}
   </>

@@ -21,16 +21,19 @@ export function prog(frame: number, f0: number, dur: number, ease: EasingFunctio
 
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
+/** Same normalisation as scripts/build-timeline.py: keep letters, digits, apostrophes, hyphens and inner dots ("booking.com"). */
+export const key = (w: string) => w.toLowerCase().replace(/[^\w'’.-]/g, "").replace(/\.+$/, "");
+
 /** Absolute frame where narration word `word` (case-insensitive, punctuation ignored) starts in `line`. nth = 0-based occurrence. */
 export function cue(line: string, word: string, nth = 0): number {
-  const k = word.toLowerCase().replace(/[^\w'’-]/g, "");
+  const k = key(word);
   const hits = WORDS.filter((w) => w.line === line && w.k === k);
   if (!hits[nth]) throw new Error(`cue: no "${word}" #${nth} in ${line}`);
   return hits[nth].f0;
 }
 /** End frame of that word. */
 export function cueEnd(line: string, word: string, nth = 0): number {
-  const k = word.toLowerCase().replace(/[^\w'’-]/g, "");
+  const k = key(word);
   const hits = WORDS.filter((w) => w.line === line && w.k === k);
   if (!hits[nth]) throw new Error(`cueEnd: no "${word}" #${nth} in ${line}`);
   return hits[nth].f1;

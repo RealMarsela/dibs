@@ -1,5 +1,23 @@
 {
   "fps": 30,
   "total_seconds": 124.0,
-  "starts": { "L01": 0.5, "L02": 7.6, "L03": 19.0, "L04": 36.8, "L05": 50.7, "L06": 59.4, "L07": 80.1, "L08": 103.1, "L09": 112.7 }
+  "starts": {
+    "L01": 0.5,
+    "L02": 7.6,
+    "L03": 19.0,
+    "L04": 36.8,
+    "L05": 50.7,
+    "L06": 59.4,
+    "L07": 80.1,
+    "L08": 103.1,
+    "L09": 112.7,
+    "L03A": 31.55,
+    "L03B": 31.8
+  },
+  "variant": "B",
+  "note": "starts are for variant A (mainnet tail L03A). Variant B (testnet tail L03B) shifts every line after L03 by shift_B frames; build-timeline.py applies it. Switch variants by setting 'variant'.",
+  "tail_speech_end": {
+    "L03A": 3.69,
+    "L03B": 5.81
+  }
 }

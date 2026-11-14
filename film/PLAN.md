@@ -2,7 +2,7 @@
 
 Film lead: Claude (Opus 5.5). Approved story: `../demo/STORY.md` (Gabriel, 14 Nov). Contract: `~/Documents/hackathons/_demo-films/BRIEF-COMMON.md`.
 Delivery: 1920x1080, 30 fps, H.264 yuv420p limited-range BT.709, AAC 48 kHz, about -14 LUFS, true peak <= -1 dBTP.
-Length: **124.0 s (3,720 frames)**, target 2:00, hard cap 2:15. Milestones: v1 by 23:00 IST, final by 02:30 IST.
+Length: **126.37 s (3,791 frames) with voice variant B** (124.0 s with variant A), target 2:00, hard cap 2:15. Milestones: v1 by 23:00 IST, final by 02:30 IST.
 Studio: `http://localhost:3017` (composition `Film`; one composition per scene `Scene01`..`Scene09`; seam reference `Handoffs`).
 
 ## 1. Story, audience, aha, closing line
@@ -41,16 +41,22 @@ voices are Polish- or Tamil-native or a Gen-Z social read.
 Docs: https://elevenlabs.io/docs/overview/models , https://elevenlabs.io/docs/overview/capabilities/text-to-speech/eleven-v4 ,
 https://elevenlabs.io/docs/api-reference/text-to-speech/convert-with-timestamps , https://elevenlabs.io/blog/eleven-v4 ,
 https://elevenlabs.io/blog/elevenlabs-audio-tags-list
-Budget: 4,000 characters including retries. **Used: 1,891 characters sent** (9 lines, no retries; the API's
-`character-cost` header reported less). Quota before: 115,047 / 220,149 used. Script: `scripts/voice.py` (refuses past 4,000).
+Budget: 4,000 characters including retries. **Used: 2,005 characters sent** (9 lines + the testnet variant line, no retries;
+the API's `character-cost` header reported less). Quota before: 115,047 / 220,149 used. Script: `scripts/voice.py` (refuses past 4,000).
 
 Placement is `voice/placement.json`; every word's absolute frame is in `src/timeline.generated.ts` (`scripts/build-timeline.py`).
+**Variants (coordinator, 14 Nov):** the mainnet run is not confirmed, so the cut uses **B** (testnet line). A is a
+one-field swap: `"variant": "A"` in `voice/placement.json`, then `python3 -I scripts/build-timeline.py`. With B every line
+from L04 on, and every scene from S04 on, starts **+71 frames** later (`SHIFT`); the table below lists L04-L09 at their
+variant-A frames: add 71 for the cut.
 
 | Line | Start-end (s) | Frames | Lands on | Text |
 |---|---|---|---|---|
 | L01 | 0.50-6.82 | 15-205 | "money" @181 | Every group trip has one friend who books the place, and then spends weeks chasing everyone for the money. |
 | L02 | 7.60-18.24 | 228-547 | "NEAR" @336, "paid" @532 | So we built Dibs, where the trip itself is a contract on NEAR. Every bed gets its own account with no keys, and nobody can book until every bed is paid. |
-| L03 | 19.00-35.96 | 570-1079 | "Intents" @868, "mainnet" @1009 | Now Leo pays for his bed. A passkey on his phone is his only key, so there's no wallet and no gas. He pays with USDC on Base, NEAR Intents swaps it, and it lands in bed three. We ran this same payment on NEAR mainnet, with real money. |
+| L03 | 19.00-31.50 | 570-945 | "Intents" @868, "three" @928 | Now Leo pays for his bed. A passkey on his phone is his only key, so there's no wallet and no gas. He pays with USDC on Base, NEAR Intents swaps it, and it lands in bed three. |
+| **L03B** (variant B, default) | 31.80-38.12 | 954-1144 | "faucet" @992, "mainnet" @1118 | On testnet, a faucet stands in for that deposit, because NEAR Intents only runs on mainnet. |
+| L03A (variant A, only if the mainnet run is real) | 31.55-35.96 | 947-1079 | "mainnet" @1009 | We ran this same payment on NEAR mainnet, with real money. (cut from the original L03 take) |
 | L04 | 36.80-49.84 | 1104-1495 | "refuses" @1243, "Priya" @1404 | Say Ana can't make it anymore. She asks for a refund, and the contract refuses, because that would leave the trip short. So she sells her bed at face value to Priya, who's already waiting with her money in. |
 | L05 | 50.70-58.54 | 1521-1756 | "randomness" @1622 | Once all eight beds are paid, OutLayer's verifiable randomness decides who sleeps where, so nobody argues over the double room. |
 | L06 | 59.40-79.08 | 1782-2372 | "card" @2008, "declined" @2245, "sandbox" @2350 | Now Maya books, but not with her own money. An OutLayer enclave, called from NEAR, issues the trip its own card, sealed to Maya's passkey, and it only works at hotels. So the hotel charge goes through, and the electronics store is declined. For now, that card runs on Lithic's sandbox. |
@@ -70,7 +76,7 @@ NEAR's role named concretely (contract, keyless bed accounts, NEAR Intents, main
 | b01-lis0312 ... b08-lis0312 (bed accounts) | DEPLOY-HANDBACK.md (`b03-lis0312.dibs-0eb9ae.testnet` form) |
 | lis0312@dibs.larinova.com | services/inbox/HANDBACK.md, `outlayer/verifier/src/recipient.rs` |
 | E_NO_REFUND | contract; live refusal in DEPLOY-HANDBACK.md; judge-report.json |
-| VRF draw tx gADA3SGt...6c7w (testnet, trip drw0001) | DEPLOY-HANDBACK.md |
+| VRF draw tx gADA3SGt...7c6w (testnet, trip drw0001) | DEPLOY-HANDBACK.md |
 | Card: hotels only, MCC 7011, limit = pot, Carlton City Hotel SG approved, VoltCity Electronics (MCC 5732) declined, last4 8087 in the preview | outlayer/CARD-HANDBACK.md, `apps/web/src/components/trip/card-sheet.tsx` |
 | Forged email refused: proof_refused E_NO_RESULT, tx 93AJG9P2... | DEPLOY-HANDBACK.md (tampered-body .eml, DAO untouched) |
 | 35 attacks refused; 46 of 46 checks pass | `contracts/judge-report.json`: 46 checks all ok; 35 expect a refusal code (the 36th code entry is "OK", a genuine accept) |
@@ -154,7 +160,7 @@ SFX: soft click on the button; stamp on the refusal; paper tear (paper slide); c
 |---|---|---|---|
 | 1521-1565 | From H4: on "eight beds are paid" the Paid badges brighten in a quick green wave; a chip rises above the list: dice icon + "OutLayer VRF". | Slight pull back | H4 in |
 | 1570-1690 | The draw: each row's sub-line cycles bed names (DrawSheet rolling: grey, slightly blurred, slowing ticks) on "verifiable randomness decides" @1600-1655; then names lock in white top to bottom by "where" @1677. | Static | - |
-| 1691-1750 | "so nobody argues over the double room": Leo's row "Double room, window side" gets a brief yellow ring; below the list a mono proof chip "VRF draw verified on NEAR testnet · gADA3SGt...6c7w". | - | - |
+| 1691-1750 | "so nobody argues over the double room": Leo's row "Double room, window side" gets a brief yellow ring; below the list a mono proof chip "VRF draw verified on NEAR testnet · gADA3SGt...7c6w". | - | - |
 | 1750-1782 | Chip and ring fade; settle on **H5** (drawn list). | - | **H5** |
 SFX: decelerating ticks; a small win sound when it settles.
 
@@ -197,7 +203,7 @@ SFX: key presses for the retype; stamp/punch for refused; ticks for the wave (tr
 |---|---|---|---|
 | 3381-3420 | From H8: the line sweeps out upward; Maya's face rises from below to centre (hello-face rise, 1 s) and bobs; the crowd rises around (bookend to S02). | - | H8 in |
 | 3405-3500 | "Nobody fronts the money." (white) "Nobody chases anyone." (grey) sweeps in under her on "fronts" @3410 / "chase" @3471, 64 px. | - | - |
-| 3505-3720 | Headline sweeps out; lockup: "dibs" wordmark 140 px; a light pill "dibs-trips.pages.dev/t/lis0312" (the live trip; final URL confirmed by the coordinator) on "link" @3597; mono fg2 "github.com/RealMarsela/dibs"; bottom line fg3 22 px "Built at NEAR HACKATHON · NEAR testnet, with a real mainnet payment · card rails: Lithic sandbox". Faces keep bobbing; hold to the end. | Very slow push | end |
+| 3505-3720 | Headline sweeps out; lockup: "dibs" wordmark 140 px; a light pill "dibs-trips.pages.dev/t/lis0312" (the live trip; final URL confirmed by the coordinator) on "link" @3597; mono fg2 "github.com/RealMarsela/dibs"; bottom line fg3 22 px "Built at NEAR HACKATHON · runs on NEAR testnet · card rails: Lithic sandbox". Faces keep bobbing; hold to the end. | Very slow push | end |
 SFX: soft rise under the crowd; nothing on the final hold (music resolves).
 
 ## 7. Transitions (start, intermediate, end; easing; duration)

@@ -1,6 +1,6 @@
 {
  "id": "L03",
- "text": "Now Leo pays for his bed. A passkey on his phone is his only key, so there's no wallet and no gas. He pays with USDC on Base, NEAR Intents swaps it, and it lands in bed three. We ran this same payment on NEAR mainnet, with real money.",
+ "text": "Now Leo pays for his bed. A passkey on his phone is his only key, so there's no wallet and no gas. He pays with USDC on Base, NEAR Intents swaps it, and it lands in bed three.",
  "words": [
   {
    "w": "Now",
@@ -190,63 +190,8 @@
   {
    "w": "three.",
    "s": 11.92,
-   "e": 12.8
-  },
-  {
-   "w": "We",
-   "s": 12.88,
-   "e": 12.96
-  },
-  {
-   "w": "ran",
-   "s": 13.04,
-   "e": 13.12
-  },
-  {
-   "w": "this",
-   "s": 13.2,
-   "e": 13.44
-  },
-  {
-   "w": "same",
-   "s": 13.56,
-   "e": 13.68
-  },
-  {
-   "w": "payment",
-   "s": 13.76,
-   "e": 14.08
-  },
-  {
-   "w": "on",
-   "s": 14.16,
-   "e": 14.32
-  },
-  {
-   "w": "NEAR",
-   "s": 14.44,
-   "e": 14.56
-  },
-  {
-   "w": "mainnet,",
-   "s": 14.64,
-   "e": 15.28
-  },
-  {
-   "w": "with",
-   "s": 15.36,
-   "e": 15.44
-  },
-  {
-   "w": "real",
-   "s": 15.6,
-   "e": 15.84
-  },
-  {
-   "w": "money.",
-   "s": 15.92,
-   "e": 16.96
+   "e": 12.5
   }
  ],
- "duration": 16.96
+ "duration": 12.5
 }

@@ -22,7 +22,21 @@
     {
       "id": "L03",
       "beat": "pay",
-      "text": "Now Leo pays for his bed. A passkey on his phone is his only key, so there's no wallet and no gas. He pays with USDC on Base, NEAR Intents swaps it, and it lands in bed three. We ran this same payment on NEAR mainnet, with real money."
+      "text": "Now Leo pays for his bed. A passkey on his phone is his only key, so there's no wallet and no gas. He pays with USDC on Base, NEAR Intents swaps it, and it lands in bed three.",
+      "note": "head of the original L03 generation (cut at 12.55 s); full take in voice/raw/L03-full.mp3"
+    },
+    {
+      "id": "L03A",
+      "beat": "pay-tail",
+      "variant": "A",
+      "text": "We ran this same payment on NEAR mainnet, with real money.",
+      "note": "tail of the original L03 generation (mainnet claim); use only if the mainnet run is real"
+    },
+    {
+      "id": "L03B",
+      "beat": "pay-tail",
+      "variant": "B",
+      "text": "On testnet, a faucet stands in for that deposit, because NEAR Intents only runs on mainnet."
     },
     {
       "id": "L04",

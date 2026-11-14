@@ -1,6 +1,7 @@
 import React from "react";
 import { getStaticFiles, OffthreadVideo, staticFile } from "remotion";
 import { C, GLASS } from "../tokens";
+import { FOOTAGE_READY } from "../footage.generated";
 
 /* FootageSlot: real app footage when public/footage/<id>.mp4 exists, otherwise the scene's on-brand placeholder
    (rebuilt from the app's real components, never a grey box). Clips are recorded at a 1920x1080 CSS viewport
@@ -8,7 +9,9 @@ import { C, GLASS } from "../tokens";
    Placeholders receive the same box, so swapping footage in never moves the layout. */
 export type Crop = { x: number; y: number; w: number; h: number };
 
+/** A clip is used only when scripts/footage-ready.py has probed it as complete AND the file is in public/. */
 export function hasFootage(id: string): boolean {
+  if (!FOOTAGE_READY[id]) return false;
   try {
     return getStaticFiles().some((f) => f.name === `footage/${id}.mp4`);
   } catch {

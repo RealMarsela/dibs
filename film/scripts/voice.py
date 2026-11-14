@@ -57,8 +57,11 @@ def main():
         if usage["billed_chars"] + len(text) > BUDGET:
             raise SystemExit(f"budget: {usage['billed_chars']} + {len(text)} > {BUDGET}")
         body = {"text": text, "model_id": cfg["model_id"], "voice_settings": cfg["voice_settings"], "seed": cfg["seed"]}
-        if idx > 0: body["previous_text"] = lines[idx - 1]["text"]
-        if idx < len(lines) - 1: body["next_text"] = lines[idx + 1]["text"]
+        ok = lambda o: o.get("variant") in (None, ln.get("variant"))  # neighbours from the same variant path
+        prev = [o for o in lines[:idx] if ok(o)]
+        nxt = [o for o in lines[idx + 1:] if ok(o)]
+        if prev: body["previous_text"] = prev[-1]["text"]
+        if nxt: body["next_text"] = nxt[0]["text"]
         if os.environ.get("NO_CONTEXT"): body.pop("previous_text", None); body.pop("next_text", None)
         req = urllib.request.Request(
             f"https://api.elevenlabs.io/v1/text-to-speech/{cfg['voice_id']}/with-timestamps?output_format=mp3_44100_192",

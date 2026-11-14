@@ -6,3 +6,4 @@ Config.setConcurrency(4);
 Config.setChromiumOpenGlRenderer("angle");
 Config.setPixelFormat("yuv420p");
 Config.setCodec("h264");
+Config.setColorSpace("bt709");
