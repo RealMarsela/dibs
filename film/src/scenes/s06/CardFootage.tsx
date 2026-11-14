@@ -9,7 +9,7 @@ import type { Times } from "./poses";
    A starts with the hotel row already charging and shows Approved on "through"; a 4-frame crossfade cuts to B, the
    electronics row charging, Declined on "declined"; B freezes just before the clip ends (33.17 s) and holds.
    Measured in the clip (24 fps): Approved first visible 25.417 s, Declined 29.917 s; rows are stable from 20 s. */
-export const CROP = { x: 756, y: 600, w: 408, h: 176 }; // "Try it" + both rows; text 14/12 css px reads 28/24 px at 2x
+export const CROP = { x: 756, y: 600, w: 408, h: 176 }; // "Try it" + both rows; at 860 px wide (2.11x) text 14/12 css px reads 30/25 px
 const FPS = 30;
 const APPROVED_S = 25.417;
 const DECLINED_S = 29.917;
@@ -21,7 +21,7 @@ export function CardFootage({ f, T, width, height }: { f: number; T: Times; widt
   const aStart = Math.round(APPROVED_S * FPS - (T.through - inF));
   const bStart = Math.round(DECLINED_S * FPS - (T.declined - cut));
   const bHold = cut + Math.floor(LAST_SAFE_S * FPS - bStart);
-  const placeholder = <TryRows f={f} pressA={T.hotel + 14} okA={T.through} pressB={T.electronics + 3} noB={T.declined} />;
+  const placeholder = <TryRows f={f} S={width / CROP.w} pressA={T.hotel + 14} okA={T.through} pressB={T.electronics + 3} noB={T.declined} />;
   const slot = (startFrom: number) => <FootageSlot id="card" width={width} height={height} crop={CROP} startFrom={startFrom} placeholder={placeholder} />;
   return (
     <AbsoluteFill>

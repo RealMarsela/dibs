@@ -2,7 +2,7 @@ import { TH, TW } from "./tear";
 
 /* Where the ticket lives on screen. It floats a little (motion never stops) and sits at the app's -2 deg. */
 export const TICKET_ROT = -2;
-export const TC = (f: number) => ({ x: 940, y: 540 + 3 * Math.sin(f / 28) });
+export const TC = (f: number) => ({ x: 860, y: 520 + 3 * Math.sin(f / 28) });
 
 /** Ticket-local point → screen point. */
 export function toScreen(lx: number, ly: number, f: number, rotDeg = TICKET_ROT) {
@@ -21,12 +21,13 @@ export function toLocal(x: number, y: number, f: number, rotDeg = TICKET_ROT) {
   return { x: TW / 2 + dx * Math.cos(a) - dy * Math.sin(a), y: TH / 2 + dx * Math.sin(a) + dy * Math.cos(a) };
 }
 
-export const PRIYA_AT = { x: 1660, y: 530 };
-export const PRIYA_SIZE = 120;
-export const CHIP_AT = { x: 1660, y: 640 };
-export const ANA_OUT = { x: 372, y: 590 };
-export const ANA_SIZE_OUT = 84;
-export const PLUS_AT = { x: 372, y: 686 };
+export const PRIYA_AT = { x: 1706, y: 500 };
+export const PRIYA_SIZE = 132;
+export const CHIP_AT = { x: 1706, y: 624 };
+export const ANA_OUT = { x: 212, y: 556 };
+export const ANA_SIZE_OUT = 100;
+export const PLUS_AT = { x: 212, y: 664 };
+export const COIN_CTRL = { x: 960, y: 1010 };
 
 /** Quadratic Bézier point. */
 export function bez(p0: { x: number; y: number }, c: { x: number; y: number }, p1: { x: number; y: number }, t: number) {

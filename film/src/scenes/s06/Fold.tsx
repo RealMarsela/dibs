@@ -1,10 +1,10 @@
 import React from "react";
-import { C, FONT, GLASS, PEOPLE } from "../../tokens";
+import { C, FONT, GLASS, LIST_SCALE, PEOPLE } from "../../tokens";
 import { LIST_W, ROW_H, ROWS_DRAWN, type Row } from "../../components/Trip";
 import { Badge } from "../../components/Surfaces";
 import { prog } from "../../lib/anim";
 
-/* H5 taken apart: the same glass list (identical geometry to BedList) with each face slot left empty, because S06
+/* H5 taken apart: the same glass list, scaled LIST_SCALE like H5 (identical geometry to BedList) with each face slot left empty, because S06
    flies the faces on their own layer (Crew.tsx). The rows fold up (rx -70 about their top edge, fade) top to bottom,
    2 frames apart, while the glass panel fades. */
 
@@ -32,6 +32,7 @@ export function FoldList({ f }: { f: number }) {
   const n = ROWS_DRAWN.length;
   return (
     <div style={{ position: "absolute", left: 960, top: 540, transform: "translate(-50%, -50%)" }}>
+      <div style={{ transform: `scale(${LIST_SCALE})` }}>
       {bg < 1 && <div style={{ ...GLASS, position: "absolute", inset: 0, borderRadius: 30, opacity: 1 - bg, transform: `scale(${1 - 0.03 * bg})` }} />}
       <div style={{ width: LIST_W, padding: 8, borderRadius: 30, border: "1px solid transparent", position: "relative" }}>
         {ROWS_DRAWN.map((r, i) => {
@@ -46,6 +47,7 @@ export function FoldList({ f }: { f: number }) {
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

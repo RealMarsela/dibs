@@ -9,9 +9,9 @@ import type { TT } from "./time";
    every bed is paid; Ana's cell 04 empties into a pulsing hole (the rest fall back to white: no longer all paid),
    then refills when the contract keeps her $40. Cell 04 then becomes the ticket (drawn by the scene). */
 export const MY = 700;
-const MW = 1200;
-export const CH = 26;
-const GAP = 12;
+const MW = 1400;
+export const CH = 30;
+const GAP = 14;
 export const CW = (MW - GAP * 7) / 8;
 export const cellX = (i: number) => 960 - MW / 2 + i * (CW + GAP) + CW / 2;
 
@@ -86,10 +86,10 @@ function ShortLine({ T }: { T: TT }) {
         position: "absolute",
         left: 0,
         right: 0,
-        top: 800 - 32,
+        top: 812 - 36,
         textAlign: "center",
         ...DISPLAY,
-        fontSize: 56,
+        fontSize: 64,
         opacity: 1 - out,
         filter: out > 0 ? `blur(${out * 10}px)` : undefined,
         transform: `translateY(${-out * 12}px)`,
@@ -106,7 +106,7 @@ function ShortLine({ T }: { T: TT }) {
               color: wd.tone === "fg" ? C.fg : C.fg2,
               opacity: p,
               filter: p < 1 ? `blur(${(1 - p) * 8}px)` : undefined,
-              transform: `translateY(${(1 - p) * 9}px)`,
+              transform: `translateY(${(1 - p) * 10}px)`,
               marginRight: i < WORDS.length - 1 ? "0.25em" : 0,
             }}
           >

@@ -9,8 +9,8 @@ import { BASE_AMOUNT, cropAt } from "./PayScreen";
    through a turning glass ring labelled "NEAR Intents", flips to "40.00 USDC · NEAR" inside it, slips behind the ring's
    lower band and drops into bed 03's own account, a glass tile "b03-lis0312" that lights white. Stage coords. */
 
-const RING = { x: 530, y: -160, r: 190, band: 54 };
-const TILE = { x: 530, y: 232, w: 290, h: 112 };
+const RING = { x: 560, y: -160, r: 190, band: 54 };
+const TILE = { x: 560, y: 232, w: 290, h: 112 };
 const hide: React.CSSProperties = { backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" };
 
 function ChipFace({ amount, chain, back, opacity }: { amount: string; chain: "base" | "near"; back?: boolean; opacity: number }) {
@@ -126,11 +126,11 @@ export function LiftOut({ f, t }: { f: number; t: T }) {
   const S = WIN.w / cr.w;
   const sx = P0.x + ((BASE_AMOUNT.x - cr.x) * S - WIN.w / 2) * P0.s;
   const sy = P0.y + ((BASE_AMOUNT.y - cr.y) * S - WIN.h / 2) * P0.s;
-  const P1 = { x: 280, y: -240 };
-  const x = kf(f, [c0, c1, c2], [sx, P1.x, RING.x], [EASE, IN_OUT_STRONG]);
-  const y = f <= c2b ? kf(f, [c0, c1, c2], [sy, P1.y, RING.y], [EASE, IN_OUT_STRONG]) : kf(f, [c2b, land], [RING.y, TILE.y], IN_OUT_STRONG);
-  const z = kf(f, [c0, c1, c1 + 8, c2, c2b, c2b + 12, land], [0, 70, 40, -70, -70, -70, 0], [EASE, EASE, IN_OUT_STRONG, EASE, EASE, IN_OUT_STRONG]);
-  const s = kf(f, [c0, c1, c2, c2b, land - 4, land + 2], [0.45, 1, 0.8, 0.8, 0.8, 0.55], [EASE, IN_OUT_STRONG, EASE, EASE, IN_OUT_STRONG]);
+  // one continuous move from the amount straight into the ring's hole (no stop on the way), lifting off the window first
+  const x = kf(f, [c0, c2], [sx, RING.x], EASE);
+  const y = f <= c2b ? kf(f, [c0, c2], [sy, RING.y], EASE) : kf(f, [c2b, land], [RING.y, TILE.y], IN_OUT_STRONG);
+  const z = kf(f, [c0, c1, c2 - 6, c2, c2b, c2b + 12, land], [0, 80, 40, -70, -70, -70, 0], [EASE, EASE, IN_OUT_STRONG, EASE, EASE, IN_OUT_STRONG]);
+  const s = kf(f, [c0, c0 + 8, c2, c2b, land - 4, land + 2], [0.45, 1, 0.8, 0.8, 0.8, 0.55], [EASE, IN_OUT_STRONG, EASE, EASE, IN_OUT_STRONG]);
   const ry = kf(f, [c2, c2b], [0, 180], IN_OUT_STRONG);
   const op = prog(f, c0, 5) * (1 - prog(f, land - 3, 6));
   return (

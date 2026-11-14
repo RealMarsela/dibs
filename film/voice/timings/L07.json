@@ -1,282 +1,317 @@
 {
  "id": "L07",
- "text": "Then the confirmation from booking.com lands in the trip's own inbox. An Intel TDX enclave checks that booking.com really signed it, NEAR AI reads it privately, and the contract verifies the signed result on chain. Friends only see the dates, the guests and the total, and the crew's DAO releases the money on its own.",
+ "text": "Here's a real booking.com confirmation from one of our own trips, landing in that trip's own inbox. An Intel TDX enclave checks that booking.com really signed it, and NEAR AI reads it privately, so friends only see the dates, the guests and the total. When the contract verifies that signed result on chain, the crew's DAO releases the money on its own.",
  "words": [
   {
-   "w": "Then",
-   "s": 0.222,
-   "e": 0.24
+   "w": "Here's",
+   "s": 0.08,
+   "e": 0.28
   },
   {
-   "w": "the",
-   "s": 0.28,
-   "e": 0.32
+   "w": "a",
+   "s": 0.32,
+   "e": 0.48
   },
   {
-   "w": "confirmation",
-   "s": 0.4,
-   "e": 1.04
-  },
-  {
-   "w": "from",
-   "s": 1.12,
-   "e": 1.28
+   "w": "real",
+   "s": 0.56,
+   "e": 0.8
   },
   {
    "w": "booking.com",
-   "s": 1.44,
-   "e": 2.24
+   "s": 0.96,
+   "e": 1.6
   },
   {
-   "w": "lands",
+   "w": "confirmation",
+   "s": 1.68,
+   "e": 2.32
+  },
+  {
+   "w": "from",
    "s": 2.4,
-   "e": 2.64
+   "e": 2.56
   },
   {
-   "w": "in",
-   "s": 2.68,
+   "w": "one",
+   "s": 2.64,
    "e": 2.72
   },
   {
-   "w": "the",
+   "w": "of",
    "s": 2.76,
    "e": 2.8
   },
   {
-   "w": "trip's",
-   "s": 2.88,
-   "e": 3.2
+   "w": "our",
+   "s": 2.92,
+   "e": 3.04
   },
   {
    "w": "own",
-   "s": 3.28,
-   "e": 3.44
+   "s": 3.16,
+   "e": 3.28
   },
   {
-   "w": "inbox.",
-   "s": 3.52,
+   "w": "trips,",
+   "s": 3.36,
+   "e": 4.0
+  },
+  {
+   "w": "landing",
+   "s": 4.08,
+   "e": 4.4
+  },
+  {
+   "w": "in",
+   "s": 4.48,
    "e": 4.64
   },
   {
-   "w": "An",
-   "s": 4.72,
-   "e": 4.8
-  },
-  {
-   "w": "Intel",
-   "s": 4.88,
-   "e": 5.28
-  },
-  {
-   "w": "TDX",
-   "s": 5.36,
-   "e": 5.84
-  },
-  {
-   "w": "enclave",
-   "s": 5.92,
-   "e": 6.48
-  },
-  {
-   "w": "checks",
-   "s": 6.56,
-   "e": 6.8
-  },
-  {
    "w": "that",
-   "s": 6.88,
+   "s": 4.76,
+   "e": 4.88
+  },
+  {
+   "w": "trip's",
+   "s": 5.0,
+   "e": 5.36
+  },
+  {
+   "w": "own",
+   "s": 5.44,
+   "e": 5.68
+  },
+  {
+   "w": "inbox.",
+   "s": 6.0,
+   "e": 6.88
+  },
+  {
+   "w": "An",
+   "s": 6.96,
    "e": 7.04
   },
   {
+   "w": "Intel",
+   "s": 7.24,
+   "e": 7.44
+  },
+  {
+   "w": "TDX",
+   "s": 7.52,
+   "e": 8.08
+  },
+  {
+   "w": "enclave",
+   "s": 8.16,
+   "e": 8.72
+  },
+  {
+   "w": "checks",
+   "s": 8.88,
+   "e": 9.04
+  },
+  {
+   "w": "that",
+   "s": 9.12,
+   "e": 9.2
+  },
+  {
    "w": "booking.com",
-   "s": 7.16,
-   "e": 7.92
-  },
-  {
-   "w": "really",
-   "s": 8.0,
-   "e": 8.32
-  },
-  {
-   "w": "signed",
-   "s": 8.48,
-   "e": 8.64
-  },
-  {
-   "w": "it,",
-   "s": 8.72,
-   "e": 9.32
-  },
-  {
-   "w": "NEAR",
-   "s": 9.36,
-   "e": 9.6
-  },
-  {
-   "w": "AI",
-   "s": 9.76,
+   "s": 9.28,
    "e": 10.08
   },
   {
-   "w": "reads",
-   "s": 10.2,
-   "e": 10.32
+   "w": "really",
+   "s": 10.24,
+   "e": 10.56
   },
   {
-   "w": "it",
-   "s": 10.4,
-   "e": 10.48
+   "w": "signed",
+   "s": 10.72,
+   "e": 10.88
   },
   {
-   "w": "privately,",
-   "s": 10.6,
+   "w": "it,",
+   "s": 10.96,
    "e": 11.48
   },
   {
    "w": "and",
    "s": 11.52,
-   "e": 11.6
-  },
-  {
-   "w": "the",
-   "s": 11.64,
    "e": 11.68
   },
   {
-   "w": "contract",
-   "s": 11.76,
-   "e": 12.24
+   "w": "NEAR",
+   "s": 11.72,
+   "e": 11.92
   },
   {
-   "w": "verifies",
-   "s": 12.32,
-   "e": 12.88
+   "w": "AI",
+   "s": 12.0,
+   "e": 12.32
   },
   {
-   "w": "the",
-   "s": 12.96,
-   "e": 13.12
+   "w": "reads",
+   "s": 12.4,
+   "e": 12.56
   },
   {
-   "w": "signed",
-   "s": 13.24,
-   "e": 13.36
+   "w": "it",
+   "s": 12.64,
+   "e": 12.72
   },
   {
-   "w": "result",
-   "s": 13.44,
-   "e": 13.84
+   "w": "privately,",
+   "s": 12.84,
+   "e": 13.653
   },
   {
-   "w": "on",
-   "s": 13.92,
-   "e": 14.08
+   "w": "so",
+   "s": 13.707,
+   "e": 13.76
   },
   {
-   "w": "chain.",
-   "s": 14.16,
-   "e": 15.16
-  },
-  {
-   "w": "Friends",
-   "s": 15.2,
-   "e": 15.52
+   "w": "friends",
+   "s": 13.84,
+   "e": 14.16
   },
   {
    "w": "only",
-   "s": 15.6,
-   "e": 15.84
+   "s": 14.24,
+   "e": 14.48
   },
   {
    "w": "see",
-   "s": 15.92,
-   "e": 16.0
+   "s": 14.56,
+   "e": 14.64
   },
   {
    "w": "the",
-   "s": 16.08,
-   "e": 16.16
+   "s": 14.72,
+   "e": 14.8
   },
   {
    "w": "dates,",
-   "s": 16.24,
-   "e": 16.933
+   "s": 15.08,
+   "e": 15.4
   },
   {
    "w": "the",
-   "s": 16.987,
-   "e": 17.04
+   "s": 15.44,
+   "e": 15.52
   },
   {
    "w": "guests",
-   "s": 17.24,
-   "e": 17.6
+   "s": 15.72,
+   "e": 16.16
   },
   {
    "w": "and",
-   "s": 17.64,
+   "s": 16.24,
+   "e": 16.32
+  },
+  {
+   "w": "the",
+   "s": 16.4,
+   "e": 16.48
+  },
+  {
+   "w": "total.",
+   "s": 16.96,
+   "e": 17.467
+  },
+  {
+   "w": "When",
+   "s": 17.493,
+   "e": 17.52
+  },
+  {
+   "w": "the",
+   "s": 17.6,
    "e": 17.68
   },
   {
-   "w": "the",
-   "s": 17.76,
-   "e": 17.84
-  },
-  {
-   "w": "total,",
+   "w": "contract",
    "s": 17.92,
-   "e": 18.68
+   "e": 18.16
   },
   {
-   "w": "and",
-   "s": 18.72,
+   "w": "verifies",
+   "s": 18.24,
    "e": 18.8
   },
   {
-   "w": "the",
-   "s": 18.88,
-   "e": 18.96
+   "w": "that",
+   "s": 18.92,
+   "e": 19.04
   },
   {
-   "w": "crew's",
-   "s": 19.08,
-   "e": 19.36
+   "w": "signed",
+   "s": 19.16,
+   "e": 19.28
   },
   {
-   "w": "DAO",
-   "s": 19.44,
-   "e": 19.92
-  },
-  {
-   "w": "releases",
-   "s": 20.0,
-   "e": 20.48
-  },
-  {
-   "w": "the",
-   "s": 20.56,
-   "e": 20.64
-  },
-  {
-   "w": "money",
-   "s": 20.76,
-   "e": 20.88
+   "w": "result",
+   "s": 19.36,
+   "e": 19.76
   },
   {
    "w": "on",
+   "s": 19.84,
+   "e": 20.0
+  },
+  {
+   "w": "chain,",
+   "s": 20.08,
+   "e": 20.76
+  },
+  {
+   "w": "the",
+   "s": 20.8,
+   "e": 20.88
+  },
+  {
+   "w": "crew's",
    "s": 20.96,
-   "e": 21.04
+   "e": 21.28
+  },
+  {
+   "w": "DAO",
+   "s": 21.36,
+   "e": 21.84
+  },
+  {
+   "w": "releases",
+   "s": 21.92,
+   "e": 22.4
+  },
+  {
+   "w": "the",
+   "s": 22.48,
+   "e": 22.56
+  },
+  {
+   "w": "money",
+   "s": 22.72,
+   "e": 22.88
+  },
+  {
+   "w": "on",
+   "s": 22.92,
+   "e": 22.96
   },
   {
    "w": "its",
-   "s": 21.12,
-   "e": 21.2
+   "s": 23.04,
+   "e": 23.2
   },
   {
    "w": "own.",
-   "s": 21.28,
-   "e": 22.08
+   "s": 23.28,
+   "e": 24.08
   }
  ],
- "duration": 22.08
+ "duration": 24.08
 }

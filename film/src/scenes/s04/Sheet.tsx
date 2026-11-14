@@ -6,11 +6,16 @@ import type { TT } from "./time";
 
 /* Placeholder for footage slot `resale`: apps/web/src/components/trip/resale-sheet.tsx (desktop Dialog, 440 css px,
    radius 28, padding 28) rebuilt at S x its CSS px, centred in the window exactly where the crop puts the real dialog. */
-export const S = 2.08;
-export const WIN_W = 1000;
-export const WIN_H = 720;
-/** Crop in the 1920 x 1080 recording: the centred dialog plus a margin, scaled by S into the window. */
-export const CROP = { x: 960 - WIN_W / S / 2, y: 540 - WIN_H / S / 2, w: WIN_W / S, h: WIN_H / S };
+/* v2: the window hugs the dialog (desktop Dialog x 740-1180 css px, centred on y 540; measured in the live clip:
+   ask step y 394.7-684.7, refused step y 376-703.5), so no trip page shows at its edges. */
+export const CROP_W = 441;
+export const WIN_W = 1150;
+export const S = WIN_W / CROP_W;
+export const WIN_H_ASK = 292 * S;
+export const WIN_H_REF = 330 * S;
+export const WIN_R = 28.5 * S;
+/** Crop in the 1920 x 1080 (css px) recording for a window of height h. */
+export const cropFor = (h: number) => ({ x: 960 - CROP_W / 2, y: 540 - h / S / 2, w: CROP_W, h: h / S });
 
 const SHEET_W = 440 * S;
 const PAD = 28 * S;
@@ -50,7 +55,7 @@ const pill = (tone: "dark" | "light", extra?: React.CSSProperties): React.CSSPro
   ...extra,
 });
 
-export function ResaleSheet({ T }: { T: TT }) {
+export function ResaleSheet({ T, winH }: { T: TT; winH: number }) {
   const { f } = T;
   const open = prog(f, T.win + 10, 14);
   const toRef = prog(f, T.step, 10, OUT_STRONG);
@@ -61,13 +66,13 @@ export function ResaleSheet({ T }: { T: TT }) {
   const press = kf(f, [T.press, T.press + 3, T.press + 9], [1, 0.97, 1]);
   const answered = prog(f, T.answer, 3);
   return (
-    <div style={{ position: "absolute", inset: 0, fontFamily: FONT, background: `radial-gradient(70% 60% at 50% 45%, ${C.panel} 0%, ${C.void} 75%)` }}>
+    <div style={{ position: "absolute", inset: 0, fontFamily: FONT, background: C.void }}>
       <div
         style={{
           ...GLASS,
           position: "absolute",
           left: (WIN_W - SHEET_W) / 2,
-          top: (WIN_H - h) / 2,
+          top: (winH - h) / 2,
           width: SHEET_W,
           height: h,
           boxSizing: "border-box",

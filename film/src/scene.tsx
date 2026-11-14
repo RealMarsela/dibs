@@ -1,24 +1,28 @@
 import React, { createContext, useContext } from "react";
 import { useCurrentFrame } from "remotion";
 import { cue as absCue, cueEnd as absCueEnd } from "./lib/anim";
-import { SHIFT } from "./timeline.generated";
+import { LINES, TOTAL } from "./timeline.generated";
 
 /* Scene registry: absolute frame ranges in the 30 fps film (from PLAN.md shot list). A scene renders [from, to).
    Each scene ends exactly on its out-handoff pose and the next one starts exactly on it (handoffs.tsx), so the
    full film hard-cuts on identical frames and reads as one continuous shot. */
-/* Frames below are for voice variant A; with variant B (testnet line) S03 is SHIFT frames longer and every later scene
-   starts SHIFT frames later (timeline.generated.ts). Scenes only use local frames and cue(), so nothing else changes. */
-const S = SHIFT;
+/* Every scene starts exactly where its narration line starts (S01 at 0), and the last one ends at TOTAL, so any voice
+   change (variant A/B, a re-voiced line) moves the scenes with it. Scenes only use local frames and cue(). */
+const at = (id: string) => {
+  const l = LINES.find((x) => x.id === id);
+  if (!l) throw new Error(`scene: no line ${id}`);
+  return l.from;
+};
 export const SCENES = {
-  S01: { from: 0, to: 228, title: "Hook: pay me later" },
-  S02: { from: 228, to: 570, title: "The flip: the trip is a contract" },
-  S03: { from: 570, to: 1104 + S, title: "Pay from any chain" },
-  S04: { from: 1104 + S, to: 1521 + S, title: "Can't make it" },
-  S05: { from: 1521 + S, to: 1782 + S, title: "Fair draw" },
-  S06: { from: 1782 + S, to: 2403 + S, title: "The trip gets a card" },
-  S07: { from: 2403 + S, to: 3093 + S, title: "Prove it (magic moment)" },
-  S08: { from: 3093 + S, to: 3381 + S, title: "Try to cheat" },
-  S09: { from: 3381 + S, to: 3720 + S, title: "Close" },
+  S01: { from: 0, to: at("L02"), title: "Hook: pay me later" },
+  S02: { from: at("L02"), to: at("L03"), title: "The flip: the trip is a contract" },
+  S03: { from: at("L03"), to: at("L04"), title: "Pay from any chain" },
+  S04: { from: at("L04"), to: at("L05"), title: "Can't make it" },
+  S05: { from: at("L05"), to: at("L06"), title: "Fair draw" },
+  S06: { from: at("L06"), to: at("L07"), title: "The trip gets a card" },
+  S07: { from: at("L07"), to: at("L08"), title: "Prove it (magic moment)" },
+  S08: { from: at("L08"), to: at("L09"), title: "Try to cheat" },
+  S09: { from: at("L09"), to: TOTAL, title: "Close" },
 } as const;
 export type SceneId = keyof typeof SCENES;
 

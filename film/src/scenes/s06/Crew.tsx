@@ -4,7 +4,7 @@ import { C, SPRING } from "../../tokens";
 import { Face, idle } from "../../components/LetterFace";
 import { ROWS_DRAWN } from "../../components/Trip";
 import { lerp, prog } from "../../lib/anim";
-import { GATHER, mayaPose, SLOT, type CardPose, type Times } from "./poses";
+import { GATHER, mayaPose, SLOT, SLOT_SIZE, type CardPose, type Times } from "./poses";
 import { LockIcon } from "./icons";
 
 /* The eight faces lifted out of H5. Maya grows and moves left of centre; the other seven settle in a soft arc behind
@@ -13,7 +13,7 @@ import { LockIcon } from "./icons";
 
 const ARC = [190, 157, 123, 90, 57, 23, -10].map((deg) => {
   const a = (deg * Math.PI) / 180;
-  return [Math.cos(a) * 118, -Math.sin(a) * 118] as const;
+  return [Math.cos(a) * 150, -Math.sin(a) * 150] as const;
 });
 
 const At = ({ x, y, children, style }: { x: number; y: number; children: React.ReactNode; style?: React.CSSProperties }) => (
@@ -30,6 +30,7 @@ export function Crew({ f, A, T, card, end }: { f: number; A: number; T: Times; c
   const out = prog(f, end - 36, 16);
   const lockT = T.passkey - 8;
   const lock = f < lockT ? 0 : spring({ frame: f - lockT, fps: 30, config: SPRING });
+  const badge = Math.max(30, m.size * 0.44);
   return (
     <AbsoluteFill>
       {crewO > 0 &&
@@ -39,7 +40,7 @@ export function Crew({ f, A, T, card, end }: { f: number; A: number; T: Times; c
           const k = lerp(1, 0.86, pB);
           const x = lerp(sl.x, m.bx + ARC[j][0] * k, pA);
           const y = lerp(sl.y, m.by + ARC[j][1] * k, pA);
-          const size = lerp(52, lerp(68, 58, pB), pA);
+          const size = lerp(SLOT_SIZE, lerp(84, 72, pB), pA);
           return (
             <At key={id} x={x} y={y} style={{ opacity: crewO }}>
               <div style={{ transform: amp > 0 ? idle(A, id, amp) : undefined }}>
@@ -56,10 +57,10 @@ export function Crew({ f, A, T, card, end }: { f: number; A: number; T: Times; c
               <div
                 style={{
                   position: "absolute",
-                  left: m.size * 0.86 - 17,
-                  top: m.size * 0.86 - 17,
-                  width: 34,
-                  height: 34,
+                  left: m.size * 0.86 - badge / 2,
+                  top: m.size * 0.86 - badge / 2,
+                  width: badge,
+                  height: badge,
                   borderRadius: 99,
                   background: C.raise,
                   boxShadow: `0 0 0 3px ${C.void}`,
@@ -68,7 +69,7 @@ export function Crew({ f, A, T, card, end }: { f: number; A: number; T: Times; c
                   transform: `scale(${lock})`,
                 }}
               >
-                <LockIcon size={18} color={C.fg} stroke={2.2} />
+                <LockIcon size={badge * 0.53} color={C.fg} stroke={2.2} />
               </div>
             )}
           </div>

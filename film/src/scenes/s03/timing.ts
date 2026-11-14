@@ -2,20 +2,22 @@ import { SCENES } from "../../scene";
 import { TAIL } from "../../timeline.generated";
 import { V as VARIANT } from "./variant";
 import { kf, lerp } from "../../lib/anim";
-import { EASE, IN_OUT_STRONG, OUT_STRONG } from "../../tokens";
+import { EASE, IN_OUT_STRONG, LIST_SCALE, OUT_STRONG } from "../../tokens";
 
 /* S03 clock. Every narrated moment comes from cue(); the scene end comes from SCENES (variant B is SHIFT frames longer). */
-export const K = 1.35; // Leo's single-row card scale (BedRow is already film px)
-export const WIN = { w: 1000, h: 820 };
+export const K = 1.5; // Leo's single-row card scale (BedRow is already film px)
+/** The pay-base slot box: 1150 wide (crop 450 CSS px -> x2.56), as tall as the 96 px margins allow. */
+export const WIN = { w: 1150, h: 888 };
 /** The window hugs each PaySheet step (the slot stays WIN-sized and centred, so this only trims the crop vertically). */
-export const FRONT_H = { passkey: 620, chain: 820, track: 700 };
-export const BACK = VARIANT === "A" ? { w: 1000, h: 640 } : { w: 1100, h: 500 };
-/** Row 03 of H3's bed list, in stage coords (centre origin). The page renders border-box (measured), so the list box is
-    860 wide and each row 842 (860 - padding 16 - border 2); row 03 sits at x 539..1381, y 372..456. */
-export const ROW3 = { x: 0, y: -126, w: 842, h: 84 };
+export const FRONT_H = { passkey: 670, chain: 859, track: 777 }; // CSS 262 / 336 / 304 tall at x2.556
+export const BACK = VARIANT === "A" ? { w: 1150, h: 736 } : { w: 1200, h: 560 };
+/** Row 03 of H3's bed list, in stage coords (centre origin). The page renders border-box (measured), so each row is 842 x 84
+    at 1x (centre 126 px above the list centre); H3 scales the list by LIST_SCALE about the frame centre. */
+export const ROW_1X = { w: 842, h: 84, y: -126 };
+export const ROW3 = { x: 0, y: ROW_1X.y * LIST_SCALE, w: ROW_1X.w * LIST_SCALE, h: ROW_1X.h * LIST_SCALE };
 /** Where the "Pay $40" pill sits in Leo's card (stage coords) and its film size. */
-export const PILL = { x: 470, y: 0, w: 146, h: 62 };
-export const PULL = { x: -260, s: 0.86 };
+export const PILL = { x: 518, y: 0, w: 169, h: 69 };
+export const PULL = { x: -200, s: 0.84 };
 
 type Cue = (line: string, word: string, nth?: number) => number;
 
@@ -89,7 +91,7 @@ export function winPose(f: number, t: T): Pose {
   const x = lerp(PILL.x, 0, open) + PULL.x * pull + Math.sin(f / 52) * 6 * drift;
   // the face reaches row 03's height first, then finishes shrinking in place (nothing slides across the other rows)
   const shrinkY = kf(f, [t.shrink0, t.shrink0 + (t.shrink1 - t.shrink0) * 0.6], [0, 1], IN_OUT_STRONG);
-  const y = lerp(Math.sin(f / 38) * 5 * drift, ROW3.y, shrinkY);
+  const y = lerp(Math.sin(f / 38) * 4 * drift, ROW3.y, shrinkY);
   const z = -150 * Math.sin(flip * Math.PI);
   const s = lerp(1, PULL.s, pull) * (1 + 0.04 * push * still);
   const rx = lerp(14, 0, kf(f, [t.win0, t.win0 + 30], [0, 1], EASE));

@@ -2,7 +2,7 @@ import React from "react";
 import { AbsoluteFill } from "remotion";
 import { C, EASE, FONT, IN_OUT_STRONG, OE } from "../../tokens";
 import { lerp, prog } from "../../lib/anim";
-import { Centre } from "../../handoffs";
+import { Centre, H2_LINE, H2_METER } from "../../handoffs";
 import { Display } from "../../components/Surfaces";
 import { Face } from "../../components/LetterFace";
 import { ROW_H } from "../../components/Trip";
@@ -11,9 +11,10 @@ import { K, type T } from "./timing";
 /* H2 -> Leo's row. The line sweeps out, the seven paid cells fall away (the camera pushes toward bed 03), and cell 03
    grows into Leo's bed row on a glass card at K x. Then "Pay $40" presses on "pays". */
 
-const CW = 139.5; // (1200 - 12 * 7) / 8, the H2 meter cell
-const cellX = (i: number) => 360 + i * (CW + 12);
-const C3 = { x: cellX(2), y: 609, w: CW, h: 22 };
+const M = H2_METER;
+const CW = (M.width - M.gap * 7) / 8; // the H2 meter cell
+const cellX = (i: number) => 960 - M.width / 2 + i * (CW + M.gap);
+const C3 = { x: cellX(2), y: M.cy - M.height / 2, w: CW, h: M.height };
 const CARD = { w: 878 * K, h: 102 * K };
 const CARD_RECT = { x: 960 - CARD.w / 2, y: 540 - CARD.h / 2 };
 const HATCH = `repeating-linear-gradient(135deg, ${C.due} 0 4px, transparent 4px 12px)`;
@@ -61,16 +62,16 @@ export function Intro({ f, t }: { f: number; t: T }) {
   const m = prog(f, t.morph0, t.morph1 - t.morph0, IN_OUT_STRONG);
   const away = prog(f, t.lineOut, 16, EASE);
   const press = Math.sin(prog(f, t.press, 9, IN_OUT_STRONG) * Math.PI);
-  const cardOut = prog(f, t.win0 + 6, 12, EASE);
+  const cardOut = prog(f, t.win0, 10, EASE);
   const hatch = 1 - prog(m, 0, 0.45);
   const h = lerp(C3.h, CARD.h, m);
-  const content = prog(m, 0.45, 0.55);
+  const content = prog(m, 0.65, 0.35);
   const r = Math.min(h / 2, 30 * K);
   return (
     <AbsoluteFill>
       {out < 1 && (
-        <Centre cx={960} cy={500}>
-          <Display size={60} style={{ whiteSpace: "nowrap", opacity: 1 - out, filter: out > 0 ? `blur(${out * 10}px)` : undefined, transform: `translateY(${-out * 12}px)` }}>
+        <Centre cx={960} cy={H2_LINE.cy}>
+          <Display size={H2_LINE.size} style={{ whiteSpace: "nowrap", opacity: 1 - out, filter: out > 0 ? `blur(${out * 10}px)` : undefined, transform: `translateY(${-out * 12}px)` }}>
             7 of 8 paid. <span style={{ color: C.fg2 }}>1 to go before anyone can book.</span>
           </Display>
         </Centre>

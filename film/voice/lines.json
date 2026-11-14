@@ -56,7 +56,9 @@
     {
       "id": "L07",
       "beat": "proof",
-      "text": "Then the confirmation from booking.com lands in the trip's own inbox. An Intel TDX enclave checks that booking.com really signed it, NEAR AI reads it privately, and the contract verifies the signed result on chain. Friends only see the dates, the guests and the total, and the crew's DAO releases the money on its own."
+      "text": "Here's a real booking.com confirmation from one of our own trips, landing in that trip's own inbox. An Intel TDX enclave checks that booking.com really signed it, and NEAR AI reads it privately, so friends only see the dates, the guests and the total. When the contract verifies that signed result on chain, the crew's DAO releases the money on its own.",
+      "previous_take": "Then the confirmation from booking.com lands in the trip's own inbox. An Intel TDX enclave checks that booking.com really signed it, NEAR AI reads it privately, and the contract verifies the signed result on chain. Friends only see the dates, the guests and the total, and the crew's DAO releases the money on its own.",
+      "note": "v2 (coordinator, 14 Nov): the proof beat uses the real sin1025 booking; on-chain acceptance stated as a condition, true whether or not the live run is accepted"
     },
     {
       "id": "L08",

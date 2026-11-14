@@ -6,10 +6,34 @@ export const FOOTAGE_READY: Record<string, { w: number; h: number; fps: number; 
   "fps": 24.0,
   "seconds": 33.167
  },
- "resale": {
+ "pay-base": {
+  "w": 2880,
+  "h": 1620,
+  "fps": 24.0,
+  "seconds": 23.333
+ },
+ "proof-take1": {
+  "w": 1920,
+  "h": 1080,
+  "fps": 24.0,
+  "seconds": 9.792
+ },
+ "proof": {
+  "w": 1920,
+  "h": 1080,
+  "fps": 24.0,
+  "seconds": 10.083
+ },
+ "resale-take1": {
   "w": 3840,
   "h": 2160,
   "fps": 30.0,
   "seconds": 10.967
+ },
+ "resale": {
+  "w": 2880,
+  "h": 1620,
+  "fps": 24.0,
+  "seconds": 11.542
  }
 };

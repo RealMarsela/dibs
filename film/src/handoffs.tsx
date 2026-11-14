@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill } from "remotion";
-import { C } from "./tokens";
+import { C, CARD_W, FACTS, INBOX_SCALE, LIST_SCALE, PROOF_ACCEPTED } from "./tokens";
 import { Face } from "./components/LetterFace";
 import { Meter } from "./components/Meter";
 import { BedList, InboxPanel, ROWS_ALL_PAID, ROWS_DRAWN, ROWS_RESOLD, TripCard } from "./components/Trip";
@@ -23,17 +23,19 @@ export const H1 = () => (
   </AbsoluteFill>
 );
 
-/** H2 S02→S03 @570: the funding meter (1200 x 22 at y=620, 7 paid white, bed 03 hatched orange, ringed) under
-    the two-tone line "7 of 8 paid. 1 to go before anyone can book." at 60 px centred on y=500. */
+/** H2 S02→S03: the funding meter (1500 x 28, gap 14, centred on y=610; 7 paid white, bed 03 hatched orange, ringed)
+    under the two-tone line "7 of 8 paid. 1 to go before anyone can book." at 76 px centred on y=470. (v2 scale) */
+export const H2_LINE = { size: 76, cy: 470 } as const;
+export const H2_METER = { width: 1500, height: 28, gap: 14, cy: 610 } as const;
 export const H2 = () => (
   <AbsoluteFill>
-    <Centre cx={960} cy={500}>
-      <Display size={60} style={{ whiteSpace: "nowrap" }}>
+    <Centre cx={960} cy={H2_LINE.cy}>
+      <Display size={H2_LINE.size} style={{ whiteSpace: "nowrap" }}>
         7 of 8 paid. <span style={{ color: C.fg2 }}>1 to go before anyone can book.</span>
       </Display>
     </Centre>
-    <Centre cx={960} cy={620}>
-      <Meter state={["paid", "paid", "held", "paid", "paid", "paid", "paid", "paid"]} width={1200} height={22} gap={12} highlight={2} />
+    <Centre cx={960} cy={H2_METER.cy}>
+      <Meter state={["paid", "paid", "held", "paid", "paid", "paid", "paid", "paid"]} width={H2_METER.width} height={H2_METER.height} gap={H2_METER.gap} highlight={2} />
     </Centre>
   </AbsoluteFill>
 );
@@ -42,7 +44,9 @@ export const H2 = () => (
 export const H3 = () => (
   <AbsoluteFill>
     <Centre cx={960} cy={540}>
-      <BedList rows={ROWS_ALL_PAID} />
+      <div style={{ transform: `scale(${LIST_SCALE})` }}>
+        <BedList rows={ROWS_ALL_PAID} />
+      </div>
     </Centre>
   </AbsoluteFill>
 );
@@ -51,7 +55,9 @@ export const H3 = () => (
 export const H4 = () => (
   <AbsoluteFill>
     <Centre cx={960} cy={540}>
-      <BedList rows={ROWS_RESOLD} />
+      <div style={{ transform: `scale(${LIST_SCALE})` }}>
+        <BedList rows={ROWS_RESOLD} />
+      </div>
     </Centre>
   </AbsoluteFill>
 );
@@ -60,34 +66,41 @@ export const H4 = () => (
 export const H5 = () => (
   <AbsoluteFill>
     <Centre cx={960} cy={540}>
-      <BedList rows={ROWS_DRAWN} />
+      <div style={{ transform: `scale(${LIST_SCALE})` }}>
+        <BedList rows={ROWS_DRAWN} />
+      </div>
     </Centre>
   </AbsoluteFill>
 );
 
-/** H6 S06→S07 @2403: the trip card, flat and front-on, 640 px wide, centred at (960, 540). */
+/** H6 S06→S07: the trip card, flat and front-on, CARD_W (1000) px wide, centred at (960, 540). (v2 scale) */
 export const H6 = () => (
   <AbsoluteFill>
     <Centre cx={960} cy={540}>
-      <TripCard width={640} />
+      <TripCard width={CARD_W} />
     </Centre>
   </AbsoluteFill>
 );
 
-/** H7 S07→S08 @3093: the trip inbox with the verified booking.com email, centred at (960, 540). */
+/** H7 S07→S08: trip sin1025's inbox (the REAL booking) with the booking.com email, scaled INBOX_SCALE, centred.
+    Its status is "Received" until PROOF_ACCEPTED (coordinator's word that the live proof was accepted on chain). */
+export const H7_ITEM = { from: "booking.com", subject: "Your booking is confirmed", status: PROOF_ACCEPTED ? "verified" : "received" } as const;
 export const H7 = () => (
   <AbsoluteFill>
     <Centre cx={960} cy={540}>
-      <InboxPanel items={[{ from: "booking.com", subject: "Your booking is confirmed", status: "verified" }]} />
+      <div style={{ transform: `scale(${INBOX_SCALE})` }}>
+        <InboxPanel address={FACTS.proofInbox} items={[H7_ITEM]} />
+      </div>
     </Centre>
   </AbsoluteFill>
 );
 
-/** H8 S08→S09 @3381: "35 attacks. Every one refused." 72 px two-tone, centred at (960, 540). */
+/** H8 S08→S09: "35 attacks. Every one refused." 88 px two-tone, centred at (960, 540). (v2 scale) */
+export const H8_SIZE = 88;
 export const H8 = () => (
   <AbsoluteFill>
     <Centre cx={960} cy={540}>
-      <Display size={72} style={{ whiteSpace: "nowrap" }}>
+      <Display size={H8_SIZE} style={{ whiteSpace: "nowrap" }}>
         35 attacks. <span style={{ color: C.fg2 }}>Every one refused.</span>
       </Display>
     </Centre>

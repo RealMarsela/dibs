@@ -25,7 +25,7 @@ export function initials(name: string): [string, string] {
 export function blinkScale(frame: number, seed: string): number {
   const h = hash(seed);
   const k = 2 + (h % 3);
-  const phase = ((h >> 3) % 4) * BLINK_BEAT_FRAMES;
+  const phase = ((h >>> 3) % 4) * BLINK_BEAT_FRAMES; // unsigned, as the app (commit 9a20e33)
   const cycle = k * BLINK_BEAT_FRAMES;
   const p = (((frame - phase) % cycle) + cycle) % cycle / cycle; // 0..1
   if (p < 0.93) return 1;
@@ -82,7 +82,7 @@ export function LetterFace({
             {e2}
           </text>
         </g>
-        <path d={MOUTHS[(h >> 7) % MOUTHS.length]} stroke="#0e0e0e" strokeWidth={small ? 2.4 : 2} fill="none" strokeLinecap="round" />
+        <path d={MOUTHS[(h >>> 7) % MOUTHS.length]} stroke="#0e0e0e" strokeWidth={small ? 2.4 : 2} fill="none" strokeLinecap="round" />
       </svg>
     </div>
   );

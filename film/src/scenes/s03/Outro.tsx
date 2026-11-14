@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill } from "remotion";
-import { C, GLASS } from "../../tokens";
+import { C, GLASS, LIST_SCALE } from "../../tokens";
 import { prog } from "../../lib/anim";
 import { Centre } from "../../handoffs";
 import { BedRow, LIST_W, ROWS_ALL_PAID } from "../../components/Trip";
@@ -17,11 +17,14 @@ export function Outro({ f, t }: { f: number; t: T }) {
   return (
     <AbsoluteFill>
       <Centre cx={960} cy={540}>
-        <div style={{ ...GLASS, width: LIST_W, padding: 8, borderRadius: 30, opacity: box }}>
-          <div style={{ height: 84 * 8 }} />
+        <div style={{ transform: `scale(${LIST_SCALE})` }}>
+          <div style={{ ...GLASS, width: LIST_W, padding: 8, borderRadius: 30, opacity: box }}>
+            <div style={{ height: 84 * 8 }} />
+          </div>
         </div>
       </Centre>
       <Centre cx={960} cy={540}>
+        <div style={{ transform: `scale(${LIST_SCALE})` }}>
         <div style={{ width: LIST_W, padding: 8, border: "1px solid transparent", borderRadius: 30 }}>
           {ROWS_ALL_PAID.map((r, i) => {
             const mine = r.n === 3;
@@ -36,6 +39,7 @@ export function Outro({ f, t }: { f: number; t: T }) {
               </div>
             );
           })}
+        </div>
         </div>
       </Centre>
     </AbsoluteFill>

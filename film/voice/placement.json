@@ -1,6 +1,6 @@
 {
   "fps": 30,
-  "total_seconds": 124.0,
+  "total_seconds": 126.0,
   "starts": {
     "L01": 0.5,
     "L02": 7.6,
@@ -9,8 +9,8 @@
     "L05": 50.7,
     "L06": 59.4,
     "L07": 80.1,
-    "L08": 103.1,
-    "L09": 112.7,
+    "L08": 105.1,
+    "L09": 114.7,
     "L03A": 31.55,
     "L03B": 31.8
   },
@@ -19,5 +19,6 @@
   "tail_speech_end": {
     "L03A": 3.69,
     "L03B": 5.81
-  }
+  },
+  "note2": "v2: L07 re-voiced (real sin1025 booking), 2.0 s longer; L08/L09 and total moved +2.0 s."
 }

@@ -1,6 +1,8 @@
 /* S08 facts and clock. Every code and number here traces to the repo (PLAN.md section 3):
    - CODES: contracts/judge-report.json, the 35 checks that expect a refusal, in file order.
-   - The forged email: DEPLOY-HANDBACK.md (tampered-body .eml, tx 93AJG9P2g7Za..., stored proof_refused E_NO_RESULT, DAO untouched). */
+   - The forged email: the REAL sin1025 booking (total SGD 226.60) with its body edited; the tampered-body proof tx
+     93AJG9P2... was submitted on this very trip (deploy/testnet.json "submit_proof_sin1025_tampered"): stored
+     proof_refused E_NO_RESULT, DAO untouched (DEPLOY-HANDBACK.md). SGD 2,266.00 is the film lead's illustrative edit. */
 import { cue as absCue } from "../../lib/anim";
 import { SCENES } from "../../scene";
 
@@ -13,7 +15,7 @@ export const CODES = [
 ] as const;
 
 export const TX_SHORT = "93AJG9P2…";
-export const FORGED_TOTAL = "$3,200";
+export const FORGED_TOTAL = "SGD 2,266.00";
 
 /** Scene length in frames (from the registry). */
 export const D = SCENES.S08.to - SCENES.S08.from;
@@ -27,24 +29,23 @@ export function timeline() {
   const we = c("we");
   const threw = c("threw");
   const contracts = c("contracts");
-  const refused = c("refused");
   const back = email + 6; // the forged card flies back into the inbox as row 2
-  const words0 = D - 32; // H8 words sweep in as the tiles vanish; the line settles 8 frames before the cut
+  const words0 = D - 65; // H8 words sweep in as the tiles vanish; fully in 41 frames before the cut (readable >= 1.5 s)
   return {
     forges,
     lift: 4, // the copy lifts out of row 1
     caret: forges - 3,
-    del0: forges + 3, // "320" deleted one key at a time
-    type0: forges + 10, // "3,200" typed
+    sel0: forges + 1, // "226.60" selected
+    type0: forges + 7, // "2,266.00" typed over it, one key every 2 frames
     back,
     swap: back + 26, // the flying card is now exactly row 2
     refuses,
     chip: refuses + 1,
     recede: we,
     grid0: threw,
-    cap0: contracts - 6,
-    wave0: refused - 14, // the rose wave starts on "every one" and has turned every tile by "refused"
-    collapse0: refused + 11,
+    cap0: c("thirty-five") + 9, // judge-report caption, readable until the collapse (>= 45 frames)
+    wave0: contracts + 6, // rose wave on "contracts, and"
+    collapse0: c("every") + 1, // tiles collapse on "every one"; H8's "refused." lands on the spoken "refused"
     words0,
     wordsEnd: words0 + 4 * 2 + 16,
   };

@@ -2,15 +2,19 @@ import React from "react";
 import { spring } from "remotion";
 import { C, GLASS, IN_OUT_STRONG, MONO, OE, SPRING } from "../../tokens";
 import { lerp, prog } from "../../lib/anim";
+import { H2_METER } from "../../handoffs";
 import type { Times } from "./timing";
 
-/* Row geometry in stage coordinates (0,0 = frame centre). Meter cells match H2 exactly: 1200 x 22, gap 12, centre y 620. */
-export const PITCH = 190;
-export const FACE_Y = -70; // film y 470
-export const TILE = { y: 64, w: 176, h: 124, r: 24 }; // film y 604
-export const CELL = { w: (1200 - 12 * 7) / 8, h: 22, y: 80 }; // film y 620
+/* Row geometry in stage coordinates (0,0 = frame centre). Meter cells match H2 exactly (H2_METER: 1500 x 28, gap 14,
+   centre y 610). Tiles sit on the meter's line so the squeeze is mostly a height/width collapse. With ry +-6 and pan
+   +-16 the outer tile edge stays >= 111 px from the frame edge. */
+export const PITCH = 210;
+export const FACE_Y = -76; // film y 464
+export const TILE = { y: H2_METER.cy - 540, w: 194, h: 136, r: 26 }; // film y 610
+const M = H2_METER;
+export const CELL = { w: (M.width - M.gap * 7) / 8, h: M.height, y: M.cy - 540 };
 export const slotX = (i: number) => (i - 3.5) * PITCH;
-export const cellX = (i: number) => -600 + i * (CELL.w + 12) + CELL.w / 2;
+export const cellX = (i: number) => -M.width / 2 + i * (CELL.w + M.gap) + CELL.w / 2;
 
 const FLAT = "rgba(255,255,255,0.07)"; // Meter cell track
 
@@ -65,17 +69,17 @@ export function Tile({ i, f, T }: { i: number; f: number; T: Times }) {
       {q > 0 && <div style={{ position: "absolute", inset: 0, background: FLAT, borderRadius: r, opacity: q }} />}
       {content > 0 && (
         <div style={{ position: "absolute", inset: 0, borderRadius: r, overflow: "hidden", opacity: content, filter: content < 1 ? `blur(${(1 - content) * 6}px)` : undefined }}>
-          <div style={{ position: "absolute", left: "50%", top: "50%", transform: `translate(-50%, -50%) translateY(${-22 - 6 * (1 - kp)}px) scale(${0.85 + 0.15 * kp})`, opacity: kp }}>
-            <KeyGlyph size={40} strike={st} />
+          <div style={{ position: "absolute", left: "50%", top: "50%", transform: `translate(-50%, -50%) translateY(${-24 - 6 * (1 - kp)}px) scale(${0.85 + 0.15 * kp})`, opacity: kp }}>
+            <KeyGlyph size={44} strike={st} />
           </div>
           <div
             style={{
               position: "absolute",
               left: "50%",
               top: "50%",
-              transform: `translate(-50%, -50%) translateY(${30 * kp}px)`,
+              transform: `translate(-50%, -50%) translateY(${34 * kp}px)`,
               fontFamily: MONO,
-              fontSize: 24,
+              fontSize: 26,
               letterSpacing: "-0.01em",
               color: C.fg,
               whiteSpace: "nowrap",

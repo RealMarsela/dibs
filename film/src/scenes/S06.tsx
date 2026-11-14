@@ -9,8 +9,8 @@ import { FoldList } from "./s06/Fold";
 import { Crew } from "./s06/Crew";
 import { S06Card } from "./s06/Card";
 import { Enclave, Inflow, SealChip } from "./s06/Enclave";
-import { CardFootage } from "./s06/CardFootage";
-import { cardPose, times, windowPose, type CardPose } from "./s06/poses";
+import { CardFootage, CROP } from "./s06/CardFootage";
+import { cardPose, times, WIN, windowPose, type CardPose } from "./s06/poses";
 
 /* S06 "The trip gets a card". From H5 the rows fold away and the faces regroup around Maya with the crew's $320 pot;
    the OutLayer enclave (a turning glass cube) takes in the NEAR call and the pot, and the trip's card rises out of its
@@ -20,10 +20,10 @@ import { cardPose, times, windowPose, type CardPose } from "./s06/poses";
 
 const DUR = SCENES.S06.to - SCENES.S06.from;
 const END = DUR - 1;
-const WIN = { w: 816, h: 352 };
+const WIN_H = Math.round((WIN.w * CROP.h) / CROP.w);
 
 function CardLayer({ c }: { c: CardPose }) {
-  const clip = c.front ? undefined : `polygon(0 0, 100% 0, 100% ${c.clipY}px, 0 ${c.clipY}px)`;
+  const clip = c.clip ? `polygon(0 0, 100% 0, 100% ${c.clipY}px, 0 ${c.clipY}px)` : undefined;
   return (
     <AbsoluteFill style={{ perspective: 2000, clipPath: clip }}>
       <div
@@ -32,10 +32,10 @@ function CardLayer({ c }: { c: CardPose }) {
           left: c.x,
           top: c.y,
           opacity: c.opacity,
-          transform: `translate(-50%, -50%) rotateX(${c.rx}deg) rotateY(${c.ry}deg) scale(${c.s})`,
+          transform: `translate(-50%, -50%) rotateX(${c.rx}deg) rotateY(${c.ry}deg)`,
         }}
       >
-        <S06Card width={640} glow={c.glow} sheen={c.sheen} last4="0810" />
+        <S06Card width={c.w} glow={c.glow} sheen={c.sheen} />
       </div>
     </AbsoluteFill>
   );
@@ -62,41 +62,39 @@ export const S06: React.FC = () => {
     <World>
       {f < 40 && <FoldList f={f} />}
       <Inflow f={f} T={T} />
-      {card.on && !card.front && <CardLayer c={card} />}
       <Enclave f={f} T={T} />
-      {card.on && card.front && <CardLayer c={card} />}
+      {card.on && <CardLayer c={card} />}
       {win.on && (
         <AbsoluteFill style={{ perspective: 2000 }}>
           <div style={{ position: "absolute", left: win.x, top: win.y, opacity: win.opacity, transform: `translate(-50%, -50%) translateZ(${win.z}px) rotateY(${win.ry}deg)` }}>
-            <AppWindow width={WIN.w} height={WIN.h}>
-              <CardFootage f={f} T={T} width={WIN.w} height={WIN.h} />
+            <AppWindow width={WIN.w} height={WIN_H}>
+              <CardFootage f={f} T={T} width={WIN.w} height={WIN_H} />
             </AppWindow>
           </div>
         </AbsoluteFill>
       )}
       <SealChip f={f} T={T} card={card} />
-      {f >= T.card2 - 2 && f < END - 20 && (
-        <div style={{ position: "absolute", left: card.x - 320, top: card.y + 286 }}>
+      {f >= T.forNow - 2 && f < END - 20 && (
+        <div style={{ position: "absolute", left: 0, right: 0, top: 790, display: "flex", justifyContent: "center" }}>
           <Sweep
             lines={[{ text: "Lithic sandbox: the card network is simulated; the rules are real.", tone: "fg2" }]}
-            start={T.card2 - 2}
+            start={T.forNow - 2}
             stagger={2.5}
-            size={28}
-            align="left"
-            out={END - 36}
+            size={30}
+            out={END - 38}
             outDur={12}
             style={{ fontWeight: 500, letterSpacing: "-0.01em", whiteSpace: "nowrap" }}
           />
         </div>
       )}
       {f < T.an + 10 && (
-        <div style={{ position: "absolute", left: 0, right: 0, top: 830, transform: "translateY(-50%)", display: "flex", justifyContent: "center" }}>
+        <div style={{ position: "absolute", left: 0, right: 0, top: 860, transform: "translateY(-50%)", display: "flex", justifyContent: "center" }}>
           <Sweep
             lines={[
               { text: "Maya books.", tone: "fg", at: [T.books - 3, T.books + 1] },
               { text: "Not with her own money.", tone: "fg2", at: [T.not, T.with, T.her, T.own, T.money] },
             ]}
-            size={64}
+            size={72}
             out={T.an - 4}
             outDur={12}
             style={{ display: "flex", columnGap: "0.25em", whiteSpace: "nowrap" }}

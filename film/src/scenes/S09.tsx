@@ -19,7 +19,8 @@ const CREDIT = "Built at NEAR HACKATHON · runs on NEAR testnet · card rails: L
    the landing's crowd rises around her (bookend to S02). "Nobody fronts the money. Nobody chases anyone." sweeps in
    under her on the narration; then it sweeps out, Maya lifts, and the lockup forms: wordmark, the live trip link in a
    light pill on "link", the repo on "right below", the honest credit line on "NEAR testnet". Calm hold to the end. */
-const MAYA_RISE = 8; // local frame Maya starts rising (the landing's 0.4 s)
+const H8_HOLD = 10; // H8 holds still this long so "35 attacks. Every one refused." reads across the seam
+const MAYA_RISE = 13; // local frame Maya starts rising (the landing's 0.4 s); she reaches the H8 band only once it is gone
 const MAYA_Y = 390; // centre while the headline plays
 const LOCK = { maya: 318, word: 478, pill: 626, repo: 716, credit: 958 }; // lockup centres (film px, before the push)
 
@@ -39,8 +40,8 @@ const sweepIn = (f: number, at: number, dy = 10, dur = 16.5) => {
 export const S09: React.FC = () => {
   const { f, A, cue } = useScene();
 
-  // H8 sweeps out upward (oe 12 f), first frame untouched.
-  const h8 = interpolate(f, [1, 13], [0, 1], { easing: OE, extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // H8 holds, then sweeps out upward (oe 12 f); the first frames are untouched.
+  const h8 = interpolate(f, [H8_HOLD, H8_HOLD + 12], [0, 1], { easing: OE, extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // Maya: rise from 90% of the frame below (1 s, EASE), bob in, then bob; lifts into the lockup.
   const lift = prog(f, cue("L09", "anyone") + 20, 30);
@@ -90,7 +91,7 @@ export const S09: React.FC = () => {
               out={out}
               style={{ whiteSpace: "nowrap" }}
               lines={[
-                { text: "Nobody fronts the money.", at: [24, cue("L09", "fronts"), cue("L09", "the"), cue("L09", "money")] },
+                { text: "Nobody fronts the money.", at: [cue("L09", "fronts") - 1, cue("L09", "fronts"), cue("L09", "the"), cue("L09", "money")] },
                 { text: "Nobody chases anyone.", tone: "fg2", at: [cue("L09", "nobody", 1), cue("L09", "chase"), cue("L09", "anyone")] },
               ]}
             />

@@ -11,7 +11,7 @@ function mix(a: string, b: string, t: number): string {
   return `rgb(${ch(16)}, ${ch(8)}, ${ch(0)})`;
 }
 
-export function S06Card({ width = 640, glow = 0, sheen = 0, last4 = "8087" }: { width?: number; glow?: number; sheen?: number; last4?: string }) {
+export function S06Card({ width = 640, glow = 0, sheen = 0, last4 = "0810" }: { width?: number; glow?: number; sheen?: number; last4?: string }) {
   const k = width / 400;
   const g = glow > 0.001;
   return (

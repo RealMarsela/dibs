@@ -20,8 +20,10 @@ const RECEIPT_ROWS = [
 ] as const;
 
 function ReceiptPlaceholder() {
+  // laid out at 1000 x 640 and scaled to fill BACK (same aspect)
   return (
-    <div style={{ width: BACK.w, height: BACK.h, boxSizing: "border-box", padding: "84px 76px 0", background: C.void, fontFamily: FONT }}>
+    <div style={{ width: BACK.w, height: BACK.h, background: C.void, overflow: "hidden" }}>
+      <div style={{ width: 1000, height: 640, boxSizing: "border-box", padding: "84px 76px 0", fontFamily: FONT, transform: `scale(${BACK.w / 1000})`, transformOrigin: "0 0" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 26 }}>
         <span style={{ ...DISPLAY, fontSize: 48, color: C.fg }}>Transaction</span>
         <Badge kind="paid" label="Success" s={1.9} />
@@ -32,6 +34,7 @@ function ReceiptPlaceholder() {
           <span style={{ fontSize: 32, fontWeight: 500, color: C.fg, letterSpacing: "-0.01em" }}>{v}</span>
         </div>
       ))}
+      </div>
     </div>
   );
 }
@@ -114,7 +117,7 @@ function TestnetCard({ t }: { t: T }) {
   const chipAt = Math.max(floor, t.tail.words[1] ?? floor);
   const chip = prog(f, chipAt, 14);
   return (
-    <div style={{ width: BACK.w, height: BACK.h, boxSizing: "border-box", padding: "0 84px", fontFamily: FONT, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start" }}>
+    <div style={{ width: BACK.w, height: BACK.h, boxSizing: "border-box", padding: "0 96px", fontFamily: FONT, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start" }}>
       <span
         style={{
           display: "inline-flex",
@@ -134,7 +137,7 @@ function TestnetCard({ t }: { t: T }) {
         NEAR testnet · faucet deposit
       </span>
       <div style={{ marginTop: 34 }}>
-        <InlineSweep words={words} size={56} />
+        <InlineSweep words={words} size={60} />
       </div>
     </div>
   );

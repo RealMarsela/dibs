@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, interpolate } from "remotion";
-import { Centre } from "../../handoffs";
+import { Centre, H2_LINE, H2_METER } from "../../handoffs";
 import { Display } from "../../components/Surfaces";
 import { C, EASE, OE } from "../../tokens";
 import { prog } from "../../lib/anim";
@@ -10,7 +10,8 @@ import type { Times } from "./timing";
    finished it is pixel-identical to <H2/>. Local Meter variant: per-cell fill, hatch opacity, and a ring that
    collapses onto bed 03. Rendered 2D under the same camera scale `s` as the stage (identity on the last frame). */
 const HELD = 2;
-const CW = (1200 - 12 * 7) / 8;
+const M = H2_METER;
+const CW = (M.width - M.gap * 7) / 8;
 const LINE1 = ["7", "of", "8", "paid."];
 const LINE2 = ["1", "to", "go", "before", "anyone", "can", "book."];
 
@@ -18,7 +19,7 @@ function Word({ f, at, children }: { f: number; at: number; children: string }) 
   const p = interpolate(f, [at, at + 16.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: OE });
   return (
     // Inline (not inline-block) so the line lays out exactly like H2's plain text; the lift uses relative `top`.
-    <span style={{ position: "relative", top: (1 - p) * 10, opacity: p, filter: p < 1 ? `blur(${(1 - p) * 8}px)` : undefined }}>
+    <span style={{ position: "relative", top: (1 - p) * 8 * (H2_LINE.size / 48), opacity: p, filter: p < 1 ? `blur(${(1 - p) * 8}px)` : undefined }}>
       {children}
     </span>
   );
@@ -38,8 +39,8 @@ export function FinalLayer({ f, T, s }: { f: number; T: Times; s: number }) {
   return (
     <AbsoluteFill style={{ transform: Math.abs(s - 1) > 0.0004 ? `scale(${s})` : undefined, transformOrigin: "960px 540px" }}>
       {f >= T.line1 && (
-        <Centre cx={960} cy={500}>
-          <Display size={60} style={{ whiteSpace: "nowrap" }}>
+        <Centre cx={960} cy={H2_LINE.cy}>
+          <Display size={H2_LINE.size} style={{ whiteSpace: "nowrap" }}>
             {f >= T.line2 + (LINE2.length - 1) * 2.5 + 17 ? (
               /* every word landed: the exact text nodes of H2 (split spans shape a glyph 1 px differently) */
               <>7 of 8 paid. <span style={{ color: C.fg2 }}>1 to go before anyone can book.</span></>
@@ -49,8 +50,8 @@ export function FinalLayer({ f, T, s }: { f: number; T: Times; s: number }) {
           </Display>
         </Centre>
       )}
-      <Centre cx={960} cy={620}>
-        <div style={{ display: "flex", gap: 12, width: 1200 }}>
+      <Centre cx={960} cy={M.cy}>
+        <div style={{ display: "flex", gap: M.gap, width: M.width }}>
           {Array.from({ length: 8 }, (_, i) => {
             const at = T.fill + 2 * i;
             const fill = i === HELD ? 0 : interpolate(f, [at, at + 18], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE });
@@ -60,7 +61,7 @@ export function FinalLayer({ f, T, s }: { f: number; T: Times; s: number }) {
                 ? `0 0 0 3px ${ring < 1 ? `rgba(14,14,14,${ring})` : C.void}, 0 0 0 ${5 + 10 * (1 - ring)}px rgba(251,146,60,${0.55 * ring})`
                 : undefined;
             return (
-              <div key={i} style={{ position: "relative", width: CW, height: 22, borderRadius: 999, overflow: "hidden", background: "rgba(255,255,255,0.07)", boxShadow: shadow }}>
+              <div key={i} style={{ position: "relative", width: CW, height: M.height, borderRadius: 999, overflow: "hidden", background: "rgba(255,255,255,0.07)", boxShadow: shadow }}>
                 <div style={{ position: "absolute", inset: 0, borderRadius: 999, background: "rgb(236, 236, 234)", transform: `scaleX(${fill})`, transformOrigin: "left" }} />
                 {i === HELD && hatch > 0 && (
                   <div style={{ position: "absolute", inset: 0, opacity: 0.6 * hatch, background: `repeating-linear-gradient(135deg, ${C.due} 0 4px, transparent 4px 12px)` }} />

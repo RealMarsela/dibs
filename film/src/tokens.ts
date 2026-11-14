@@ -86,4 +86,28 @@ export const FACTS = {
   attacksRefused: 35,
   liveUrl: "dibs-trips.pages.dev",
   repo: "github.com/RealMarsela/dibs",
+  /* The proof beat uses a REAL booking (coordinator, 14 Nov): trip sin1025, Gabriel's own booking.com confirmation.
+     Redacted: never his name, address or booking reference. */
+  proofTrip: "SIN-1025",
+  proofTripId: "sin1025",
+  proofInbox: "sin1025@dibs.larinova.com",
+  proofStay: "Carlton City Hotel Singapore",
+  proofDates: "25 Oct – 26 Oct 2025",
+  proofNights: 1,
+  proofGuests: 2,
+  proofTotal: "SGD 226.60", // compared 1:1 to the USDC cap (no FX conversion yet): never claim a USD conversion
+  proofCap: "$240",
+  proofTx: "54g9Y2qgKPNFamFeN6tQUgpR1AqU322F1J184LB8mYKr", // accepted on testnet (verifier v7); payout Done: DAO paid Maya 226.60 USDC
+  proofPaid: "226.60 USDC",
+  proofPot: 240,
+  forgedTx: "93AJG9P2g7ZaTQacNb6dS1csZZRLpX8gxAFy1imTrBFF",
 } as const;
+
+/* Until the coordinator confirms the live proof was ACCEPTED on chain, nothing in motion graphics may say "verified" or
+   show a payout for the real booking; that end-state lives only in the `proof` footage slot. Flip to true on his word. */
+export const PROOF_ACCEPTED = true; // coordinator, 14 Nov: sin1025 proof accepted on chain (tx 54g9Y2qg…), payout Done
+
+/* v2 scale (coordinator review): focal UI fills ~55-70% of the frame. Shared by handoff poses and scenes. */
+export const LIST_SCALE = 1.25; // "The beds" list: 860 x 688 -> 1075 x 860
+export const CARD_W = 1000; // the trip card at H6
+export const INBOX_SCALE = 1.3; // the inbox panel at H7: 1000 -> 1300 wide

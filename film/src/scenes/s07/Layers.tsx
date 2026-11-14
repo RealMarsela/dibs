@@ -1,14 +1,13 @@
 import React from "react";
-import { AbsoluteFill, Easing, spring } from "remotion";
-import { C, type PersonId } from "../../tokens";
-import { Face, idle } from "../../components/LetterFace";
+import { AbsoluteFill } from "remotion";
+import { C, FACTS, FONT, GLASS, INBOX_SCALE } from "../../tokens";
 import { InboxPanel, type InboxItem } from "../../components/Trip";
-import { kf, prog } from "../../lib/anim";
 
-/* 2D layers of S07 (outside the 3D Stage so they land pixel-identical on the H7 pose and keep the bottom safe margin). */
+/* 2D pieces of S07 (outside the 3D Stage so they land pixel-identical on the H7 pose). */
 
-/* The real InboxPanel (identical to H7 when every var is at rest), with its children driven by CSS vars so the label,
-   address row and email row can assemble one by one and the row can glow once when it turns Verified. */
+/* The real InboxPanel with H7's exact DOM (centred box, then a scale(INBOX_SCALE) wrapper), its children driven by CSS
+   vars so the label, address row and email row can assemble one by one, and the row can glow once if the proof is
+   accepted. Every var at rest = H7. */
 const CSS = [
   ".s07-inbox > div > div:nth-child(1){opacity:var(--lab)}",
   ".s07-inbox > div > div:nth-child(2){opacity:var(--addr)}",
@@ -22,50 +21,23 @@ export function InboxLayer({ look, camT }: { look: InboxLook; camT: string }) {
   const vars = { "--lab": look.lab, "--addr": look.addr, "--row": look.row, "--rowy": `${look.rowY}px`, "--glow": look.glow } as React.CSSProperties;
   return (
     <AbsoluteFill style={{ transform: camT }}>
-      <div
-        className="s07-inbox"
-        style={{
-          position: "absolute",
-          left: 960,
-          top: 540,
-          transform: `translate(-50%, -50%) scale(${look.s})`,
-          opacity: look.o,
-          filter: look.blur > 0.05 ? `blur(${look.blur}px)` : undefined,
-          ...vars,
-        }}
-      >
-        <style>{CSS}</style>
-        <InboxPanel items={[{ from: "booking.com", subject: "Your booking is confirmed", status: look.status }]} />
+      <div style={{ position: "absolute", left: 960, top: 540, transform: "translate(-50%, -50%)", opacity: look.o, filter: look.blur > 0.05 ? `blur(${look.blur}px)` : undefined }}>
+        <div className="s07-inbox" style={{ transform: `scale(${INBOX_SCALE * look.s})`, ...vars }}>
+          <style>{CSS}</style>
+          <InboxPanel address={FACTS.proofInbox} items={[{ from: "booking.com", subject: "Your booking is confirmed", status: look.status }]} />
+        </div>
       </div>
     </AbsoluteFill>
   );
 }
 
-/* The crew after the resale (bed order), popping up along the bottom edge for a quiet cheer, then sinking away. */
-const CREW: PersonId[] = ["maya", "sam", "leo", "priya", "tomas", "jun", "chloe", "kofi"];
-const SIZE = 80;
-const GAP = 28;
-const ROW_Y = 928;
-
-export function CrewCheer({ f, A, inAt, outAt }: { f: number; A: number; inAt: number; outAt: number }) {
-  const span = CREW.length * SIZE + (CREW.length - 1) * GAP;
+/** "Trip SIN-1025 · a real booking": tells viewers this is a different, real trip (not the Lisbon story trip). */
+export function TripChip() {
   return (
-    <AbsoluteFill>
-      {CREW.map((id, i) => {
-        const t0 = inAt + i * 2;
-        const up = spring({ frame: f - t0, fps: 30, config: { damping: 13, stiffness: 150, mass: 1 } });
-        const hop = kf(f, [t0 + 14, t0 + 21, t0 + 31], [0, -22, 0], [Easing.out(Easing.quad), Easing.in(Easing.quad)]);
-        const down = prog(f, outAt + i * 1.5, 18, Easing.in(Easing.cubic));
-        const y = (1 - up) * 230 + hop + down * 240;
-        if (f < t0 || down >= 1) return null;
-        return (
-          <div key={id} style={{ position: "absolute", left: 960 - span / 2 + SIZE / 2 + i * (SIZE + GAP), top: ROW_Y, transform: `translate(-50%, -50%) translateY(${y}px)` }}>
-            <div style={{ transform: idle(A, id, 1.3) }}>
-              <Face id={id} size={SIZE} ring={C.void} />
-            </div>
-          </div>
-        );
-      })}
-    </AbsoluteFill>
+    <div style={{ ...GLASS, borderRadius: 999, height: 70, padding: "0 32px", display: "inline-flex", alignItems: "center", gap: 16, fontFamily: FONT, fontSize: 30, fontWeight: 600, letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
+      <span style={{ width: 12, height: 12, borderRadius: 99, background: C.fg }} />
+      <span style={{ color: C.fg }}>Trip {FACTS.proofTrip}</span>
+      <span style={{ color: C.fg2 }}>· a real booking</span>
+    </div>
   );
 }

@@ -7,8 +7,8 @@ import { kf, lerp, prog } from "../../lib/anim";
 import { useScene } from "../../scene";
 import { cellX, MY } from "./HoleMeter";
 import { FACE_SPOT } from "./Ticket";
-import { ANA_OUT, ANA_SIZE_OUT, bez, CHIP_AT, PLUS_AT, PRIYA_AT, PRIYA_SIZE, toScreen } from "./geo";
-import { rowFace } from "./List";
+import { ANA_OUT, ANA_SIZE_OUT, bez, CHIP_AT, COIN_CTRL, PLUS_AT, PRIYA_AT, PRIYA_SIZE, toScreen } from "./geo";
+import { ROW_FACE, rowFace } from "./List";
 import type { TT } from "./time";
 
 /* Screen-space people for the meter → ticket → list stretch: Ana (from her meter cell into the ticket, then out with
@@ -19,11 +19,11 @@ const GreenChip = ({ children, scale = 1 }: { children: React.ReactNode; scale?:
     style={{
       display: "inline-flex",
       alignItems: "center",
-      height: 46,
-      padding: "0 18px",
+      height: 54,
+      padding: "0 22px",
       borderRadius: 999,
       fontFamily: FONT,
-      fontSize: 26,
+      fontSize: 30,
       fontWeight: 600,
       letterSpacing: "-0.01em",
       color: C.paid,
@@ -49,12 +49,12 @@ export function Swap({ T }: { T: TT }) {
   const spot = toScreen(FACE_SPOT.x, FACE_SPOT.y, f);
 
   /* Ana */
-  const meterPos = { x: cellX(3), y: MY - 50 };
+  const meterPos = { x: cellX(3), y: MY - 62 };
   const lift = prog(f, T.hole, 12) * (1 - prog(f, T.refill, 12));
   const toTicket = prog(f, T.morph, 22, IN_OUT_STRONG);
   const out = prog(f, T.anaOut, 18, EASE);
-  let ana = { x: lerp(meterPos.x, spot.x, toTicket), y: lerp(meterPos.y - 26 * lift, spot.y, toTicket) - Math.sin(Math.PI * toTicket) * 40, s: lerp(44, FACE_SPOT.size, toTicket) };
-  if (out > 0) ana = { x: lerp(spot.x, ANA_OUT.x, out), y: lerp(spot.y, ANA_OUT.y, out) - Math.sin(Math.PI * out) * 50, s: lerp(FACE_SPOT.size, ANA_SIZE_OUT, out) };
+  let ana = { x: lerp(meterPos.x, spot.x, toTicket), y: lerp(meterPos.y - 30 * lift, spot.y, toTicket) - Math.sin(Math.PI * toTicket) * 48, s: lerp(56, FACE_SPOT.size, toTicket) };
+  if (out > 0) ana = { x: lerp(spot.x, ANA_OUT.x, out), y: lerp(spot.y, ANA_OUT.y, out) - Math.sin(Math.PI * out) * 60, s: lerp(FACE_SPOT.size, ANA_SIZE_OUT, out) };
   const anaO = prog(f, T.meterIn + 6, 14) * (1 - 0.45 * lift) * (1 - prog(f, T.pull, 16));
   const anaIdle = idle(A, "ana", toTicket > 0.99 && out < 0.01 ? 0.25 : 1);
   const anaDrift = prog(f, T.pull, 16) * -24;
@@ -64,20 +64,20 @@ export function Swap({ T }: { T: TT }) {
   const seat = prog(f, T.seat, 22, IN_OUT_STRONG);
   const toRow = prog(f, T.pull + 4, 24, IN_OUT_STRONG);
   const row = rowFace(4);
-  const pStart = { x: lerp(2060, PRIYA_AT.x, enter), y: PRIYA_AT.y };
-  const pSeat = { x: lerp(pStart.x, spot.x, seat), y: lerp(pStart.y, spot.y, seat) + Math.sin(Math.PI * seat) * 26 };
+  const pStart = { x: lerp(2100, PRIYA_AT.x, enter), y: PRIYA_AT.y };
+  const pSeat = { x: lerp(pStart.x, spot.x, seat), y: lerp(pStart.y, spot.y, seat) + Math.sin(Math.PI * seat) * 32 };
   const spotAtPull = toScreen(FACE_SPOT.x, FACE_SPOT.y, T.pull);
   const docked = f >= T.pull ? spotAtPull : pSeat;
-  const priya = { x: lerp(docked.x, row.x, toRow), y: lerp(docked.y, row.y, toRow), s: lerp(PRIYA_SIZE, FACE_SPOT.size, seat) };
+  const priya = { x: lerp(docked.x, row.x, toRow), y: lerp(docked.y, row.y, toRow), s: lerp(lerp(PRIYA_SIZE, FACE_SPOT.size, seat), ROW_FACE, toRow) };
   const catchBump = kf(f, [T.stubFly + 12, T.stubFly + 17, T.stubFly + 24], [1, 1.08, 1]);
   const priyaIdle = idle(A, "priya", seat > 0.99 ? 0.25 * (1 - toRow) : 1);
 
   /* "$40 ready" chip, then the coin to Ana, then Ana's "+$40" */
   const chipIn = prog(f, T.priya + 5, 18, EASE);
   const chipO = chipIn * (1 - prog(f, T.coin - 2, 5));
-  const chipX = lerp(2060, CHIP_AT.x, chipIn);
+  const chipX = lerp(2100, CHIP_AT.x, chipIn);
   const ct = prog(f, T.coin, 20, IN_OUT_STRONG);
-  const coin = bez(CHIP_AT, { x: 1015, y: 960 }, { x: PLUS_AT.x, y: PLUS_AT.y }, ct);
+  const coin = bez(CHIP_AT, COIN_CTRL, PLUS_AT, ct);
   const coinO = f >= T.coin - 2 && f < T.coin + 21 ? 1 : 0;
   const land = f - (T.coin + 19);
   const plus = land >= 0 ? spring({ frame: land, fps: 30, config: { damping: 12, stiffness: 200 } }) : 0;

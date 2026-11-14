@@ -2,15 +2,15 @@ import React from "react";
 import { AbsoluteFill, Easing } from "remotion";
 import { World } from "../components/World";
 import { H3, H4 } from "../handoffs";
-import { C, IN_OUT_STRONG } from "../tokens";
-import { ROWS_ALL_PAID, ROWS_RESOLD, ROW_H } from "../components/Trip";
+import { C, IN_OUT_STRONG, LIST_SCALE } from "../tokens";
+import { ROWS_ALL_PAID, ROWS_RESOLD } from "../components/Trip";
 import { kf, lerp, prog } from "../lib/anim";
 import { useT, type TT } from "./s04/time";
-import { List, ROW_W, rowY } from "./s04/List";
+import { List, ROW_HS, ROW_W, rowY } from "./s04/List";
 import { PUSH_S, WindowGroup } from "./s04/Window";
 import { CH, CW, cellX, HoleMeter, meterState, MY } from "./s04/HoleMeter";
 import { Ticket, type Flight } from "./s04/Ticket";
-import { stubPoint, tearAt, TH, TS, TW } from "./s04/tear";
+import { K, stubPoint, tearAt, TH, TS, TW } from "./s04/tear";
 import { PRIYA_AT, TC, TICKET_ROT, toLocal, toScreen } from "./s04/geo";
 import { Swap } from "./s04/Swap";
 import { mixHex } from "./s04/Sheet";
@@ -98,7 +98,7 @@ function CellToTicket({ T }: { T: TT }) {
         top: y - h / 2,
         width: w,
         height: h,
-        borderRadius: lerp(CH / 2, 38, m),
+        borderRadius: lerp(CH / 2, 16 * K, m),
         background: col,
         border: `1.5px solid rgba(255,255,255,${0.14 * m})`,
         transform: `rotate(${TICKET_ROT * m}deg)`,
@@ -157,7 +157,7 @@ function TicketToRow({ T }: { T: TT }) {
   const x = lerp(from.x, 960, m);
   const y = lerp(from.y, rowY(4), m);
   const w = lerp(TW - TS, ROW_W, m);
-  const h = lerp(TH, ROW_H, m);
+  const h = lerp(TH, ROW_HS, m);
   const fill = (1 - prog(f, T.pull + 12, 18)) * prog(f, T.pull + 1, 3);
   return (
     <AbsoluteFill>
@@ -168,7 +168,7 @@ function TicketToRow({ T }: { T: TT }) {
           top: y - h / 2,
           width: w,
           height: h,
-          borderRadius: lerp(38, 22, m),
+          borderRadius: lerp(16 * K, 22 * LIST_SCALE, m),
           background: `rgba(35,35,34,${fill})`,
           border: `1.5px solid rgba(255,255,255,${0.14 * fill})`,
           transform: `rotate(${TICKET_ROT * (1 - m)}deg)`,

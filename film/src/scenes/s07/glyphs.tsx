@@ -41,3 +41,27 @@ export const SpinnerGlyph = ({ size, color, rot, style }: G & { rot: number }) =
     <path d="M21 12a9 9 0 1 1-6.219-8.56" />
   </svg>
 );
+
+/* Layer glyphs for the checks while the proof is not yet accepted (descriptive, not a pass). */
+export const KeyGlyph = ({ size, color, style }: G) => (
+  <svg {...svg(size, color, 2.2, style)}>
+    <path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" />
+    <circle cx="16.5" cy="7.5" r=".5" fill={color} />
+  </svg>
+);
+
+export const EyeOffGlyph = ({ size, color, style }: G) => (
+  <svg {...svg(size, color, 2.2, style)}>
+    <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+    <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+    <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+    <path d="m2 2 20 20" />
+  </svg>
+);
+
+export const LinkGlyph = ({ size, color, style }: G) => (
+  <svg {...svg(size, color, 2.2, style)}>
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </svg>
+);

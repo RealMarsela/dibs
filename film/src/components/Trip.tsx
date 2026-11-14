@@ -148,13 +148,13 @@ export function TripCard({ width = 640, last4 = "0810", style }: { width?: numbe
 export type InboxItem = { from: string; subject: string; status: BadgeKind | "checking"; tone?: "ok" | "bad" };
 
 /** The trip's inbox (proof-sheet.tsx upload step): the address row, then received emails. Width 1000 by default. */
-export function InboxPanel({ items, width = 1000, style, children }: { items: InboxItem[]; width?: number; style?: React.CSSProperties; children?: React.ReactNode }) {
+export function InboxPanel({ items, width = 1000, address = FACTS.inbox, style, children }: { items: InboxItem[]; width?: number; address?: string; style?: React.CSSProperties; children?: React.ReactNode }) {
   return (
     <div style={{ ...GLASS, width, padding: 28, borderRadius: 36, fontFamily: FONT, ...style }}>
       <div style={{ fontSize: 18, fontWeight: 500, color: C.fg2, marginBottom: 6 }}>The trip’s own inbox</div>
       <div style={{ display: "flex", alignItems: "center", gap: 14, borderRadius: 22, background: "rgba(255,255,255,0.05)", padding: "18px 22px" }}>
         <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke={C.fg2} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" /></svg>
-        <span style={{ fontFamily: MONO, fontSize: 28, color: C.fg }}>{FACTS.inbox}</span>
+        <span style={{ fontFamily: MONO, fontSize: 28, color: C.fg }}>{address}</span>
       </div>
       {items.map((it, i) => (
         <div key={i} style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 14, borderRadius: 22, background: "rgba(255,255,255,0.05)", padding: "16px 22px" }}>

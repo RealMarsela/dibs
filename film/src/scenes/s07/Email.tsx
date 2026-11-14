@@ -1,5 +1,5 @@
 import React from "react";
-import { C, DISPLAY, FACTS, FONT, GLASS, MONO } from "../../tokens";
+import { C, DISPLAY, FACTS, FONT, GLASS, MONO, PROOF_ACCEPTED } from "../../tokens";
 import { MailGlyph, ShieldGlyph } from "./glyphs";
 
 /* The booking.com confirmation as a glass email card (film px). The same card morphs into the inbox row:
@@ -9,10 +9,10 @@ export const EW = 760;
 export const EH = 420;
 const PAD = 38;
 
-/** Where the body facts sit (offsets from the card centre to the start of each fact's text line). */
+/** Where the body facts sit (offsets from the card centre to the start of each fact's text line, design px). */
 export const BODY_AT = {
   dates: { x: -EW / 2 + PAD, y: 89 },
-  guests: { x: -EW / 2 + PAD + 318, y: 89 },
+  guests: { x: -EW / 2 + PAD + 362, y: 89 },
   total: { x: -EW / 2 + PAD, y: 125 },
 } as const;
 
@@ -20,12 +20,13 @@ const Bar = ({ w }: { w: number }) => (
   <span style={{ display: "inline-block", width: w, height: 14, borderRadius: 99, background: C.fg3, verticalAlign: "middle" }} />
 );
 
+/* The real sin1025 confirmation, redacted: guest name, hotel/address and booking reference are bars, never text. */
 const BODY: React.ReactNode[] = [
-  "Hi Maya, your stay is confirmed.",
-  `${FACTS.stay}, ${FACTS.place}`,
-  `${FACTS.dates} · ${FACTS.nights} nights · ${FACTS.beds} guests`,
+  <Bar key="a" w={300} />,
+  <Bar key="b" w={470} />,
+  `${FACTS.proofDates} · ${FACTS.proofNights} night · ${FACTS.proofGuests} guests`,
   <>
-    Total ${FACTS.pot} · card •••• 0810 · ref <Bar w={120} />
+    Total {FACTS.proofTotal} · ref <Bar w={140} />
   </>,
 ];
 
@@ -50,7 +51,7 @@ export function EmailCard({
   bodyO?: number;
   /** sheen band position 0..1 across the card; outside that range it is off */
   sheen?: number;
-  /** DKIM seal next to the sender, 0..1 */
+  /** small seal next to the sender, 0..1 (green only once the proof is accepted on chain) */
   seal?: number;
 }) {
   const k = Math.min(w / EW, h / EH);
@@ -80,10 +81,10 @@ export function EmailCard({
             <div style={{ display: "flex", alignItems: "center", gap: 12, height: 33 }}>
               <span style={{ fontSize: 30, fontWeight: 600, letterSpacing: "-0.015em", color: C.fg, lineHeight: 1.1 }}>booking.com</span>
               <span style={{ display: "inline-flex", opacity: seal, transform: `scale(${0.5 + 0.5 * seal})` }}>
-                <ShieldGlyph size={28} color={C.paid} />
+                <ShieldGlyph size={28} color={PROOF_ACCEPTED ? C.paid : C.fg} />
               </span>
             </div>
-            <span style={{ fontFamily: MONO, fontSize: 22, color: C.fg2, lineHeight: 1.2 }}>to {FACTS.inbox}</span>
+            <span style={{ fontFamily: MONO, fontSize: 22, color: C.fg2, lineHeight: 1.2 }}>to {FACTS.proofInbox}</span>
           </div>
         </div>
         <div style={{ ...DISPLAY, fontSize: 46, color: C.fg, marginTop: 28, whiteSpace: "nowrap" }}>Your booking is confirmed</div>

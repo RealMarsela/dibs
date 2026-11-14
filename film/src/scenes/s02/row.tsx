@@ -8,7 +8,7 @@ import { FACE_Y, slotX } from "./tile";
 import type { Times } from "./timing";
 
 const CREW: PersonId[] = ["sam", "leo", "ana", "tomas", "jun", "chloe", "kofi"];
-const ROW_FACE = 80;
+const ROW_FACE = 88;
 const CSS_EIO = Easing.bezier(0.42, 0, 0.58, 1);
 const LIFT = Easing.bezier(0.4, 0, 0.7, 0.5);
 
@@ -86,11 +86,11 @@ export function Heading({ T }: { T: Times }) {
   const sub = `${FACTS.stay}. ${FACTS.dates}, ${FACTS.nights} nights.`;
   return (
     <>
-      <div style={{ position: "absolute", left: 0, top: -244, transform: "translate(-50%, -50%)", whiteSpace: "nowrap" }}>
+      <div style={{ position: "absolute", left: 0, top: -262, transform: "translate(-50%, -50%)", whiteSpace: "nowrap" }}>
         <Sweep lines={[{ text: FACTS.place, at: [T.lisbon] }]} size={88} out={T.headingOut} outDur={12} style={{ whiteSpace: "nowrap" }} />
       </div>
-      <div style={{ position: "absolute", left: 0, top: -172, transform: "translate(-50%, -50%)", whiteSpace: "nowrap" }}>
-        <Sweep lines={[{ text: sub, tone: "fg2" }]} start={T.lisbon + 6} stagger={1.5} size={30} out={T.headingOut + 2} outDur={12} style={{ whiteSpace: "nowrap" }} />
+      <div style={{ position: "absolute", left: 0, top: -186, transform: "translate(-50%, -50%)", whiteSpace: "nowrap" }}>
+        <Sweep lines={[{ text: sub, tone: "fg2" }]} start={T.lisbon + 6} stagger={1.5} size={34} out={T.headingOut + 2} outDur={12} style={{ whiteSpace: "nowrap" }} />
       </div>
     </>
   );

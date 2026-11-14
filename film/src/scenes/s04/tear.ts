@@ -1,11 +1,12 @@
 /* Tear-ticket geometry and a frame-driven tear, ported from apps/web/src/vendor/tear-ticket.tsx (React Bits, MIT +
    Commons Clause; the app's own vendored copy). Horizontal orientation only. The app's sizes (width ~380, height 186,
-   stub 104, radius 16, 10 holes of 6 px, notch 3) are scaled by K so the ticket reads at about 900 x 340 in the film. */
+   stub 104, radius 16, 10 holes of 6 px, notch 3) are scaled by K so the ticket reads at about 1100 x 416 in the film. */
 
-export const K = 900 / 380;
-export const TW = 900;
-export const TH = 340;
-export const TS = 240;
+export const TW = 1100;
+export const K = TW / 380;
+export const TH = Math.round((TW * 340) / 900);
+export const TS = Math.round((TW * 240) / 900);
+const Q = TW / 900; // film-px offsets below were tuned at 900 wide
 const RADIUS = 16 * K;
 const HOLES = 10;
 const HOLE = 6 * K;
@@ -84,12 +85,12 @@ export function tearAt(u: number): TearState {
     const settle = Math.min(1, v / 18);
     const ease = 1 - Math.pow(1 - settle, 3);
     theta = HANG + (pullTheta(TU) - HANG) * Math.exp(-v / 7) * Math.cos(v / 3.6) + 0.025 * Math.sin(v / 13);
-    sx = pullSlack(TU) + (34 - pullSlack(TU)) * ease;
-    sy = 16 * ease + 3 * Math.sin(v / 15);
+    sx = pullSlack(TU) + (34 * Q - pullSlack(TU)) * ease;
+    sy = 16 * Q * ease + 3 * Q * Math.sin(v / 15);
   }
   // body recoil: a small damped kick from the snaps (the app's bx spring)
   const r = u - FIRST_SNAP;
-  const bx = r > 0 ? -8 * Math.exp(-r / 7) * Math.sin(r / 2.4) : 0;
+  const bx = r > 0 ? -8 * Q * Math.exp(-r / 7) * Math.sin(r / 2.4) : 0;
   const cos = Math.cos(theta);
   const sin = Math.sin(theta);
   const { x: hx, y: hy } = GEO.hinge;

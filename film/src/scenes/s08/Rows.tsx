@@ -80,7 +80,7 @@ export function ForgedRow({ f, t }: { f: number; t: T08 }) {
 /** The verdict chip under row 2 (mono): why it failed and what the chain stored. */
 export function VerdictChip({ f, t }: { f: number; t: T08 }) {
   const seg = (i: number) => {
-    const p = interpolate(f, [t.chip + 2 + i * 3, t.chip + 14 + i * 3], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: OE });
+    const p = interpolate(f, [t.chip + 2 + i * 2, t.chip + 12 + i * 2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: OE });
     return { display: "inline-block", opacity: p, filter: p < 1 ? `blur(${(1 - p) * 6}px)` : undefined, transform: `translateY(${(1 - p) * 6}px)` } as React.CSSProperties;
   };
   const dot = <span style={{ color: C.fg3 }}>{"\u00a0·\u00a0"}</span>;

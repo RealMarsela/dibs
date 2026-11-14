@@ -43,6 +43,8 @@ const BADGE = {
   verified: { label: "Verified", c: C.paid },
   approved: { label: "Approved", c: C.paid },
   declined: { label: "Declined", c: C.refused },
+  received: { label: "Received", c: C.fg2 },
+  checked: { label: "Checked in the enclave", c: C.fg },
 } as const;
 export type BadgeKind = keyof typeof BADGE;
 

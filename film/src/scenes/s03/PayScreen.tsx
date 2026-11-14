@@ -10,15 +10,16 @@ import { WIN, type T } from "./timing";
    height), then cropped with the same crop the footage uses. Steps: passkey -> chain (Base) -> tracking. */
 const DX = 740;
 const DW = 440;
-const HEAD = 103; // padding 28 + eyebrow 16 + gaps 12 + title 27 + mb 20
-export const H_PK = 244;
-export const H_CH = 654;
-export const H_TR = 287;
+// Heights and offsets measured on the real pay-base clip (CSS px): passkey 417-663, chain 200-880, tracking 396-684.
+const HEAD = 105; // padding 28 + eyebrow 16 + gap 14 + title 27 + mb 20
+export const H_PK = 246;
+export const H_CH = 680;
+export const H_TR = 288;
 const top = (h: number) => 540 - h / 2;
-const ROW = 68;
-const ROW_GAP = 8;
-/** Centre of the "$40.42" amount on the Base row, in screen CSS px. */
-export const BASE_AMOUNT = { x: 1110, y: top(H_CH) + HEAD + 45 + 16 + (ROW + ROW_GAP) + 25 };
+const ROW = 71;
+const ROW_GAP = 10;
+/** Centre of the "$40.42" amount on the Base row, in screen CSS px (measured on the clip). */
+export const BASE_AMOUNT = { x: 1108, y: 474 };
 
 const CHAINS = [
   { id: "near", name: "NEAR", amt: "$40.00", eta: "2 s" },
@@ -30,11 +31,15 @@ const CHAINS = [
 
 const TRACK = ["Deposit seen on your chain", "Swapped by NEAR Intents", "Landed in your bed’s own account", "Counted in the crew DAO"];
 
-/** The crop (screen CSS px) at local frame f; its height keeps the window's aspect. Shared by footage and placeholder. */
+/** The crop (screen CSS px) at local frame f, shared by footage and placeholder. 450 wide (the 440 dialog + 5 a side), so
+    the slot shows it at x2.56; its height keeps the slot's aspect and the window face shows the middle of it. The visible
+    centre: passkey 540; chain 360 (title to Base, cut in the gap before Solana) panning to 604 (Base to Ethereum, cut
+    before the button); tracking 540. */
+const CROP_W = 450;
+const CROP_H = (CROP_W * WIN.h) / WIN.w;
 export function cropAt(f: number, t: T): Crop {
-  const w = kf(f, [t.chain0, t.chain0 + 10, t.track0, t.track0 + 10], [480, 560, 560, 480], IN_OUT_STRONG);
-  const y = kf(f, [t.chain0, t.chain0 + 10, t.pan0, t.pan1, t.track0, t.track0 + 10], [343, 190, 190, 392, 392, 343], IN_OUT_STRONG);
-  return { x: 960 - w / 2, y, w, h: (w * WIN.h) / WIN.w };
+  const c = kf(f, [t.chain0, t.chain0 + 10, t.pan0, t.pan1, t.track0, t.track0 + 10], [540, 360, 360, 604, 604, 540], IN_OUT_STRONG);
+  return { x: 960 - CROP_W / 2, y: c - CROP_H / 2, w: CROP_W, h: CROP_H };
 }
 
 export function mixHex(a: string, b: string, k: number): string {
@@ -61,7 +66,7 @@ function Dialog({ h, title, opacity, children }: { h: number; title: string; opa
   return (
     <div style={{ ...GLASS, position: "absolute", left: DX, top: top(h), width: DW, height: h, boxSizing: "border-box", borderRadius: 28, padding: 28, opacity, fontFamily: FONT, color: C.fg }}>
       <Icon d={["M18 6 6 18", "m6 6 12 12"]} color={C.fg2} style={{ position: "absolute", top: 16, right: 16, opacity: 0.7 }} />
-      <div style={{ fontSize: 12, fontWeight: 500, color: C.fg2, lineHeight: "16px", marginBottom: 12 }}>Bed 03 · Lisbon</div>
+      <div style={{ fontSize: 12, fontWeight: 500, color: C.fg2, lineHeight: "16px", marginBottom: 14 }}>Bed 03 · Lisbon</div>
       <div style={{ ...DISPLAY, fontSize: 24, height: 27, marginBottom: 20 }}>{title}</div>
       {children}
     </div>

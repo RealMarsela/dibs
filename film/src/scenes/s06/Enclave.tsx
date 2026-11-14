@@ -2,7 +2,7 @@ import React from "react";
 import { AbsoluteFill } from "remotion";
 import { C, FONT, GLASS, OE, CHAIN_DOT } from "../../tokens";
 import { lerp, prog } from "../../lib/anim";
-import { CUBE, cubePose, DOCK, type CardPose, type Times } from "./poses";
+import { CUBE, cubePose, dockOf, type CardPose, type Times } from "./poses";
 import { GlassCube } from "./Cube";
 import { FingerprintIcon } from "./icons";
 
@@ -51,18 +51,18 @@ export function Inflow({ f, T }: { f: number; T: Times }) {
   const potIn = prog(f, 34, 22);
   const potMove = prog(f, 100, 36);
   const potFlow = prog(f, T.near + 6, 24);
-  const potX = lerp(lerp(1150, 720, potMove), CUBE.x, potFlow);
-  const potY = lerp(lerp(470, 540, potMove), CUBE.y, potFlow) + Math.sin(f / 34) * 3 - Math.sin(potFlow * Math.PI) * 40;
+  const potX = lerp(lerp(1220, 700, potMove), CUBE.x, potFlow);
+  const potY = lerp(lerp(450, 580, potMove), CUBE.y, potFlow) + Math.sin(f / 34) * 3 - Math.sin(potFlow * Math.PI) * 40;
   const potO = potIn * (1 - prog(f, T.near + 16, 12));
   const nearIn = prog(f, T.called - 2, 16, OE);
   const nearMove = prog(f, T.near, 18);
-  const nearY = lerp(176, CUBE.y - 20, nearMove);
+  const nearY = lerp(164, CUBE.y - 20, nearMove);
   const nearO = nearIn * (1 - prog(f, T.near + 8, 10));
   return (
     <AbsoluteFill>
       {potO > 0 && (
         <Place x={potX} y={potY} s={(0.92 + 0.08 * potIn) * lerp(1, 0.45, potFlow)} style={{ ...arrive(potIn, 0, 16), opacity: potO, filter: blur((1 - potIn) * 8 + potFlow * 8) }}>
-          <GlassPill h={84} fs={36}>
+          <GlassPill h={100} fs={42}>
             <span>$320</span>
             <span style={{ color: C.fg2 }}>· crew DAO</span>
           </GlassPill>
@@ -70,8 +70,8 @@ export function Inflow({ f, T }: { f: number; T: Times }) {
       )}
       {nearO > 0 && (
         <Place x={CUBE.x} y={nearY} s={lerp(1, 0.55, nearMove)} style={{ ...arrive(nearIn, 0, -10), opacity: nearO, filter: blur((1 - nearIn) * 8 + nearMove * 6) }}>
-          <GlassPill h={56} fs={24}>
-            <span style={{ width: 10, height: 10, borderRadius: 99, background: CHAIN_DOT.near }} />
+          <GlassPill h={64} fs={28}>
+            <span style={{ width: 12, height: 12, borderRadius: 99, background: CHAIN_DOT.near }} />
             <span style={{ color: C.fg2 }}>called from</span>
             <span style={{ marginLeft: -4 }}>NEAR</span>
           </GlassPill>
@@ -89,11 +89,11 @@ export function Enclave({ f, T }: { f: number; T: Times }) {
   return (
     <AbsoluteFill>
       <Place x={c.x} y={c.y} s={c.s} style={{ opacity: c.o }}>
-        <GlassCube size={300} rx={-20} ry={c.ry} pulse={c.pulse} />
+        <GlassCube size={CUBE.size} rx={-20} ry={c.ry} pulse={c.pulse} />
       </Place>
       {chipO > 0 && (
-        <Place x={CUBE.x} y={CUBE.y + 290} style={{ ...arrive(chipIn), opacity: chipO }}>
-          <GlassPill h={56} fs={26}>
+        <Place x={CUBE.x} y={CUBE.y + 355} style={{ ...arrive(chipIn), opacity: chipO }}>
+          <GlassPill h={60} fs={28}>
             <span>OutLayer</span>
             <span style={{ color: C.fg2, marginLeft: -4 }}>· Intel TDX</span>
           </GlassPill>
@@ -108,10 +108,11 @@ export function SealChip({ f, T, card }: { f: number; T: Times; card: CardPose }
   const p = prog(f, T.mayas, 16, OE);
   const o = p * (1 - prog(f, T.so - 15, 12));
   if (o <= 0) return null;
+  const d = dockOf(card);
   return (
-    <div style={{ position: "absolute", left: card.x + DOCK.dx + 60, top: card.y + DOCK.dy + 28, transform: "translateY(-50%)", ...arrive(p, -14, 0), opacity: o }}>
-      <GlassPill h={54} fs={24}>
-        <FingerprintIcon size={26} color={C.fg2} stroke={1.9} />
+    <div style={{ position: "absolute", left: d.x + d.size * 0.78, top: d.y + d.size * 0.36, transform: "translateY(-50%)", ...arrive(p, -14, 0), opacity: o }}>
+      <GlassPill h={60} fs={28}>
+        <FingerprintIcon size={30} color={C.fg2} stroke={1.9} />
         <span>
           Sealed to Maya’s passkey
         </span>

@@ -15,9 +15,9 @@ summ["audio"] = [{k: s.get(k) for k in ["codec_name", "sample_rate", "channels"]
 dec = subprocess.run(["ffmpeg", "-v", "error", "-i", mp4, "-f", "null", "-"], capture_output=True, text=True)
 summ["decode_errors"] = len([l for l in dec.stderr.splitlines() if l.strip()])
 print(json.dumps(summ, indent=1))
-src = open(os.path.join(ROOT, "src/scene.tsx")).read()
-shift = int(re.search(r"SHIFT = (\d+)", open(os.path.join(ROOT, "src/timeline.generated.ts")).read()).group(1))
-bounds = sorted({eval(m.replace("S", str(shift))) for m in re.findall(r"from: ([0-9 +S]+),", src)} - {0})
+tl = open(os.path.join(ROOT, "src/timeline.generated.ts")).read()
+lines = json.loads(re.search(r"LINES: Line\[\] = (\[.*?\]);", tl, re.S).group(1))
+bounds = sorted(l["from"] for l in lines if re.fullmatch(r"L0[2-9]", l["id"]))  # scenes start where their line starts
 frames = sorted({f for b in bounds for f in (b - 6, b - 2, b, b + 2, b + 6)} | set(extra))
 sel = "+".join(f"eq(n\\,{f})" for f in frames)
 tmp = os.path.join(qd, "tmp_%04d.jpg")

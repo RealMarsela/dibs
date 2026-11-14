@@ -8,13 +8,15 @@ import { CODES, type T08 } from "./data";
 
 /* Shot 3: 35 glass tiles, one real refusal code each (judge-report.json order), flip in one frame apart;
    a rose wave flips every tile to its refused side, then they collapse to the centre for H8.
-   7 x 5 grid, 224 x 100 tiles, 14 px gaps: 1652 x 556 at s = 1 (inside the 96 px margin with the tilt). */
-const TW = 224;
-const TH = 100;
+   7 x 5 grid, 228 x 120 tiles, 14/16 px gaps: 1680 x 664 at s = 1; with the small tilt the widest row stays
+   >= 100 px from the frame edges, the caption ends above y = 984. */
+const TW = 228;
+const TH = 120;
 const GAP = 14;
+const VGAP = 16;
 const COLS = 7;
 const GRID_Y = -40;
-const CAPTION_Y = GRID_Y + (5 * TH + 4 * GAP) / 2 + 54;
+const CAPTION_Y = GRID_Y + (5 * TH + 4 * VGAP) / 2 + 52;
 
 /** Break opportunities after underscores so the two longest codes wrap instead of overflowing. */
 function codeText(code: string) {
@@ -41,7 +43,7 @@ const faceBase: React.CSSProperties = {
   padding: "0 12px",
   textAlign: "center",
   fontFamily: MONO,
-  fontSize: 20,
+  fontSize: 22,
   fontWeight: 500,
   lineHeight: 1.25,
   letterSpacing: "-0.01em",
@@ -68,9 +70,9 @@ export function AttackGrid({ f, t }: { f: number; t: T08 }) {
   if (f < t.grid0 - 1 || f >= t.wordsEnd) return null;
   // Slow push with a slight tilt that keeps turning until the collapse.
   const u = interpolate(f, [t.grid0, t.words0 + 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const cam = { s: 0.95 + 0.05 * u, rx: 6 - 4.5 * u, ry: -4 + 7 * u };
-  const capIn = interpolate(f, [t.cap0, t.cap0 + 16], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: OE });
-  const capOut = prog(f, t.wave0 + 6, 12, EASE);
+  const cam = { s: 0.955 + 0.04 * u, rx: 4 - 3 * u, ry: -1.2 + 2.4 * u };
+  const capIn = interpolate(f, [t.cap0, t.cap0 + 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: OE });
+  const capOut = prog(f, t.collapse0 - 2, 10, EASE);
   const capA = capIn * (1 - capOut);
   return (
     <Stage cam={cam}>
@@ -78,10 +80,10 @@ export function AttackGrid({ f, t }: { f: number; t: T08 }) {
         const r = Math.floor(i / COLS);
         const c = i % COLS;
         const x = (c - 3) * (TW + GAP);
-        const y = GRID_Y + (r - 2) * (TH + GAP);
+        const y = GRID_Y + (r - 2) * (TH + VGAP);
         const pin = prog(f, t.grid0 + i, 14, OUT_STRONG); // one frame apart, file order
         const d = r + c; // diagonal wave index, 0..10
-        const flip = prog(f, t.wave0 + d, 9, EASE);
+        const flip = prog(f, t.wave0 + d * 0.8, 9, EASE);
         const cs = t.collapse0 + d * 0.4;
         const cp = prog(f, cs, 16, IN_OUT_STRONG);
         const fade = 1 - interpolate(f, [cs + 2, cs + 10], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -95,7 +97,7 @@ export function AttackGrid({ f, t }: { f: number; t: T08 }) {
       })}
       {capA > 0.001 && (
         <At y={CAPTION_Y + 8 * (1 - capIn)} opacity={capA}>
-          <div style={{ fontFamily: MONO, fontSize: 22, letterSpacing: "-0.01em", whiteSpace: "nowrap", color: C.fg3 }}>
+          <div style={{ fontFamily: MONO, fontSize: 26, letterSpacing: "-0.01em", whiteSpace: "nowrap", color: C.fg3 }}>
             contracts/judge-report.json · <span style={{ color: C.fg2 }}>{FACTS.checksPassed} of {FACTS.checksTotal} checks pass</span>
           </div>
         </At>

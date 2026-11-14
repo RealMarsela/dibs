@@ -28,7 +28,7 @@ export function times(cue: CueFn, dur: number) {
     headingOut: c("and") - 5,
     facesOut: c("and") + 1, // + 2i
     squeeze: c("nobody") - 2,
-    squeezeEnd: c("nobody") + 30,
+    squeezeEnd: c("nobody") + 26, // tiles already sit on the meter line: a shorter collapse
     fill: c("until") + 1, // + 2i, bed 03 (held) takes its slot as hatch
     line1: c("until") + 3, // + 3j
     ring: c("is", 1) + 6,
@@ -41,11 +41,12 @@ const SINE = Easing.inOut(Easing.sin);
 const SETTLE = Easing.bezier(0.45, 0, 0.25, 1);
 const LIN = (t: number) => t;
 
-/** Camera: slow push on the headline, pull back to reveal the row, truck along it (ry 7 -> -7), return to neutral
-    while the tiles become the meter, then a slow settle that lands on exact identity on the last frame. */
+/** Camera: slow push on the headline, pull back to reveal the row, truck along it (ry 6 -> -6, pan with the near side
+    so the bigger row keeps the safe margin), return to neutral while the tiles become the meter with a small push,
+    then a slow settle that lands on exact identity on the last frame. */
 export function camAt(f: number, T: Times): Required<Pick<Cam, "s" | "ry" | "x">> {
-  const s = kf(f, [0, T.push0, T.push1, T.rowSettle, T.squeeze + 6, T.end], [1, 1, 1.04, 1, 1.025, 1], [LIN, SINE, SINE, SINE, SETTLE]);
-  const ry = kf(f, [T.push1, T.rowSettle, T.squeeze - 2, T.squeezeEnd], [0, 7, -7, 0], SINE);
-  const x = kf(f, [T.push1, T.rowSettle, T.squeeze - 2, T.squeezeEnd], [0, -24, 24, 0], SINE);
+  const s = kf(f, [0, T.push0, T.push1, T.rowSettle, T.squeeze, T.squeezeEnd, T.end], [1, 1, 1.04, 1, 1, 1.02, 1], [LIN, SINE, SINE, LIN, SINE, SETTLE]);
+  const ry = kf(f, [T.push1, T.rowSettle, T.squeeze - 2, T.squeezeEnd], [0, 6, -6, 0], SINE);
+  const x = kf(f, [T.push1, T.rowSettle, T.squeeze - 2, T.squeezeEnd], [0, -16, 16, 0], SINE);
   return { s, ry, x };
 }

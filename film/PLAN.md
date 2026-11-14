@@ -2,7 +2,7 @@
 
 Film lead: Claude (Opus 5.5). Approved story: `../demo/STORY.md` (Gabriel, 14 Nov). Contract: `~/Documents/hackathons/_demo-films/BRIEF-COMMON.md`.
 Delivery: 1920x1080, 30 fps, H.264 yuv420p limited-range BT.709, AAC 48 kHz, about -14 LUFS, true peak <= -1 dBTP.
-Length: **126.37 s (3,791 frames) with voice variant B** (124.0 s with variant A), target 2:00, hard cap 2:15. Milestones: v1 by 23:00 IST, final by 02:30 IST.
+Length (v2): **128.37 s (3,851 frames) with voice variant B** (126.0 s with variant A), target 2:00, hard cap 2:15. Milestones: v1 by 23:00 IST, final by 02:30 IST.
 Studio: `http://localhost:3017` (composition `Film`; one composition per scene `Scene01`..`Scene09`; seam reference `Handoffs`).
 
 ## 1. Story, audience, aha, closing line
@@ -41,7 +41,7 @@ voices are Polish- or Tamil-native or a Gen-Z social read.
 Docs: https://elevenlabs.io/docs/overview/models , https://elevenlabs.io/docs/overview/capabilities/text-to-speech/eleven-v4 ,
 https://elevenlabs.io/docs/api-reference/text-to-speech/convert-with-timestamps , https://elevenlabs.io/blog/eleven-v4 ,
 https://elevenlabs.io/blog/elevenlabs-audio-tags-list
-Budget: 4,000 characters including retries. **Used: 2,005 characters sent** (9 lines + the testnet variant line, no retries;
+Budget: 4,000 characters including retries. **Used: 2,381 characters sent** (v2 adds the re-voiced L07, 376) (9 lines + the testnet variant line, no retries;
 the API's `character-cost` header reported less). Quota before: 115,047 / 220,149 used. Script: `scripts/voice.py` (refuses past 4,000).
 
 Placement is `voice/placement.json`; every word's absolute frame is in `src/timeline.generated.ts` (`scripts/build-timeline.py`).
@@ -60,7 +60,7 @@ variant-A frames: add 71 for the cut.
 | L04 | 36.80-49.84 | 1104-1495 | "refuses" @1243, "Priya" @1404 | Say Ana can't make it anymore. She asks for a refund, and the contract refuses, because that would leave the trip short. So she sells her bed at face value to Priya, who's already waiting with her money in. |
 | L05 | 50.70-58.54 | 1521-1756 | "randomness" @1622 | Once all eight beds are paid, OutLayer's verifiable randomness decides who sleeps where, so nobody argues over the double room. |
 | L06 | 59.40-79.08 | 1782-2372 | "card" @2008, "declined" @2245, "sandbox" @2350 | Now Maya books, but not with her own money. An OutLayer enclave, called from NEAR, issues the trip its own card, sealed to Maya's passkey, and it only works at hotels. So the hotel charge goes through, and the electronics store is declined. For now, that card runs on Lithic's sandbox. |
-| L07 | 80.10-102.18 | 2403-3065 | "inbox" @2509, "signed" @2657, "privately" @2721, "chain" @2828, "releases" @3003 | Then the confirmation from booking.com lands in the trip's own inbox. An Intel TDX enclave checks that booking.com really signed it, NEAR AI reads it privately, and the contract verifies the signed result on chain. Friends only see the dates, the guests and the total, and the crew's DAO releases the money on its own. |
+| L07 (v2, re-voiced) | 82.47-106.55 (B) | 2474-3196 (B) | "inbox" +180, "privately" +385, "chain" +602, "releases" +658 | Here's a real booking.com confirmation from one of our own trips, landing in that trip's own inbox. An Intel TDX enclave checks that booking.com really signed it, and NEAR AI reads it privately, so friends only see the dates, the guests and the total. When the contract verifies that signed result on chain, the crew's DAO releases the money on its own. |
 | L08 | 103.10-111.90 | 3093-3357 | "refuses" @3172, "refused" @3326 | If someone forges that email, the contract refuses it. We threw thirty-five attacks at the contracts, and every one was refused. |
 | L09 | 112.70-121.26 | 3381-3638 | "chase" @3471, "below" @3621 | So nobody fronts the money, and nobody has to chase anyone. The Lisbon trip is live on NEAR testnet, and the link is right below. |
 
@@ -78,7 +78,8 @@ NEAR's role named concretely (contract, keyless bed accounts, NEAR Intents, main
 | E_NO_REFUND | contract; live refusal in DEPLOY-HANDBACK.md; judge-report.json |
 | VRF draw tx gADA3SGt...7c6w (testnet, trip drw0001) | DEPLOY-HANDBACK.md |
 | Card: hotels only, MCC 7011, limit = pot, Carlton City Hotel SG approved, VoltCity Electronics (MCC 5732) declined, last4 8087 in the preview | outlayer/CARD-HANDBACK.md, `apps/web/src/components/trip/card-sheet.tsx` |
-| Forged email refused: proof_refused E_NO_RESULT, tx 93AJG9P2... | DEPLOY-HANDBACK.md (tampered-body .eml, DAO untouched) |
+| Forged email refused: proof_refused E_NO_RESULT, tx 93AJG9P2... | DEPLOY-HANDBACK.md; deploy/testnet.json "submit_proof_sin1025_tampered" (DAO untouched) |
+| **Proof beat (v2): the REAL booking** on trip sin1025: booking.com, 25 Oct - 26 Oct 2025, 1 night, 2 guests, total SGD 226.60 (cap $240; compared 1:1, no FX conversion), DKIM d=booking.com, inbox sin1025@dibs.larinova.com; **accepted on chain** tx 54g9Y2qgKPNFamFeN6tQUgpR1AqU322F1J184LB8mYKr (verifier v7); payout done: DAO paid Maya 226.60 USDC | coordinator (14 Nov), DEPLOY-HANDBACK.md (sin1025: 2 beds at 120 USDC, 2025-10-25..26). Redacted: no name, address, booking ref. Coordinator confirmed acceptance on chain (14 Nov), so `PROOF_ACCEPTED = true`; the payoff is the real `proof` footage. |
 | 35 attacks refused; 46 of 46 checks pass | `contracts/judge-report.json`: 46 checks all ok; 35 expect a refusal code (the 36th code entry is "OK", a genuine accept) |
 | Mainnet: Leo's payment from Base via 1Click into bed 03 | **footage slot** `mainnet-receipt`; amount and tx come from the coordinator's mainnet run (STORY plans $0.25). Narration says no amount. |
 
@@ -304,3 +305,13 @@ booking and the DAO release on proof, matching the app's own sheets.
 Order: tokens, timeline, handoffs, shared components, Root (done) -> PLAN.md, FOOTAGE.md -> nine scene sub-agents in
 parallel (Opus, one scene each, stills only through `scripts/stills.sh`) -> review each against this plan -> SFX cues
 -> full v1 render -> frame inspection at every seam and transition -> corrections -> final master.
+
+## 11. v2 corrections (coordinator review of v1, 14 Nov)
+
+1. Honesty: the proof beat is rebuilt on the real sin1025 booking (section 3); L07 re-voiced so on-chain acceptance is a
+   condition ("When the contract verifies that signed result on chain, ..."), true whether or not the live run is accepted.
+2. Scale: focal UI fills 55-70% of the frame. Seams: H2 line 76 px + meter 1500 x 28; H3-H5 bed list x1.25; H6 card 1000 px;
+   H7 inbox x1.3 (sin1025, "Received" until PROOF_ACCEPTED); H8 88 px.
+3. "35 attacks. Every one refused." and "46 of 46 checks pass" each readable for >= 1.5 s.
+4. Real footage: pay-base (lis0314 live testnet), resale (new take, pointer parked), card; faces match the app's unsigned-hash fix.
+5. Scenes now start exactly where their narration line starts (`SCENES` derived from `LINES`), so any voice change moves them.
