@@ -1,0 +1,68 @@
+{
+ "billed_chars": 1891,
+ "calls": [
+  {
+   "id": "L01",
+   "chars_sent": 129,
+   "billed": 128,
+   "header": "57",
+   "model": "eleven_v4"
+  },
+  {
+   "id": "L02",
+   "chars_sent": 175,
+   "billed": 175,
+   "header": "77",
+   "model": "eleven_v4"
+  },
+  {
+   "id": "L03",
+   "chars_sent": 257,
+   "billed": 257,
+   "header": "113",
+   "model": "eleven_v4"
+  },
+  {
+   "id": "L04",
+   "chars_sent": 229,
+   "billed": 229,
+   "header": "101",
+   "model": "eleven_v4"
+  },
+  {
+   "id": "L05",
+   "chars_sent": 150,
+   "billed": 150,
+   "header": "66",
+   "model": "eleven_v4"
+  },
+  {
+   "id": "L06",
+   "chars_sent": 308,
+   "billed": 308,
+   "header": "136",
+   "model": "eleven_v4"
+  },
+  {
+   "id": "L07",
+   "chars_sent": 341,
+   "billed": 341,
+   "header": "150",
+   "model": "eleven_v4"
+  },
+  {
+   "id": "L08",
+   "chars_sent": 151,
+   "billed": 151,
+   "header": "66",
+   "model": "eleven_v4"
+  },
+  {
+   "id": "L09",
+   "chars_sent": 152,
+   "billed": 152,
+   "header": "67",
+   "model": "eleven_v4"
+  }
+ ]
+}

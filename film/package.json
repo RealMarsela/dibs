@@ -1,0 +1,31 @@
+{
+  "name": "dibs-film",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dibs demo film (NEAR HACKATHON, Nov 2026)",
+  "scripts": {
+    "dev": "remotion studio --port 3017",
+    "render": "remotion render src/index.ts Film out/dibs-film.mp4",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-three/fiber": "9.3.0",
+    "@remotion/cli": "4.0.529",
+    "@remotion/google-fonts": "4.0.529",
+    "@remotion/media": "4.0.529",
+    "@remotion/media-utils": "4.0.529",
+    "@remotion/renderer": "4.0.529",
+    "@remotion/bundler": "4.0.529",
+    "@remotion/three": "4.0.529",
+    "lucide-react": "0.511.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.529",
+    "three": "0.178.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "@types/three": "0.178.1",
+    "typescript": "5.9.3"
+  }
+}

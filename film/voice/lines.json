@@ -1,0 +1,58 @@
+{
+  "model_id": "eleven_v4",
+  "voice_id": "xt1AC3mKnyqJYvD3KK90",
+  "voice_name": "Talia - Warm Confident Narrator (ElevenLabs Voice Library)",
+  "voice_settings": {
+    "stability": 0.5,
+    "similarity_boost": 0.75
+  },
+  "tag": "[warm, conversational]",
+  "seed": 3120,
+  "lines": [
+    {
+      "id": "L01",
+      "beat": "hook",
+      "text": "Every group trip has one friend who books the place, and then spends weeks chasing everyone for the money."
+    },
+    {
+      "id": "L02",
+      "beat": "flip",
+      "text": "So we built Dibs, where the trip itself is a contract on NEAR. Every bed gets its own account with no keys, and nobody can book until every bed is paid."
+    },
+    {
+      "id": "L03",
+      "beat": "pay",
+      "text": "Now Leo pays for his bed. A passkey on his phone is his only key, so there's no wallet and no gas. He pays with USDC on Base, NEAR Intents swaps it, and it lands in bed three. We ran this same payment on NEAR mainnet, with real money."
+    },
+    {
+      "id": "L04",
+      "beat": "exit",
+      "text": "Say Ana can't make it anymore. She asks for a refund, and the contract refuses, because that would leave the trip short. So she sells her bed at face value to Priya, who's already waiting with her money in."
+    },
+    {
+      "id": "L05",
+      "beat": "draw",
+      "text": "Once all eight beds are paid, OutLayer's verifiable randomness decides who sleeps where, so nobody argues over the double room."
+    },
+    {
+      "id": "L06",
+      "beat": "card",
+      "text": "Now Maya books, but not with her own money. An OutLayer enclave, called from NEAR, issues the trip its own card, sealed to Maya's passkey, and it only works at hotels. So the hotel charge goes through, and the electronics store is declined. For now, that card runs on Lithic's sandbox."
+    },
+    {
+      "id": "L07",
+      "beat": "proof",
+      "text": "Then the confirmation from booking.com lands in the trip's own inbox. An Intel TDX enclave checks that booking.com really signed it, NEAR AI reads it privately, and the contract verifies the signed result on chain. Friends only see the dates, the guests and the total, and the crew's DAO releases the money on its own."
+    },
+    {
+      "id": "L08",
+      "beat": "cheat",
+      "text": "If someone forges that email, the contract refuses it. We threw thirty-five attacks at the contracts, and every one was refused."
+    },
+    {
+      "id": "L09",
+      "beat": "close",
+      "text": "So nobody fronts the money, and nobody has to chase anyone. The Lisbon trip is live on NEAR testnet, and the link is right below."
+    }
+  ]
+}

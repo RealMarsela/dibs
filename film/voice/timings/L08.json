@@ -1,0 +1,112 @@
+{
+ "id": "L08",
+ "text": "If someone forges that email, the contract refuses it. We threw thirty-five attacks at the contracts, and every one was refused.",
+ "words": [
+  {
+   "w": "If",
+   "s": 0.144,
+   "e": 0.16
+  },
+  {
+   "w": "someone",
+   "s": 0.32,
+   "e": 0.48
+  },
+  {
+   "w": "forges",
+   "s": 0.64,
+   "e": 1.04
+  },
+  {
+   "w": "that",
+   "s": 1.12,
+   "e": 1.2
+  },
+  {
+   "w": "email,",
+   "s": 1.28,
+   "e": 1.8
+  },
+  {
+   "w": "the",
+   "s": 1.92,
+   "e": 2.08
+  },
+  {
+   "w": "contract",
+   "s": 2.32,
+   "e": 2.56
+  },
+  {
+   "w": "refuses",
+   "s": 2.64,
+   "e": 3.28
+  },
+  {
+   "w": "it.",
+   "s": 3.36,
+   "e": 3.76
+  },
+  {
+   "w": "We",
+   "s": 4.0,
+   "e": 4.16
+  },
+  {
+   "w": "threw",
+   "s": 4.2,
+   "e": 4.48
+  },
+  {
+   "w": "thirty-five",
+   "s": 4.56,
+   "e": 5.12
+  },
+  {
+   "w": "attacks",
+   "s": 5.32,
+   "e": 5.52
+  },
+  {
+   "w": "at",
+   "s": 5.56,
+   "e": 5.6
+  },
+  {
+   "w": "the",
+   "s": 5.68,
+   "e": 5.76
+  },
+  {
+   "w": "contracts,",
+   "s": 6.08,
+   "e": 6.56
+  },
+  {
+   "w": "and",
+   "s": 6.72,
+   "e": 6.88
+  },
+  {
+   "w": "every",
+   "s": 6.96,
+   "e": 7.28
+  },
+  {
+   "w": "one",
+   "s": 7.36,
+   "e": 7.52
+  },
+  {
+   "w": "was",
+   "s": 7.6,
+   "e": 7.68
+  },
+  {
+   "w": "refused.",
+   "s": 7.76,
+   "e": 8.8
+  }
+ ],
+ "duration": 8.8
+}
