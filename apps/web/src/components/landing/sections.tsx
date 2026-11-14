@@ -5,6 +5,7 @@ import { LetterFace } from "@/components/motion/face";
 import { Rise } from "@/components/motion/rise";
 import { Sweep } from "@/components/motion/sweep";
 import { Wordmark } from "@/components/bits";
+import { MARKS } from "./marks";
 
 const wrap = "mx-auto w-full max-w-[1680px] px-[clamp(20px,6vw,128px)]";
 
@@ -95,7 +96,9 @@ export function Hood() {
   return (
     <section id="hood" className={`${wrap} py-[clamp(60px,9vw,140px)]`}>
       <Rise>
-        <p className="mb-8 text-[13.5px] text-fg-2">Under the hood</p>
+        <h2 className="display mb-10 max-w-[20ch] text-[clamp(30px,3.2vw,44px)]">
+          Under the hood. <span className="tone-2">Every rule is code.</span>
+        </h2>
       </Rise>
       <div className="grid max-w-[1100px] gap-x-16 gap-y-8 md:grid-cols-2">
         {HOOD.map(([a, b], i) => (
@@ -106,6 +109,24 @@ export function Hood() {
           </Rise>
         ))}
       </div>
+      <Rise className="mt-[clamp(48px,6vw,88px)]">
+        <p className="mb-4 text-[13.5px] text-fg-2">Runs on</p>
+        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          {MARKS.map((m) => (
+            <li
+              key={m.slug}
+              className="group rounded-2xl bg-white/[0.025] p-4 ring-1 ring-line transition-colors duration-300 hover:bg-white/[0.05]"
+              style={{ "--brand": m.hover } as React.CSSProperties}
+            >
+              <svg viewBox="0 0 24 24" role="img" aria-label={m.name} className="size-7 fill-current text-fg transition-colors duration-300 ease-[cubic-bezier(.2,.7,.2,1)] group-hover:text-[var(--brand)]">
+                <path d={m.path} />
+              </svg>
+              <p className="mt-3 text-[13.5px] font-medium">{m.name}</p>
+              <p className="mt-1 text-[12.5px] leading-snug text-fg-2">{m.role}</p>
+            </li>
+          ))}
+        </ul>
+      </Rise>
     </section>
   );
 }
