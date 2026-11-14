@@ -1,16 +1,24 @@
-# Dibs demo film: handback (FINAL, 15 Nov 2026, 02:23 IST)
+# Dibs demo film: handback (FINAL v7 journey cut, 15 Nov 2026, 03:35 IST)
 
 | | |
 |---|---|
-| Final | `film/out/dibs-film-FINAL.mp4` (+ `dibs-film-FINAL.srt`, 39 caption cues); identical to `out/dibs-film-v6.mp4` |
-| Duration | 2:08.1 (3,840 frames at 30 fps); hard cap 2:15 |
-| sha256 | FINAL.mp4 `d4cbdddac66bcc5eb6561d097e11b9edf28b04d8069f8b086c666358655ab248`; FINAL.srt `5423720646c92162213e342807911c1f59510578c0530c50ce18b83cc1f53082`; 22,987,675 bytes |
+| Final | `film/out/dibs-film-FINAL.mp4` (+ `.srt`, 35 cues) = `out/dibs-film-v7.mp4`; previous FINAL kept as `dibs-film-FINAL-v6.mp4` |
+| Duration | 2:09.2 (3,872 frames at 30 fps); hard cap 2:15 |
+| sha256 | FINAL.mp4 `c92d982f6a6f05a5a0dcbf4d6eebec0175c83f08942a9b94a921dccac6532295`; FINAL.srt `1dd18f0e4b7fd151da51998d2db87f5bbed5b047e397288c4dff6ebf1bd3128e`; 23,712,227 bytes |
 | Composition | `Film` (scenes `Scene01`-`Scene09`, seam poses `Handoffs`) |
 | Studio | http://localhost:3017 |
-| Technical QA (ffprobe + full decode + ebur128) | 1920x1080, H.264 yuv420p, tv range, BT.709 primaries/transfer/matrix, AAC 48 kHz stereo; 0 decode errors; -14.3 LUFS integrated, true peak -1.8 dBTP, LRA 3.1; 1.44 Mb/s; all 8 seams identical across the cut (b-6, b-2, b, b+2, b+6) |
+| Technical QA (ffprobe + full decode + ebur128) | 1920x1080, H.264 yuv420p, tv range, BT.709 primaries/transfer/matrix, AAC 48 kHz stereo; 0 decode errors; -14.2 LUFS integrated, true peak -1.1 dBTP, LRA 5.9; all 8 seams identical across the cut (b-6, b-2, b, b+2, b+6) |
 | Not checked | I cannot listen: the mix (narration ~11 dB over the ducked bed, SFX levels) needs Gabriel's ear |
 
-## Story as cut
+## v7 journey (Gabriel's rules, 15 Nov 02:27)
+S03 is the real app journey on NEAR testnet with the real Meteor wallet (journey-testnet-meteor.mp4, realmarsela.testnet), in
+order: Meteor Sign Message (start the trip as the booker) -> new trip page -> This bed is yours -> Pay from any chain (NEAR)
+-> Meteor Approve Transaction (Send 40 tUSDC) + Executing -> You're in (Sent from Meteor Wallet DSX9QnWA…) -> every bed
+paid ($240 in the crew's DAO), then the real mainnet receipts. Music only over the journey (no VO go by 03:35). Gaps: the
+Invite stage is not shown; explainers (resale, draw, attacks) hand off through the MG bed list instead of returning to the
+exact journey frame.
+
+## Story as cut (v6, before the journey)
 Hook (owed $280) → the trip is a contract on NEAR, keyless bed accounts, 7 of 8 paid → Leo pays: wallet-first dialog
 (real, testnet), chain list (real), NEAR Intents coin, then **real NEAR mainnet**: the 1Click deposit sheet (0.252579 USDC
 on Base), the NEAR Intents explorer (Withdrawn to b01-lismain), the paid mainnet trip ($0.50 in the crew's DAO) →
