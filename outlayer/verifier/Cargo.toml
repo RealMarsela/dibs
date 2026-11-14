@@ -16,6 +16,8 @@ path = "src/main.rs"
 default = []
 # Testnet build only: also trusts the fixture domain `dibs-test.example` with its published fixture key.
 test-domain = []
+# Debug only: stub host signer/VRF so the wasm runs under plain wasmtime. Never deployed.
+local-run = []
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -42,3 +44,7 @@ opt-level = "z"
 lto = true
 strip = true
 codegen-units = 1
+
+# Vendored wasi-http-client 0.2.1 with one patch: request bodies are written in 4096-byte pieces (a larger single write traps).
+[patch.crates-io]
+wasi-http-client = { path = "vendor/wasi-http-client" }

@@ -100,6 +100,9 @@ impl Extractor for NearAi<'_> {
         let email_text: String = email_text.chars().take(MAX_INPUT_CHARS).collect();
         let req = json!({
             "model": MODEL, "temperature": 0, "stream": false, "max_tokens": MAX_OUTPUT_TOKENS,
+            // Qwen3.8 reasons by default: on a real confirmation it burned all 300 tokens thinking (no content) and
+            // took 45 s, past OutLayer's 30 s. Extraction needs no chain of thought.
+            "chat_template_kwargs": {"enable_thinking": false},
             "response_format": {"type": "json_object"},
             "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": email_text}],
         })

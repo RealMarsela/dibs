@@ -6,6 +6,7 @@ use dibs_verifier::nearai::{NearAi, BASE_URL};
 use dibs_verifier::ops::{self, Signer, VrfOut};
 use dibs_verifier::verify::{verify_booking, BookingInput, Ctx};
 use dibs_verifier::{blob, config};
+#[cfg(not(feature = "local-run"))]
 use outlayer::{signing_keys, vrf};
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -19,6 +20,17 @@ static OUTLAYER_MANIFEST: [u8; include_bytes!("../manifest.json").len()] = *incl
 const KEY_PATH: &str = "dibs";
 
 struct HostSigner;
+/// `local-run` (never deployed): stub signer and VRF so the wasm runs under plain wasmtime for debugging.
+#[cfg(feature = "local-run")]
+impl Signer for HostSigner {
+    fn public_key(&self) -> Result<Vec<u8>, String> {
+        Ok(vec![0; 32])
+    }
+    fn sign(&self, _: &[u8]) -> Result<Vec<u8>, String> {
+        Ok(vec![0; 64])
+    }
+}
+#[cfg(not(feature = "local-run"))]
 impl Signer for HostSigner {
     fn public_key(&self) -> Result<Vec<u8>, String> {
         signing_keys::public_key(KEY_PATH, None).map_err(|e| e.to_string())
@@ -31,6 +43,8 @@ impl Signer for HostSigner {
 struct Wasi;
 impl Http for Wasi {
     fn get(&self, url: &str, headers: &[(&str, &str)]) -> Result<Vec<u8>, String> {
+        #[cfg(feature = "local-run")]
+        eprintln!("GET {url}");
         let mut r = wasi_http_client::Client::new().get(url);
         for (k, v) in headers {
             r = r.header(*k, *v);
@@ -38,6 +52,8 @@ impl Http for Wasi {
         read(r.send().map_err(|e| format!("GET {url}: {e}"))?)
     }
     fn post(&self, url: &str, headers: &[(&str, &str)], body: &[u8]) -> Result<Vec<u8>, String> {
+        #[cfg(feature = "local-run")]
+        eprintln!("POST {url} {} bytes", body.len());
         let mut r = wasi_http_client::Client::new().post(url).body(body);
         for (k, v) in headers {
             r = r.header(*k, *v);
@@ -76,6 +92,9 @@ fn run(raw: &str) -> Result<Value, String> {
         "public_key" => ops::public_key_op(&HostSigner).map_err(|e| fail("E_KEY", e)),
         "vrf" => {
             let i: VrfIn = serde_json::from_str(raw).map_err(|e| fail("E_INPUT", e.to_string()))?;
+            #[cfg(feature = "local-run")]
+            let gen = |_: &str| -> Result<VrfOut, String> { Err("no vrf in local-run".into()) };
+            #[cfg(not(feature = "local-run"))]
             let gen = |seed: &str| vrf::random(seed).map(|v| VrfOut { output_hex: v.output_hex, signature_hex: v.signature_hex, alpha: v.alpha });
             ops::vrf_op(&i.trip, i.n, gen, &HostSigner).map_err(|e| fail("E_VRF", e))
         }
@@ -105,13 +124,24 @@ fn run(raw: &str) -> Result<Value, String> {
     }
 }
 
+/// wasi stdout traps on a single write over 4096 bytes ("Buffer too large for blocking-write-and-flush"),
+/// which OutLayer reports as a wasm trap and the contract as E_NO_RESULT. Write in small chunks.
+fn emit(text: &str) {
+    use std::io::Write;
+    let mut out = std::io::stdout();
+    for chunk in text.as_bytes().chunks(2048) {
+        let _ = out.write_all(chunk);
+        let _ = out.flush();
+    }
+}
+
 fn main() {
     let mut raw = String::new();
     let _ = std::io::stdin().read_to_string(&mut raw);
     match run(&raw) {
-        Ok(out) => print!("{out}"),
+        Ok(out) => emit(&out.to_string()),
         Err(e) => {
-            print!("{e}");
+            emit(&e);
             std::process::exit(1);
         }
     }
