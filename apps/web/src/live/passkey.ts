@@ -33,7 +33,7 @@ const b64u = (b: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Ui
 const fromB64u = (s: string) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
 
 const B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-function base58(bytes: Uint8Array): string {
+export function base58(bytes: Uint8Array): string {
   let n = BigInt("0x" + (bytesToHex(bytes) || "0"));
   let out = "";
   while (n > 0n) {

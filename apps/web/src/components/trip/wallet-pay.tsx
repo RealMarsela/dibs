@@ -5,9 +5,10 @@ import type { ChainId } from "@/data/types";
 import * as api from "@/live/api";
 import { connectEvm, discoverEvmWallets, disconnectEvm, ensureChain, evmError, isEvmChain, sendUsdc, usdcBalance, type EvmWallet } from "@/live/evm-wallet";
 import { connectNear, disconnectNear, nearError, nearUsdcBalance, payBedFromNear, type NearSession } from "@/live/near-wallet";
+import { connectSolana, discoverSolanaWallets, disconnectSolana, sendSolUsdc, solError, solUsdcBalance, type SolSession, type SolWallet } from "@/live/solana-wallet";
 
 /* "Pay with your wallet": the friend's own wallet sends exactly the quoted USDC, so nobody copies an address by hand.
-   EVM wallets come from EIP-6963, NEAR wallets from NEAR Connect. The copy-and-send route stays underneath. */
+   EVM wallets come from EIP-6963, Solana wallets from the Wallet Standard, NEAR wallets from NEAR Connect. The copy-and-send route stays underneath. */
 
 export type Pay = { depositAddress: string; amountIn: string; expiresAt: string | null; refundTo: string; sentTx?: string; wallet?: string };
 
@@ -23,8 +24,10 @@ export function WalletPay({ chain, price, pay, getQuote, onSent, compact }: {
   compact?: boolean;
 }) {
   const evm = isEvmChain(chain) ? chain : null;
+  const sol = chain === "solana";
   const [wallets, setWallets] = useState<EvmWallet[] | null>(null);
-  const [conn, setConn] = useState<{ id: string; name: string; from: string; w?: EvmWallet } | null>(null);
+  const [solWallets, setSolWallets] = useState<SolWallet[] | null>(null);
+  const [conn, setConn] = useState<{ id: string; name: string; from: string; w?: EvmWallet; s?: SolSession } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [phase, setPhase] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -32,6 +35,7 @@ export function WalletPay({ chain, price, pay, getQuote, onSent, compact }: {
   const floor = BigInt(Math.round(price * 1e6));
 
   useEffect(() => (evm ? discoverEvmWallets(setWallets) : undefined), [evm]);
+  useEffect(() => (sol ? discoverSolanaWallets(setSolWallets) : undefined), [sol]);
 
   async function payEvm(w: EvmWallet) {
     if (!evm) return;
@@ -54,6 +58,30 @@ export function WalletPay({ chain, price, pay, getQuote, onSent, compact }: {
       onSent(p, tx, w.name);
     } catch (e) {
       setErr(evmError(e, w.name, evm));
+    } finally {
+      setBusy(null);
+      setPhase("");
+    }
+  }
+
+  async function paySolana(w: SolWallet) {
+    setBusy(w.id);
+    setErr(null);
+    try {
+      setPhase(`Connecting ${w.name}…`);
+      const s = await connectSolana(w);
+      setConn({ id: w.id, name: w.name, from: s.account.address, s });
+      const bal = await solUsdcBalance(s.account.address);
+      if (bal < floor) throw new Error(`${short(s.account.address)} has ${usdc(bal)} USDC on Solana. This bed needs about ${usdc((floor * 1011n) / 1000n)}.`);
+      if (!pay) setPhase("Holding your bed and getting a live quote…");
+      const p = pay ?? (await getQuote(s.account.address));
+      if (bal < BigInt(p.amountIn)) throw new Error(`${short(s.account.address)} has ${usdc(bal)} USDC on Solana. This bed needs ${usdc(BigInt(p.amountIn))}.`);
+      setPhase(`Confirm ${usdc(BigInt(p.amountIn))} USDC in ${w.name}…`);
+      const sig = await sendSolUsdc(s, p.depositAddress, BigInt(p.amountIn));
+      api.submitDeposit(p.depositAddress, sig).catch(() => undefined);
+      onSent(p, sig, w.name);
+    } catch (e) {
+      setErr(solError(e, w.name));
     } finally {
       setBusy(null);
       setPhase("");
@@ -84,28 +112,29 @@ export function WalletPay({ chain, price, pay, getQuote, onSent, compact }: {
 
   async function disconnect() {
     if (conn?.w) await disconnectEvm(conn.w);
+    if (conn?.s) await disconnectSolana(conn.s);
     if (conn?.id === "near") await disconnectNear();
     setConn(null);
     setErr(null);
   }
 
-  if (chain === "solana") return null;
   const rows: { id: string; icon: React.ReactNode; title: string; sub: string; go: () => void }[] =
     chain === "near"
       ? [{ id: "near", icon: <Wallet className="size-4" />, title: "Pay with a NEAR wallet", sub: "HOT, Meteor, MyNearWallet, Intear, NEAR Mobile, Ledger", go: payNear }]
-      : (wallets ?? []).map((w) => ({
+      : ((sol ? solWallets : wallets) ?? []).map((w) => ({
           id: w.id,
           icon: w.icon ? <img src={w.icon} alt="" className="size-5 rounded" /> : <Wallet className="size-4" />,
           title: `Pay with ${w.name}`,
           sub: conn?.id === w.id ? `Connected · ${short(conn.from)}` : `USDC on ${name}, signed in your wallet`,
-          go: () => void payEvm(w),
+          go: () => void ("w" in w ? paySolana(w as SolWallet) : payEvm(w as EvmWallet)),
         }));
+  const found = sol ? solWallets : wallets;
 
   return (
     <div className={compact ? "mt-4" : undefined}>
       {!compact && <p className="label mb-2">Pay with your wallet</p>}
-      {evm && wallets === null && <p className="flex items-center gap-2 text-[13px] text-fg-3"><Loader2 className="size-3.5 animate-spin" /> Looking for wallets in this browser…</p>}
-      {evm && wallets?.length === 0 && !compact && <p className="text-[13px] leading-relaxed text-fg-3">No browser wallet found here. Any wallet or exchange works with the address below.</p>}
+      {chain !== "near" && found === null && <p className="flex items-center gap-2 text-[13px] text-fg-3"><Loader2 className="size-3.5 animate-spin" /> Looking for wallets in this browser…</p>}
+      {chain !== "near" && found?.length === 0 && !compact && <p className="text-[13px] leading-relaxed text-fg-3">No browser wallet found here. Any wallet or exchange works with the address below.</p>}
       <div className="flex flex-col gap-2">
         {rows.map((r) => (
           <button key={r.id} disabled={busy !== null} onClick={r.go} className="press focus-ring flex items-center gap-3 rounded-xl border border-line px-4 py-3 text-left transition-colors hover:bg-white/[0.05] disabled:opacity-60">

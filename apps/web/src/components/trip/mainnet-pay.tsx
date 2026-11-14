@@ -10,6 +10,7 @@ import type { ChainId } from "@/data/types";
 import { pad2 } from "@/lib/utils";
 import * as api from "@/live/api";
 import { evmTxUrl, isEvmChain } from "@/live/evm-wallet";
+import { solTxUrl } from "@/live/solana-wallet";
 import { WalletPay, type Pay } from "@/components/trip/wallet-pay";
 
 /* The real pay-in on NEAR mainnet. Hold the bed for this device's key, ask NEAR Intents 1Click for an exact-output
@@ -154,7 +155,7 @@ export function MainnetPay({ n, chain, me, step, setStep }: { n: number; chain: 
       <div>
         <ProgressSteps steps={track.map((title) => ({ title }))} done={step === "done" ? track.length : done} />
         {pay?.sentTx && (
-          <a href={isEvmChain(chain) ? evmTxUrl(chain, pay.sentTx) : api.explorer(pay.sentTx)} target="_blank" rel="noreferrer" className="mt-4 inline-flex text-[13px] text-fg-2 underline decoration-white/20 underline-offset-4 hover:text-fg">
+          <a href={isEvmChain(chain) ? evmTxUrl(chain, pay.sentTx) : chain === "solana" ? solTxUrl(pay.sentTx) : api.explorer(pay.sentTx)} target="_blank" rel="noreferrer" className="mt-4 inline-flex text-[13px] text-fg-2 underline decoration-white/20 underline-offset-4 hover:text-fg">
             Sent from {pay.wallet} · {pay.sentTx.slice(0, 8)}…{pay.sentTx.slice(-4)} ↗
           </a>
         )}
@@ -173,12 +174,8 @@ export function MainnetPay({ n, chain, me, step, setStep }: { n: number; chain: 
   if (!pay) {
     return (
       <div>
-        {chain !== "solana" && (
-          <>
-            {wallet}
-            <div className="my-5 flex items-center gap-3 text-[12px] text-fg-3"><span className="h-px flex-1 bg-line" />or send it yourself<span className="h-px flex-1 bg-line" /></div>
-          </>
-        )}
+        {wallet}
+        <div className="my-5 flex items-center gap-3 text-[12px] text-fg-3"><span className="h-px flex-1 bg-line" />or send it yourself<span className="h-px flex-1 bg-line" /></div>
         {chain !== "near" && (
           <label className="block">
             <span className="label mb-1.5 block">Your {CHAINS[chain].name} address, for refunds</span>

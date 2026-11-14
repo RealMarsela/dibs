@@ -70,6 +70,9 @@ On a mainnet trip the pay sheet offers the friend's own wallet before the copy-a
   address for refunds, puts the wallet on Base, Arbitrum or Ethereum (adding the chain if needed), checks its USDC,
   holds the bed, gets the 1Click quote and asks the wallet to send exactly `amountIn` to the deposit address. The
   transaction hash goes to 1Click's `deposit/submit` so the swap starts sooner.
+- **Solana wallets** (Phantom, Solflare, Backpack…) found through the Wallet Standard. The wallet signs and sends one
+  transaction: create the deposit address's USDC account if it is missing, then a USDC `TransferChecked` of exactly
+  `amountIn`. Checked against mainnet's `simulateTransaction` before shipping.
 - **NEAR wallets** through NEAR Connect (`@hot-labs/near-connect`: HOT, Meteor, Intear, MyNearWallet, NEAR Mobile,
   Ledger and more). The wallet sends USDC straight to the bed's own account with one `ft_transfer`; no swap is needed.
 - **No wallet:** the one-time address, the exact amount and a QR that wallets read (EIP-681 on EVM, Solana Pay).
@@ -138,8 +141,8 @@ Deployed ids are in [deploy/testnet.json](deploy/testnet.json); the deploy log i
 
 - **Mainnet runs the pay-in only.** Proofs, the draw, the card and resale run on testnet. NEAR Intents 1Click runs on
   mainnet only, so on testnet trips a faucet stands in for the cross-chain deposit.
-- **Wallets.** Solana pays by address or QR only (no Solana wallet button yet). Mobile EVM wallets over WalletConnect
-  are not wired (they need a WalletConnect project id). The friend's own key stays our WebAuthn-PRF passkey: NEAR Auth
+- **Wallets.** Mobile EVM wallets over WalletConnect are not wired (they need a WalletConnect project id); mobile
+  users pay from their wallet's own browser, or by address and QR. The friend's own key stays our WebAuthn-PRF passkey: NEAR Auth
   (FastAuth) needs approved Auth0 credentials on mainnet, and NEAR Connect's passkey executor creates contract wallets on
   mainnet only, which our NEP-366 relayer does not sponsor as built.
 - **Card rails are the Lithic sandbox.** The rules are real (single use, hotels only, limit = pot); the card network is simulated.
