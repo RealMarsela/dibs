@@ -50,8 +50,8 @@ export function NextStep({ viewer, open }: { viewer: string; open: Opens }) {
   } else if (!mine && openSpot) {
     a = `Bed ${pad2(openSpot.n)} is open.`;
     b = mainnet
-      ? `Real money on NEAR mainnet: hold it with a passkey and pay ${usd(trip.price, 0)} in USDC from Base, Solana, Arbitrum, Ethereum or NEAR.`
-      : `Hold it with a passkey and pay ${usd(trip.price, 0)} from any chain. Nobody books until every bed is paid.`;
+      ? `Real money on NEAR mainnet: claim it with your own wallet and pay ${usd(trip.price, 0)} in USDC from Base, Solana, Arbitrum, Ethereum or NEAR.`
+      : `Claim it with your own wallet and pay ${usd(trip.price, 0)} from any chain. Nobody books until every bed is paid.`;
     cta = <button className="pill-light focus-ring press" onClick={() => open.pay(openSpot.n)}>Take bed {pad2(openSpot.n)} · {usd(trip.price, 0)}</button>;
   } else if (!mine && mainnet) {
     a = "Every bed is taken.";
