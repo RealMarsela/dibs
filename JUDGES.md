@@ -28,7 +28,7 @@ Key transactions it cites: booking proof accepted `54g9Y2qgKPNFamFeN6tQUgpR1AqU3
 
 ## 2. Open the app
 
-https://preview.dibs-trips.pages.dev/t/lis0312
+https://dibs.larinova.com/t/lis0312
 
 ## 3. What to look at
 

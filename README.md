@@ -5,7 +5,7 @@ chain, nobody can book until every bed is paid, a dropout cannot get a refund bu
 value to someone already waiting, and the money is released only when the trip's own inbox receives a real,
 verified booking confirmation.
 
-**[Open the live Lisbon trip](https://preview.dibs-trips.pages.dev/t/lis0312)** ·
+**[Open the live Lisbon trip](https://dibs.larinova.com/t/lis0312)** ·
 [Five-minute judge path](JUDGES.md) · [Threat model](docs/THREAT_MODEL.md) · `pnpm verify` (reads the chain, no keys)
 
 Built at NEAR HACKATHON, November 2026. Runs on NEAR testnet; card rails are the Lithic sandbox (details in
@@ -84,9 +84,9 @@ flowchart LR
 ## Try it in five minutes
 
 1. `pnpm install && pnpm verify` re-checks everything in the table above against testnet (no keys needed).
-2. Open the [live Lisbon trip](https://preview.dibs-trips.pages.dev/t/lis0312) and the
-   [Singapore trip](https://preview.dibs-trips.pages.dev/t/sin1025) → *See the booking proof*.
-3. [Start your own trip](https://preview.dibs-trips.pages.dev/new): the relayer creates it on testnet, holds bed 1
+2. Open the [live Lisbon trip](https://dibs.larinova.com/t/lis0312) and the
+   [Singapore trip](https://dibs.larinova.com/t/sin1025) → *See the booking proof*.
+3. [Start your own trip](https://dibs.larinova.com/new): the relayer creates it on testnet, holds bed 1
    for your passkey account and opens `<code>@dibs.larinova.com` as its inbox. Share the link; friends pay with test USDC.
 4. Run the attack suite: see [JUDGES.md](JUDGES.md) for the sandbox, verifier and API test commands.
 

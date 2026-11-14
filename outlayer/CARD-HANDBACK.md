@@ -47,7 +47,7 @@ Errors `{error, code}`: E_INPUT E_NETWORK E_CONTRACT E_SECRET E_RPC E_NO_TRIP E_
 - Sandbox-only shortcut: `simulate/authorize` needs the card number, so the API reads the sandbox card by token with `LITHIC_SIM_KEY` (the sandbox returns PAN on GET). It never returns or stores the PAN (tested). A real issuing program has no such call.
 
 ## Deploy / secret commands (NOT run: the new wasm is not deployed; `secrets set` would overwrite, so use `update`)
-Lane D's testnet exists (`deploy/testnet.json`: project `own-0eb9ae.testnet/dibs-verifier`, api https://dibs-api.gabrielaxy.workers.dev, verifier key `706445d7...06bf`). Needed, in order, by whoever owns deploys:
+Lane D's testnet exists (`deploy/testnet.json`: project `own-0eb9ae.testnet/dibs-verifier`, api https://api.dibs.larinova.com, verifier key `706445d7...06bf`). Needed, in order, by whoever owns deploys:
 ```bash
 # 1. new verifier version containing op "card" (tests first), then upload + deploy as Lane D did for v4
 cd outlayer/verifier && ./build.sh testnet            # -> target/dibs-verifier-testnet.wasm
@@ -62,7 +62,7 @@ printf %s "$LITHIC_SANDBOX_KEY" | wrangler secret put LITHIC_SIM_KEY
 wrangler deploy
 # 4. issue for a real trip (booker must be a passkey/implicit account), then post the output to the API
 outlayer run own-0eb9ae.testnet/dibs-verifier '{"op":"card","trip":"<code>","network":"testnet"}'
-curl -X POST https://dibs-api.gabrielaxy.workers.dev/card/<code>/issued -H 'content-type: application/json' -d '{"message":"...","signature":"..."}'
+curl -X POST https://api.dibs.larinova.com/card/<code>/issued -H 'content-type: application/json' -d '{"message":"...","signature":"..."}'
 ```
 Also check: the manifest `author_secrets.profile "default"` must be the profile `LITHIC_API_KEY` is stored under (it is the one DIBS_BLOB_KEY uses).
 

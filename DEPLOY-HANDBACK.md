@@ -13,7 +13,7 @@ Explorer: `https://testnet.nearblocks.io/txns/<hash>`.
 | OutLayer project | `own-0eb9ae.testnet/dibs-verifier`, active wasm sha256 `546edf70...2680` (testnet build, test-domain feature) |
 | verifier public key (pinned via `set_verifier_key`, tx `HYQWZp2N...`) | `706445d7daa364e38ea0f410fc3279c83b6200c5cfd89983546b8fecbb3706bf` |
 | `set_outlayer` | tx `BZFfVVGP...` |
-| API worker | `https://dibs-api.gabrielaxy.workers.dev` (R2 bucket `dibs-proof-blobs`, relayer `relayer.dao-0eb9ae.testnet`, added with `add_relayer`) |
+| API worker | `https://api.dibs.larinova.com` (R2 bucket `dibs-proof-blobs`, relayer `relayer.dao-0eb9ae.testnet`, added with `add_relayer`) |
 | trip lis0312 | DAO `lis0312-0eb9ae.sputnik-v2.testnet`; 8 beds at 40 USDC; beds 1,2,4-8 Paid, bed 3 (Leo) Held and unpaid; Priya funded on waitlist slot 1; DAO holds 280 USDC |
 | trip sin1025 | DAO `sin1025-0eb9ae.sputnik-v2.testnet`; 2 beds at 120 USDC, 2025-10-25..26, "Carlton City Hotel Singapore"; both Paid |
 | trip drw0001 | DAO `drw0001-0eb9ae.sputnik-v2.testnet`; 2 beds at 1 USDC; both Paid; VRF draw done |

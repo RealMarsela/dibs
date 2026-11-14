@@ -4,7 +4,7 @@ Every trip has an address `<tripcode>@dibs.larinova.com`. The booker puts it in 
 DKIM-signed confirmation arrives straight at the trip. A confirmation forwarded with Gmail "Forward as attachment" works too:
 the inner message/rfc822 part is cut out byte for byte.
 
-URL: https://dibs-inbox.gabrielaxy.workers.dev  (`GET /health`, `GET /inbox/:trip`). Testnet only. No email was sent by this lane.
+URL: https://inbox.dibs.larinova.com  (`GET /health`, `GET /inbox/:trip`). Testnet only. No email was sent by this lane.
 
 ## Flow (src/ingest.ts)
 1. `email(message)`: recipient local part = trip code (`[a-z0-9]{3,12}`, `+tag` ignored); other addresses are rejected at SMTP.
@@ -65,7 +65,7 @@ dibs-api code over the service binding (two workers in one `wrangler dev`).
 ## Live end-to-end test (needs a person to send mail; agents must not)
 Pre: the trip exists on testnet and has its literal rule (lis0312 has one; others: `scripts/add-trip-address.sh <trip>`).
 1. From any mailbox send an email to `lis0312@dibs.larinova.com`. Best: Gmail, open a real booking.com confirmation, More (three dots), "Forward as attachment", To `lis0312@dibs.larinova.com`.
-2. Within seconds: `curl https://dibs-inbox.gabrielaxy.workers.dev/inbox/lis0312` shows one item. Expect `wrapped:true`, `dkim_domain:"booking.com"`,
+2. Within seconds: `curl https://inbox.dibs.larinova.com/inbox/lis0312` shows one item. Expect `wrapped:true`, `dkim_domain:"booking.com"`,
    and `status` `submitted` (tx_hash) if all beds are Paid and the contract allows relayers, else `ready` or `submit_failed` with a `note`.
 3. Logs: `npx wrangler tail dibs-inbox`. A mail to an unknown trip bounces at SMTP ("unknown trip").
 4. Chain: `near view dibs-0eb9ae.testnet get_trip '{"trip":"lis0312"}'` shows `proof_pending`, then `proof` and `payout`. The booking must match the trip's dates and guest

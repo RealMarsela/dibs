@@ -1,7 +1,7 @@
 // Live check of POST /trips: node scripts/live-create-trip.mjs [api-base]
 // Generates a throwaway ed25519 key, creates a 2-bed trip, then reads get_trip over RPC.
 import { KeyPair } from "near-api-js";
-const API = process.argv[2] ?? "https://dibs-api.gabrielaxy.workers.dev";
+const API = process.argv[2] ?? "https://api.dibs.larinova.com";
 const RPC = "https://test.rpc.fastnear.com";
 const kp = KeyPair.fromRandom("ed25519");
 const pk = kp.getPublicKey().toString().replace("ed25519:", "");

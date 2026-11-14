@@ -2,6 +2,7 @@ name = "dibs-api"
 main = "src/index.ts"
 compatibility_date = "2026-11-01"
 compatibility_flags = ["nodejs_compat"]
+routes = [{ pattern = "api.dibs.larinova.com", custom_domain = true }]
 
 # Default = testnet. Mainnet is a separate deploy: `wrangler deploy --env mainnet`.
 [vars]
@@ -12,9 +13,9 @@ ONECLICK_URL = "https://1click.chaindefuser.com"
 DIBS_CONTRACT = "dibs-0eb9ae.testnet"
 USDC_CONTRACT = "usdc.own-0eb9ae.testnet"
 RELAYER_ACCOUNT_ID = "relayer.dao-0eb9ae.testnet"
-ALLOWED_ORIGIN = "https://preview.dibs-trips.pages.dev,http://localhost:4321"
+ALLOWED_ORIGIN = "https://dibs.larinova.com,http://localhost:4321"
 # Public base URL used to build blob capability URLs (no trailing slash). Empty = request origin.
-PUBLIC_BASE_URL = "https://dibs-api.gabrielaxy.workers.dev"
+PUBLIC_BASE_URL = "https://api.dibs.larinova.com"
 VERIFIER_PUBLIC_KEY = "706445d7daa364e38ea0f410fc3279c83b6200c5cfd89983546b8fecbb3706bf"
 TRIP_DAO = "lis0312-0eb9ae.sputnik-v2.testnet"
 CF_ZONE_ID = "bbaaf33c5998f5ebb76ea82164662d98"

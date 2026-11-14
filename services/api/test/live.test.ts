@@ -101,8 +101,8 @@ describe("names", () => {
 });
 
 describe("proof, draw, refund-check", () => {
-  const url = "https://dibs-api.gabrielaxy.workers.dev/blob/" + "a".repeat(64);
-  const env = () => makeEnv({ PUBLIC_BASE_URL: "https://dibs-api.gabrielaxy.workers.dev" });
+  const url = "https://api.dibs.larinova.com/blob/" + "a".repeat(64);
+  const env = () => makeEnv({ PUBLIC_BASE_URL: "https://api.dibs.larinova.com" });
   it("submit_proof with 0.025 NEAR and 300 Tgas", async () => {
     const b = await body(await app.fetch(json("/proof/submit", { trip: "sin1025", blob_url: url, blob_sha256: "b".repeat(64) }), env()));
     expect(b.tx_hash).toBe("TX1");

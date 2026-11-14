@@ -19,7 +19,7 @@
     ]
   },
   "verifier_public_key": "706445d7daa364e38ea0f410fc3279c83b6200c5cfd89983546b8fecbb3706bf",
-  "api_url": "https://dibs-api.gabrielaxy.workers.dev",
+  "api_url": "https://api.dibs.larinova.com",
   "r2_bucket": "dibs-proof-blobs",
   "relayer": "relayer.dao-0eb9ae.testnet",
   "dibs_wasm_sha256": "0f67bf94d56b406746b2284a5cce029889065fc75fe4b6e7bd5bd8dc356c2721",

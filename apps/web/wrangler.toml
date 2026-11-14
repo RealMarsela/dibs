@@ -1,0 +1,9 @@
+# The Dibs web app, served as static assets on its own domain (SPA fallback for /t/<code> routes).
+name = "dibs-web"
+compatibility_date = "2026-11-01"
+workers_dev = false
+routes = [{ pattern = "dibs.larinova.com", custom_domain = true }]
+
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"

@@ -2,6 +2,7 @@ name = "dibs-inbox"
 main = "src/index.ts"
 compatibility_date = "2026-11-01"
 compatibility_flags = ["nodejs_compat"]
+routes = [{ pattern = "inbox.dibs.larinova.com", custom_domain = true }]
 
 # Default = testnet. Secrets: DIBS_BLOB_KEY (same value as dibs-api and the OutLayer secret), RELAYER_PRIVATE_KEY.
 [vars]
@@ -11,7 +12,7 @@ DIBS_CONTRACT = "dibs-0eb9ae.testnet"
 RELAYER_ACCOUNT_ID = "relayer.dao-0eb9ae.testnet"
 MAIL_DOMAIN = "dibs.larinova.com"
 # Blob capability URLs point at the API worker, which already serves blobs/<id> from the shared bucket.
-PUBLIC_BASE_URL = "https://dibs-api.gabrielaxy.workers.dev"
+PUBLIC_BASE_URL = "https://api.dibs.larinova.com"
 ALLOWED_ORIGIN = "*"
 # Testnet only: also auto-submit mail DKIM-signed by the published test domain.
 ALLOW_TEST_DOMAIN = "1"
