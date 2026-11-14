@@ -81,7 +81,7 @@ and gas caps, signature, expiry, rate limit), sweeps are idempotent, blobs are e
 - **No FX conversion.** The booking total is compared 1:1 with the USDC cap; `currency` is recorded but not converted (the live proof is SGD 226.60 treated as 226.60).
 - **The OutLayer VRF is verifiable but not provably unpredictable.** The contract checks the TEE signature, not that nobody could have predicted the output.
 - **NEAR AI extraction latency is 10 to 49 seconds**, so a proof is not instant. The facts must also appear literally in the DKIM-verified text.
-- **The email inbox needs a literal routing rule per trip address** (`<trip>@dibs.larinova.com`). Forwarding by hand also works.
+- **Each trip address is its own Email Routing rule** (`<trip>@dibs.larinova.com`), added automatically when a trip is created from the app.
 - **Dev persona keys exist on localhost only**, never in the deployed app.
 - The `dibs-test.example` domain, whose private key is in the repo, is allowlisted on testnet only and must not be on mainnet.
 - `create_trip` does not read the DAO policy back on chain; DAOs are created from `contracts/scripts/dao-policy.json`.
