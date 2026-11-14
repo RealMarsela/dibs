@@ -1,8 +1,20 @@
-import { Dialog } from "radix-ui";
-import { X } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-/* Bottom sheet on phones, centred card from md up. Radix handles focus trap, Esc and scroll lock. */
+function useWide(): boolean {
+  const q = "(min-width: 768px)";
+  const [wide, setWide] = useState(() => typeof window !== "undefined" && window.matchMedia(q).matches);
+  useEffect(() => {
+    const m = window.matchMedia(q);
+    const on = () => setWide(m.matches);
+    m.addEventListener("change", on);
+    return () => m.removeEventListener("change", on);
+  }, []);
+  return wide;
+}
+
+/* shadcn Drawer (vaul) on phones, shadcn Dialog from md up. Both wear the frosted glass surface. */
 export function Sheet({
   open,
   onOpenChange,
@@ -16,28 +28,35 @@ export function Sheet({
   eyebrow?: string;
   children: ReactNode;
 }) {
-  return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-ink/35 backdrop-blur-[2px] data-[state=open]:animate-[fade-in_180ms_ease-out] data-[state=closed]:animate-[fade-out_140ms_ease-in]" />
-        <Dialog.Content
-          aria-describedby={undefined}
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed inset-x-0 bottom-0 z-50 max-h-[92dvh] overflow-y-auto rounded-t-[22px] border border-rule bg-card px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-20px_60px_-20px_#1e1b1666] outline-none data-[state=open]:animate-[sheet-up_320ms_var(--ease-out-strong)] data-[state=closed]:animate-[sheet-down_200ms_ease-in] md:inset-auto md:left-1/2 md:top-1/2 md:w-[460px] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[22px] md:px-7 md:pb-7 md:pt-6 md:data-[state=open]:animate-[pop-in_220ms_var(--ease-out-strong)]"
-        >
-          <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-rule md:hidden" />
-          <div className="mb-4 flex items-start justify-between gap-4">
-            <div>
-              {eyebrow && <p className="eyebrow mb-1">{eyebrow}</p>}
-              <Dialog.Title className="text-[22px] font-bold leading-tight tracking-[-0.02em]">{title}</Dialog.Title>
-            </div>
-            <Dialog.Close className="focus-ring -mr-1 rounded-full p-2 text-ink-soft hover:bg-paper-deep" aria-label="Close">
-              <X className="size-4" />
-            </Dialog.Close>
-          </div>
+  const wide = useWide();
+  const head = (
+    <>
+      {eyebrow && <p className="label mb-1">{eyebrow}</p>}
+    </>
+  );
+  if (wide)
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="glass max-w-[440px] gap-0 rounded-[28px] border-line p-7 text-fg sm:max-w-[440px]" onOpenAutoFocus={(e) => e.preventDefault()}>
+          <DialogHeader className="mb-5 text-left">
+            {head}
+            <DialogTitle className="display text-[24px] text-fg">{title}</DialogTitle>
+            <DialogDescription className="sr-only">{title}</DialogDescription>
+          </DialogHeader>
           {children}
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </DialogContent>
+      </Dialog>
+    );
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="glass rounded-t-[28px] rounded-b-none border-line px-5 pb-[max(20px,env(safe-area-inset-bottom))] text-fg">
+        <DrawerHeader className="px-0 pb-4 pt-3 text-left">
+          {head}
+          <DrawerTitle className="display text-[24px] text-fg">{title}</DrawerTitle>
+          <DrawerDescription className="sr-only">{title}</DrawerDescription>
+        </DrawerHeader>
+        <div className="max-h-[70dvh] overflow-y-auto pb-2">{children}</div>
+      </DrawerContent>
+    </Drawer>
   );
 }

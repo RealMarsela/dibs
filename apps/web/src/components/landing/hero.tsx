@@ -1,88 +1,46 @@
 import { Link } from "react-router";
-import { motion } from "motion/react";
-import { ArrowRight } from "lucide-react";
-import { Avatar, NearMark, Stamp } from "@/components/bits";
-import { pad2 } from "@/lib/utils";
+import { ChevronDown } from "lucide-react";
+import { Crowd } from "@/components/landing/crowd";
+import { LetterFace } from "@/components/motion/face";
+import { Sweep } from "@/components/motion/sweep";
 
-const STACK = [
-  { n: 4, who: "ana", state: "resale" as const, rot: -7, x: -26, y: 22 },
-  { n: 2, who: "sam", state: "paid" as const, rot: 5, x: 22, y: 10 },
-  { n: 3, who: "leo", state: "due" as const, rot: -1.5, x: 0, y: -6 },
-];
-
+/* The hello. Maya (the booker) rises from below the fold and bobs; the crowd rises around her; the headline sweeps
+   in word by word, the grey line lands alone after a pause; then the button rises. */
 export function Hero() {
   return (
-    <section className="mx-auto grid max-w-[1120px] items-center gap-12 px-4 pb-16 pt-10 sm:px-6 md:pt-16 lg:grid-cols-[1.05fr_1fr] lg:gap-8 lg:pb-24">
-      <div>
-        <NearMark />
-        <h1 className="mt-5 text-[46px] font-extrabold leading-[0.95] tracking-[-0.045em] sm:text-[64px] lg:text-[76px]">
-          Every bed paid
-          <br />
-          before anyone
-          <br />
-          <span className="relative inline-block">
-            books.
-            <svg className="absolute -bottom-2 left-0 w-full" height="12" viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden>
-              <path d="M2 8 C 50 2, 120 12, 198 4" stroke="var(--color-sun)" strokeWidth="5" fill="none" strokeLinecap="round" />
-            </svg>
-          </span>
-        </h1>
-        <p className="mt-7 max-w-[520px] text-[18px] leading-relaxed text-ink-soft">
-          Friends pay for their own bed, from any chain. The booker gets the money only with a verified booking. Can’t make it? Sell your bed, at
-          the price you paid.
-        </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link to="/t/lis-0312" className="btn-ink focus-ring">
-            Open the Lisbon trip <ArrowRight className="size-4" />
-          </Link>
-          <Link to="/new" className="btn-paper focus-ring">
-            Start a trip
-          </Link>
+    <section className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-5 pb-24 pt-28 text-center">
+      <Crowd />
+      <div className="relative z-10 flex flex-col items-center">
+        <div className="hello-face">
+          <div className="hello-bob group relative rounded-full text-[#fb923c]">
+            <span className="sonar absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <LetterFace name="Maya" seed="maya" size={typeof window !== "undefined" && window.innerWidth < 640 ? 84 : 104} color="#fb923c" className="shadow-[0_18px_50px_-12px_rgba(251,146,60,0.5)] ring-4 ring-void" />
+          </div>
         </div>
-        <p className="mt-5 text-[13px] text-ink-faint">No wallet, no seed phrase. A passkey holds your bed.</p>
+        <Sweep
+          as="h1"
+          delay={900}
+          immediate
+          className="mt-8 max-w-[15ch] text-[clamp(34px,4.2vw,58px)] sm:max-w-none"
+          lines={[
+            { text: "Every bed paid" },
+            { text: "before anyone books." },
+            { text: "No IOUs. No chasing.", tone: "fg-2", pause: true },
+            { text: "Nobody fronts the money.", tone: "fg-2" },
+          ]}
+        />
+        <div className="rise-in mt-9 flex flex-col items-center gap-3" style={{ animationDelay: "2.6s" }}>
+          <Link id="hello-cta" to="/t/lis-0312" className="pill-light focus-ring press h-11 px-6 text-[15px]">
+            Open the Lisbon trip
+          </Link>
+          <p className="text-[12.5px] text-fg-3">
+            Pay from any chain <span className="mx-1.5">·</span> No wallet needed
+          </p>
+        </div>
       </div>
-
-      <div className="relative mx-auto h-[330px] w-full max-w-[460px] overflow-x-clip px-4 sm:h-[400px] sm:overflow-visible" aria-hidden>
-        {STACK.map((t, i) => (
-          <motion.div
-            key={t.n}
-            initial={{ opacity: 0, y: 40, rotate: 0 }}
-            animate={{ opacity: 1, y: t.y, x: t.x, rotate: t.rot }}
-            transition={{ delay: 0.15 + i * 0.12, duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
-            className="ticket absolute inset-x-4 top-[56px] mx-auto flex h-[176px] max-w-[420px] overflow-hidden sm:top-[70px] sm:h-[190px]"
-          >
-            <div className="flex flex-1 flex-col justify-between p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="eyebrow">Bed {pad2(t.n)} · 12–15 Mar</p>
-                  <p className="mt-1 text-[38px] font-extrabold uppercase leading-none tracking-[-0.045em]">Lisbon</p>
-                </div>
-                {t.state === "paid" && <Stamp tone="paid">Paid</Stamp>}
-                {t.state === "due" && <Stamp tone="stamp">Due</Stamp>}
-                {t.state === "resale" && <Stamp tone="sea">Resale</Stamp>}
-              </div>
-              <div className="flex items-center gap-2">
-                <Avatar id={t.who} size={26} />
-                <span className="text-[15px] font-semibold capitalize">{t.who}</span>
-                <span className="ml-auto font-mono text-[12px] text-ink-faint">Alfama flat</span>
-              </div>
-            </div>
-            <div className="perf w-3" />
-            <div className="flex w-[104px] flex-col items-center justify-center bg-paper-deep/60">
-              <p className="eyebrow">Face</p>
-              <p className="font-mono text-[24px] font-semibold">$40</p>
-            </div>
-          </motion.div>
-        ))}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.75, duration: 0.4 }}
-          className="absolute -bottom-1 right-2 rounded-full border border-rule bg-card px-4 py-2 text-[13px] font-semibold shadow-sm sm:right-6"
-        >
-          7 of 8 paid · booker can’t book yet
-        </motion.div>
-      </div>
+      <a href="#film" aria-label="Scroll to how it works" className="cue rise-in absolute bottom-7 left-1/2 -ml-3 text-fg-3 hover:text-fg-2" style={{ animationDelay: "3.2s" }}>
+        <ChevronDown className="size-6" />
+      </a>
     </section>
   );
 }

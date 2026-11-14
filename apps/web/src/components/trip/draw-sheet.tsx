@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Dices } from "lucide-react";
 import { Sheet } from "@/components/sheet";
-import { Avatar } from "@/components/bits";
+import { Face } from "@/components/bits";
 import { PEOPLE } from "@/data/sample";
 import { shuffledOrder, useTrip } from "@/data/store";
 import { pad2 } from "@/lib/utils";
@@ -35,11 +35,11 @@ export function DrawSheet({ open, onClose }: { open: boolean; onClose: () => voi
     <Sheet open={open} onOpenChange={(o) => !o && onClose()} eyebrow="All beds paid" title={phase === "done" ? "Beds are drawn" : "Who gets the double room?"}>
       {phase === "ready" && (
         <div>
-          <p className="text-[15px] leading-relaxed text-ink-soft">
+          <p className="text-[15px] leading-relaxed text-fg-2">
             Nobody gets dibs on the best bed by being first or loudest. A verifiable random number from OutLayer decides, and anyone can check it.
           </p>
           <button
-            className="btn-ink focus-ring mt-6 w-full"
+            className="pill-light focus-ring mt-6 w-full"
             onClick={() => {
               setTick(0);
               setPhase("rolling");
@@ -60,20 +60,20 @@ export function DrawSheet({ open, onClose }: { open: boolean; onClose: () => voi
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
-                className="flex items-center gap-3 rounded-lg border border-rule bg-paper px-3 py-2"
+                className="flex items-center gap-3 rounded-lg border border-line bg-white/[0.04] px-3 py-2"
               >
-                <span className="w-6 font-mono text-[12px] text-ink-faint">{pad2(s.n)}</span>
-                {s.holder && <Avatar id={s.holder} size={22} />}
+                <span className="w-6 font-mono text-[12px] text-fg-3">{pad2(s.n)}</span>
+                {s.holder && <Face id={s.holder} size={22} />}
                 <span className="w-16 truncate text-[14px] font-semibold">{s.holder ? PEOPLE[s.holder].name : ""}</span>
-                <span className={phase === "done" ? "truncate text-[13.5px] text-ink" : "truncate text-[13.5px] text-ink-faint blur-[0.4px]"}>{bed}</span>
+                <span className={phase === "done" ? "truncate text-[13.5px] text-fg" : "truncate text-[13.5px] text-fg-3 blur-[0.4px]"}>{bed}</span>
               </motion.li>
             );
           })}
       </ol>
       {phase === "done" && (
         <>
-          <p className="mt-4 font-mono text-[11.5px] text-ink-faint">Proof: OutLayer VRF output and attestation, linked on the receipt.</p>
-          <button className="btn-ink focus-ring mt-4 w-full" onClick={onClose}>
+          <p className="mt-4 font-mono text-[11.5px] text-fg-3">Proof: OutLayer VRF output and attestation, linked on the receipt.</p>
+          <button className="pill-light focus-ring mt-4 w-full" onClick={onClose}>
             See my bed
           </button>
         </>

@@ -1,76 +1,85 @@
 import { Link } from "react-router";
 import { CHAINS, PEOPLE } from "@/data/sample";
-import type { ChainId } from "@/data/types";
+import type { ChainId, SpotStatus } from "@/data/types";
+import { Badge } from "@/components/reui/badge";
 import { cn } from "@/lib/utils";
+import { LetterFace } from "@/components/motion/face";
 
 export function Wordmark({ className }: { className?: string }) {
   return (
-    <Link to="/" className={cn("focus-ring inline-flex items-center gap-2 rounded-md", className)} aria-label="Dibs home">
-      <svg width="30" height="22" viewBox="0 0 30 22" aria-hidden>
-        <path
-          d="M3 1h24a2 2 0 0 1 2 2v4a4 4 0 0 0 0 8v4a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-4a4 4 0 0 0 0-8V3a2 2 0 0 1 2-2Z"
-          fill="var(--color-ink)"
-        />
-        <path d="M19 4v14" stroke="var(--color-paper)" strokeWidth="1.4" strokeDasharray="2 2.2" />
-        <circle cx="10" cy="11" r="3.2" fill="var(--color-sun)" />
-      </svg>
-      <span className="text-[21px] font-extrabold tracking-[-0.03em]">dibs</span>
+    <Link to="/" className={cn("focus-ring rounded-md text-[22px] font-bold tracking-[-0.04em] text-fg", className)} aria-label="Dibs home">
+      dibs
     </Link>
   );
 }
 
-export function Avatar({ id, size = 28, ring = false }: { id: string; size?: number; ring?: boolean }) {
-  const p = PEOPLE[id];
-  const name = p?.name ?? "?";
-  const hue = p?.hue ?? 30;
+/* Hoy-style face chip: a bright disc whose initials are the eyes, plus a small smile. */
+const FACE_COLORS: Record<string, string> = {
+  maya: "#fb923c",
+  sam: "#38bdf8",
+  leo: "#4ade80",
+  ana: "#f472b6",
+  tomas: "#facc15",
+  jun: "#a78bfa",
+  chloe: "#2dd4bf",
+  kofi: "#fb7185",
+  priya: "#c084fc",
+};
+
+export function Face({ id, size = 32, ring = false, className }: { id: string; size?: number; ring?: boolean; className?: string }) {
+  const name = PEOPLE[id]?.name ?? "?";
+  return <LetterFace name={name} seed={id} color={FACE_COLORS[id]} size={size} className={cn(ring && "ring-2 ring-void", className)} />;
+}
+
+export function FaceStack({ ids, size = 26, max = 8 }: { ids: string[]; size?: number; max?: number }) {
+  const shown = ids.slice(0, max);
   return (
-    <span
-      title={name}
-      className={cn("inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-ink", ring && "ring-2 ring-card")}
-      style={{
-        width: size,
-        height: size,
-        fontSize: size * 0.42,
-        background: `oklch(0.86 0.09 ${hue})`,
-        boxShadow: `inset 0 0 0 1px oklch(0.7 0.1 ${hue} / 0.5)`,
-      }}
-    >
-      {name.slice(0, 1)}
+    <span className="inline-flex items-center">
+      {shown.map((id, i) => (
+        <Face key={id} id={id} size={size} ring className={i ? "-ml-2" : ""} />
+      ))}
+      {ids.length > max && <span className="ml-1.5 text-[12px] text-fg-2">+{ids.length - max}</span>}
     </span>
   );
 }
 
 const CHAIN_DOT: Record<ChainId, string> = {
-  near: "#1e1b16",
-  base: "#2b5aa6",
-  solana: "#7c4ad9",
-  arbitrum: "#2d8ad6",
-  ethereum: "#6b6f86",
+  near: "#ececea",
+  base: "#3b82f6",
+  solana: "#a78bfa",
+  arbitrum: "#38bdf8",
+  ethereum: "#94a3b8",
 };
 
 export function ChainTag({ id, className }: { id: ChainId; className?: string }) {
   const c = CHAINS[id];
   return (
-    <span className={cn("inline-flex items-center gap-1.5 font-mono text-[11px] text-ink-soft", className)}>
-      <span className="size-2 rounded-full" style={{ background: CHAIN_DOT[id] }} />
+    <span className={cn("inline-flex items-center gap-1.5 text-[12.5px] text-fg-2", className)}>
+      <span className="size-1.5 rounded-full" style={{ background: CHAIN_DOT[id] }} />
       {c.token} on {c.name}
     </span>
   );
 }
 
-export function Stamp({ tone, children, className }: { tone: "paid" | "stamp" | "sea" | "ink"; children: React.ReactNode; className?: string }) {
-  const tones = {
-    paid: "border-paid text-paid bg-paid-soft",
-    stamp: "border-stamp text-stamp bg-stamp-soft",
-    sea: "border-sea text-sea bg-sea-soft",
-    ink: "border-ink-soft text-ink-soft",
-  } as const;
-  return <span className={cn("stamp", tones[tone], className)}>{children}</span>;
+const STATUS: Record<SpotStatus, { label: string; variant: "success-light" | "warning-light" | "info-light" | "invert-light" }> = {
+  paid: { label: "Paid", variant: "success-light" },
+  held: { label: "Due", variant: "warning-light" },
+  listed: { label: "For resale", variant: "info-light" },
+  open: { label: "Open", variant: "invert-light" },
+};
+
+export function StatusBadge({ status, className }: { status: SpotStatus; className?: string }) {
+  const s = STATUS[status];
+  return (
+    <Badge variant={s.variant} radius="full" size="lg" className={cn("px-2.5 font-semibold", className)}>
+      {s.label}
+    </Badge>
+  );
 }
 
 export function NearMark({ className }: { className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-ink-faint", className)}>
+    <span className={cn("inline-flex items-center gap-1.5 text-[12.5px] font-medium text-fg-2", className)}>
       <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden>
         <path d="M4 4h3.2l9.6 11.2V4H20v16h-3.2L7.2 8.8V20H4z" fill="currentColor" />
       </svg>

@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { RotateCcw, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import { useTrip } from "@/data/store";
 import { PEOPLE } from "@/data/sample";
-import { Avatar, Wordmark } from "@/components/bits";
+import { Face, Wordmark } from "@/components/bits";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { TripStrip } from "@/components/landing/strip";
 import { PassHeader } from "@/components/trip/pass-header";
 import { FundingMeter } from "@/components/trip/funding-meter";
 import { SpotList } from "@/components/trip/spot-list";
@@ -22,92 +25,101 @@ const VIEWERS = [
 ];
 
 export function TripPage() {
-  const { trip, dispatch } = useTrip();
+  const { trip, dispatch, paidCount } = useTrip();
   const [viewer, setViewer] = useState("leo");
   const [pay, setPay] = useState<number | null>(null);
   const [exit, setExit] = useState<number | null>(null);
   const [proof, setProof] = useState(false);
   const [draw, setDraw] = useState(false);
+  const [float, setFloat] = useState(false);
   const opens: Opens = { pay: setPay, exit: setExit, proof: () => setProof(true), draw: () => setDraw(true) };
+  const active = pay !== null ? viewer : exit !== null ? viewer : proof ? trip.booker : undefined;
+
+  useEffect(() => {
+    const look = () => setFloat(scrollY > 8);
+    addEventListener("scroll", look, { passive: true });
+    look();
+    return () => removeEventListener("scroll", look);
+  }, []);
 
   return (
-    <div className="min-h-dvh pb-16">
-      <header className="sticky top-0 z-30 border-b border-rule/70 bg-paper/85 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-[1120px] items-center justify-between px-4 sm:px-6">
+    <div className="page-in min-h-dvh pb-24">
+      <header className="sticky top-0 z-30">
+        <div
+          className={cn("absolute inset-0 transition-opacity duration-300", float ? "opacity-100" : "opacity-0")}
+          style={{ background: "rgb(14 14 14 / 0.82)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+        />
+        <div className="relative mx-auto flex h-16 max-w-[1120px] items-center justify-between gap-4 px-5">
           <Wordmark />
-          <div className="flex items-center gap-1">
-            <Link to="/" className="focus-ring hidden rounded-full px-3 py-1.5 text-[14px] text-ink-soft hover:text-ink sm:inline-flex">
-              How Dibs works
-            </Link>
-            <button className="btn-paper btn-sm focus-ring" onClick={() => navigator.clipboard?.writeText(location.href)}>
-              <Share2 className="size-3.5" /> Invite
-            </button>
+          <div className="hidden md:block">
+            <TripStrip paid={paidCount} active={active} clock={paidCount === trip.spots.length ? "ready" : "2d 17h"} />
           </div>
+          <button
+            className="pill-dark pill-sm focus-ring press"
+            onClick={() => {
+              navigator.clipboard?.writeText(location.href).catch(() => undefined);
+              toast("Invite link copied", { description: "Anyone with the link can claim an open bed or join the waitlist." });
+            }}
+          >
+            <Share2 className="size-3.5" /> Invite
+          </button>
         </div>
       </header>
 
-      <div className="mx-auto max-w-[1120px] px-4 sm:px-6">
-        <PreviewBar viewer={viewer} setViewer={setViewer} onReset={() => dispatch({ type: "reset" })} />
+      <main className="mx-auto max-w-[1120px] px-5">
+        <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+          <span className="shrink-0 text-[12px] text-fg-3">Preview as</span>
+          <ToggleGroup type="single" value={viewer} onValueChange={(v) => v && setViewer(v)} className="gap-1">
+            {VIEWERS.map((v) => (
+              <ToggleGroupItem
+                key={v.id}
+                value={v.id}
+                className="press h-8 shrink-0 gap-1.5 rounded-full border-0 py-1 pl-1 pr-3 text-[13px] text-fg-2 hover:bg-white/[0.05] hover:text-fg data-[state=on]:bg-fg data-[state=on]:text-void"
+              >
+                <Face id={v.id} size={22} />
+                <span className="font-semibold">{PEOPLE[v.id].name}</span>
+                <span className="opacity-60">{v.role}</span>
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+          <button onClick={() => dispatch({ type: "reset" })} className="press focus-ring ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] text-fg-3 hover:text-fg" aria-label="Reset the preview trip">
+            <RotateCcw className="size-3.5" /> Reset
+          </button>
+        </div>
 
-        <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <div className="flex min-w-0 flex-col gap-5">
+        <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16">
+          <div className="flex min-w-0 flex-col gap-10">
             <PassHeader />
             <div className="lg:hidden">
               <NextStep viewer={viewer} open={opens} />
             </div>
-            <div className="ticket p-5">
-              <FundingMeter />
-            </div>
+            <FundingMeter />
             <div>
-              <div className="mb-3 flex items-baseline justify-between">
-                <h2 className="text-[18px] font-bold tracking-[-0.02em]">The beds</h2>
-                <p className="font-mono text-[11.5px] text-ink-faint">{trip.drawn ? "drawn by VRF" : "drawn when all are paid"}</p>
+              <div className="mb-3 flex items-baseline justify-between px-1">
+                <h2 className="display text-[20px]">The beds</h2>
+                <p className="text-[12.5px] text-fg-3">{trip.drawn ? "drawn fairly" : "drawn when all are paid"}</p>
               </div>
               <SpotList viewer={viewer} onPay={setPay} onExit={setExit} />
             </div>
           </div>
-
-          <aside className="flex flex-col gap-5">
+          <aside className="flex flex-col gap-10 lg:sticky lg:top-24 lg:self-start">
             <div className="hidden lg:block">
               <NextStep viewer={viewer} open={opens} />
             </div>
             <Rules />
             <Waitlist />
             <ActivityFeed />
+            <Link to="/" className="text-[12.5px] text-fg-3 transition-colors hover:text-fg">
+              How Dibs works →
+            </Link>
           </aside>
         </div>
-      </div>
+      </main>
 
       <PaySheet n={pay} who={viewer} onClose={() => setPay(null)} />
       <ResaleSheet n={exit} onClose={() => setExit(null)} />
       <ProofSheet open={proof} onClose={() => setProof(false)} />
       <DrawSheet open={draw} onClose={() => setDraw(false)} />
-    </div>
-  );
-}
-
-function PreviewBar({ viewer, setViewer, onReset }: { viewer: string; setViewer: (v: string) => void; onReset: () => void }) {
-  return (
-    <div className="mt-4 flex items-center gap-2 overflow-x-auto rounded-full border border-dashed border-rule-strong bg-card/60 p-1.5 [scrollbar-width:none]">
-      <span className="shrink-0 pl-2.5 pr-1 font-mono text-[10.5px] uppercase tracking-[0.14em] text-ink-faint">See it as</span>
-      {VIEWERS.map((v) => (
-        <button
-          key={v.id}
-          onClick={() => setViewer(v.id)}
-          aria-pressed={viewer === v.id}
-          className={cn(
-            "focus-ring flex shrink-0 items-center gap-2 rounded-full py-1 pl-1 pr-3 text-[13.5px] transition-colors",
-            viewer === v.id ? "bg-ink text-card" : "hover:bg-paper-deep",
-          )}
-        >
-          <Avatar id={v.id} size={22} />
-          <span className="font-semibold">{PEOPLE[v.id].name}</span>
-          <span className={viewer === v.id ? "text-card/60" : "text-ink-faint"}>{v.role}</span>
-        </button>
-      ))}
-      <button onClick={onReset} className="focus-ring ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-[13px] text-ink-soft hover:bg-paper-deep" aria-label="Reset the preview trip">
-        <RotateCcw className="size-3.5" /> Reset
-      </button>
     </div>
   );
 }

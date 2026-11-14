@@ -1,0 +1,91 @@
+/* Motion, after Hoy: one easing for everything that arrives, a shared 2.2 s blink beat,
+   faces that rise from below and then bob and sway on their own periods. */
+:root {
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --oe: cubic-bezier(0, 0, 0.58, 1);
+  /* SwiftUI spring(response .5, damping .82) as a curve: about 8% past and back. */
+  --spring: linear(0, 0.2 6%, 0.62 15%, 0.94 26%, 1.07 36%, 1.08 42%, 1.04 54%, 1 66%, 0.995 80%, 1);
+}
+
+/* Word sweep */
+.sweep-word {
+  opacity: 0;
+  filter: blur(8px);
+  translate: 0 8px;
+  transition: opacity 0.55s var(--oe), filter 0.55s var(--oe), translate 0.55s var(--oe);
+}
+.sweep-word[data-on] {
+  opacity: 1;
+  filter: blur(0);
+  translate: 0 0;
+}
+
+/* Section rise */
+.rise {
+  opacity: 0;
+  translate: 0 8px;
+  transition: opacity 0.8s var(--ease), translate 0.8s var(--ease);
+}
+.rise[data-seen] {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* Letter-face blink: the eyes close for a beat every k beats of 2.2 s. */
+.face-eyes {
+  animation: face-blink calc(2.2s * var(--k, 3)) linear var(--ph, 0s) infinite;
+}
+@keyframes face-blink {
+  0%, 93%, 100% { transform: scaleY(1) }
+  95% { transform: scaleY(0.12) }
+}
+
+/* Hero face: rises from below the fold, then bobs. */
+@keyframes face-up { 0% { translate: 0 90vh } }
+@keyframes face-bob-in { 0% { translate: 0 0 } 100% { translate: 0 -2.5px } }
+@keyframes face-bob { 0% { translate: 0 -2.5px } 100% { translate: 0 2.5px } }
+.hello-face { animation: face-up 1s var(--ease) 0.4s backwards }
+.hello-bob { animation: face-bob-in 0.95s ease-in-out 1.5s both, face-bob 1.9s ease-in-out 2.45s infinite alternate }
+
+/* The crowd: each face rises in, then bobs and sways on its own clock. */
+@keyframes cf-up { 0% { transform: translateY(var(--from)) rotate(var(--tilt)); opacity: 0 } }
+@keyframes cf-bob { 0% { translate: 0 calc(var(--bob) * -1) } 100% { translate: 0 var(--bob) } }
+@keyframes cf-sway { 0% { translate: calc(var(--sway) * -1) 0; rotate: calc(var(--turn) * -1) } 100% { translate: var(--sway) 0; rotate: var(--turn) } }
+.cf { animation: cf-up var(--dur) var(--ease) var(--delay) backwards }
+.cf-b { animation: cf-bob var(--bobT) ease-in-out var(--ph1) infinite alternate }
+.cf-s { animation: cf-sway var(--swayT) ease-in-out var(--ph2) infinite alternate }
+
+/* Things that arrive after the headline */
+@keyframes rise-in { 0% { opacity: 0; transform: translateY(8px) } }
+.rise-in { animation: rise-in 0.8s var(--ease) backwards }
+
+/* Scroll cue */
+@keyframes cue { 50% { translate: 0 6px } }
+.cue { animation: cue 1.8s ease-in-out infinite }
+
+/* Sonar on the active face */
+@keyframes sonar-s { 100% { scale: 1.32 } }
+@keyframes sonar-o {
+  0% { opacity: 0; animation-timing-function: cubic-bezier(0.42, 0, 1, 1) }
+  20% { opacity: 0.64; animation-timing-function: var(--oe) }
+  100% { opacity: 0 }
+}
+.sonar::before,
+.sonar::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 999px;
+  border: 1.5px solid currentColor;
+  pointer-events: none;
+  animation: sonar-s 1.6s var(--oe) infinite, sonar-o 1.6s linear infinite;
+}
+.sonar::after { animation-delay: 0.8s }
+
+/* Page fade between routes */
+@keyframes page-in { 0% { opacity: 0 } }
+.page-in { animation: page-in 0.3s var(--ease) both }
+
+/* Buttons and links: colour and press */
+.press { transition: transform 0.2s var(--ease), background-color 0.2s, color 0.2s, border-color 0.2s }
+.press:active { transform: scale(0.96) }
