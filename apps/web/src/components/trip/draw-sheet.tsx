@@ -6,12 +6,12 @@ import { Face } from "@/components/bits";
 import { PEOPLE } from "@/data/sample";
 import { shuffledOrder, useTrip } from "@/data/store";
 import { pad2 } from "@/lib/utils";
-import { explorer } from "@/live/api";
+import { explorer, getTrip } from "@/live/api";
 
 /* The fair bed draw. Wired build: draw_beds() asks OutLayer for a VRF output, then assigns beds
    by a Fisher-Yates shuffle seeded with it. Anyone can re-run the shuffle from the proof. */
 export function DrawSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { trip, act, live } = useTrip();
+  const { trip, act, live, code } = useTrip();
   const [phase, setPhase] = useState<"ready" | "rolling" | "done">(trip.drawn ? "done" : "ready");
   const [tick, setTick] = useState(0);
   const [tx, setTx] = useState<string | undefined>();
@@ -21,7 +21,25 @@ export function DrawSheet({ open, onClose }: { open: boolean; onClose: () => voi
   // trip reads back as drawn.
   useEffect(() => {
     if (!live || phase !== "rolling") return;
-    act.draw().then((r) => setTx(r.tx)).catch((e) => setErr(e instanceof Error ? e.message : "Draw failed"));
+    act
+      .draw()
+      .then(async (r) => {
+        setTx(r.tx);
+        // The request returns once OutLayer has answered or timed out. If no order landed, say why and allow a retry.
+        const v = await getTrip(code).catch(() => null);
+        if (v && !v.trip.drawn) {
+          setErr(
+            v.trip.last_error === "E_NO_RESULT"
+              ? "OutLayer didn’t answer in time (its testnet queue is busy). Nothing changed. Draw again."
+              : `The contract refused the draw: ${v.trip.last_error || "unknown reason"}. Draw again.`,
+          );
+          setPhase("ready");
+        }
+      })
+      .catch((e) => {
+        setErr(e instanceof Error ? e.message : "Draw failed");
+        setPhase("ready");
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
   useEffect(() => {
@@ -55,6 +73,7 @@ export function DrawSheet({ open, onClose }: { open: boolean; onClose: () => voi
           <button
             className="pill-light focus-ring mt-6 w-full"
             onClick={() => {
+              setErr(null);
               setTick(0);
               setPhase("rolling");
             }}
