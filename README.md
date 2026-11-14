@@ -183,6 +183,21 @@ Deployed ids are in [deploy/testnet.json](deploy/testnet.json); the deploy log i
   Singapore and Draw trips each have their own. New trips are capped at 6 beds and $50 a bed, 2 per person a day.
 - Each trip address is its own Email Routing rule, added when the trip is created.
 
+## Disclosures
+
+- **Built in the hackathon window.** Every commit in this repository is from 14–15 November 2026; there is no earlier code.
+- **AI-written code.** Built with Claude Code (Anthropic) and Codex (OpenAI) as coding agents, directed and reviewed by the author.
+- **Libraries.** near-sdk 5 and near-workspaces (contracts); near-api-js 7, Hono and zod on Cloudflare Workers (API);
+  React 19, Vite, Tailwind CSS 4, shadcn/ui with ReUI, motion, vaul, qrcode.react, `@hot-labs/near-connect`
+  ([patched](patches/@hot-labs__near-connect@0.12.0.patch)), `@solana/web3.js` and `@noble/*` (app); Remotion (film).
+- **Services.** NEAR Intents 1Click, OutLayer, NEAR AI Cloud, Sputnik DAO, Cloudflare Workers and Email Routing,
+  Lithic (sandbox card rails), ElevenLabs (film narration).
+- **Generated media.** The landing page portraits are generated images of fictional people (GPT Image via Codex; every
+  prompt is in [PROVENANCE.md](apps/web/public/faces/PROVENANCE.md)). No real people.
+- **Test key in the repo.** `outlayer/verifier/tests/fixtures/dibs_test_dkim_key.pem` signs mail for the fake
+  `dibs-test.example` domain, which only the testnet contract allowlists.
+- **Other project filed at NEAR HACKATHON by the same author:** <!-- OTHER_FILED_PROJECT: set at filing --> to be named at filing.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
