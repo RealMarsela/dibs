@@ -1,5 +1,5 @@
 {
- "billed_chars": 2381,
+ "billed_chars": 2574,
  "calls": [
   {
    "id": "L01",
@@ -76,6 +76,13 @@
    "chars_sent": 376,
    "billed": 376,
    "header": "165",
+   "model": "eleven_v4"
+  },
+  {
+   "id": "L03W",
+   "chars_sent": 193,
+   "billed": 193,
+   "header": "85",
    "model": "eleven_v4"
   }
  ]

@@ -26,6 +26,13 @@
       "note": "head of the original L03 generation (cut at 12.55 s); full take in voice/raw/L03-full.mp3"
     },
     {
+      "id": "L03W",
+      "beat": "pay",
+      "variant": "W",
+      "text": "Now Leo pays for his bed. He claims it with his own wallet, or with a passkey if he has none. He pays with USDC on Base, NEAR Intents swaps it, and it lands in bed three.",
+      "note": "option (a) for Gabriel (wallet-first app, 15 Nov): replaces the L03 head; not in the cut unless he picks (a)"
+    },
+    {
       "id": "L03A",
       "beat": "pay-tail",
       "variant": "A",

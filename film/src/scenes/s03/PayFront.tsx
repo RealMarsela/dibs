@@ -4,6 +4,7 @@ import { FootageSlot, hasFootage, type Crop } from "../../components/Footage";
 import { WIN, type T } from "./timing";
 import { PayScreen } from "./PayScreen";
 import { V } from "./variant";
+import { HEAD } from "../../timeline.generated";
 
 /* The pay window's content (WIN-sized slot). With the real clip (pay-base.mp4, a live testnet payment): three segments,
    each its own Sequence + FootageSlot startFrom, joined by hard cuts where the app swaps the sheet content (never two
@@ -16,11 +17,18 @@ import { V } from "./variant";
         (clip 20.0 s, all four ticked) lands on t.tail.youIn, and the payment finishes on screen until the shrink.
    Without the clip: one slot whose placeholder (PayScreen) rebuilds the same three steps. */
 const FPS = 30;
+/* Wallet-first take (option (a), coordinator 15 Nov): s03-wallet-first.mp4, 1280x720 live testnet trip lisiwutm. The
+   dialog "This bed is yours" with [Connect a NEAR wallet] / [Pay with an EVM wallet (OKX, MetaMask…)] and the
+   "Judge demo: no wallet, use a passkey" link is up from 2.25 s (measured from frame 0); the cursor enters at 4.85 s and taps Connect a NEAR wallet at ~5.75 s (landing on "wallet");
+   the pressed state is
+   held from 6.0 s, before NEAR Connect's picker (third-party wallet logos) appears at 6.25 s; the picker is never shown. In 1920-space the
+   dialog spans x 630-1288, y 292-785. */
+const WALLET = { id: "s03-wallet-first", startS: 3.15, freezeS: 6.0, crop: { x: 618, y: 538.5 - (682 * 888) / 1150 / 2, w: 682, h: (682 * 888) / 1150 } };
 const SEG = { pk: 3.3, pkFreeze: 4.1, chain: 4.6, chainFreeze: 7.4, track: 12.6, done: 19.0, youIn: 20.0 };
 
-function Seg({ from, until, startS, crop, freezeS }: { from: number; until: number; startS: number; crop: Crop; freezeS?: number }) {
+function Seg({ from, until, startS, crop, freezeS, id = "pay-base" }: { from: number; until: number; startS: number; crop: Crop; freezeS?: number; id?: string }) {
   const startFrom = Math.round(startS * FPS);
-  const slot = <FootageSlot id="pay-base" width={WIN.w} height={WIN.h} crop={crop} startFrom={startFrom} placeholder={null} />;
+  const slot = <FootageSlot id={id} width={WIN.w} height={WIN.h} crop={crop} startFrom={startFrom} placeholder={null} />;
   return (
     <Sequence from={from} durationInFrames={until - from} layout="none">
       <div style={{ position: "absolute", inset: 0 }}>
@@ -51,7 +59,11 @@ export function PayFront({ f, t, crop }: { f: number; t: T; crop: Crop }) {
   }
   return (
     <div style={{ position: "relative", width: WIN.w, height: WIN.h }}>
-      <Seg from={t.win0} until={t.chain0} startS={SEG.pk} freezeS={SEG.pkFreeze} crop={crop} />
+      {HEAD === "L03W" && hasFootage(WALLET.id) ? (
+        <Seg id={WALLET.id} from={t.win0} until={t.chain0} startS={WALLET.startS} freezeS={WALLET.freezeS} crop={WALLET.crop} />
+      ) : (
+        <Seg from={t.win0} until={t.chain0} startS={SEG.pk} freezeS={SEG.pkFreeze} crop={crop} />
+      )}
       {V === "A" ? (
         <Seg from={t.chain0} until={t.flip0 + 30} startS={SEG.chain} freezeS={SEG.chainFreeze} crop={crop} />
       ) : (

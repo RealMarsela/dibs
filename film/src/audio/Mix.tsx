@@ -25,7 +25,7 @@ export const Mix: React.FC = () => (
   <>
     {LINES.map((l) => (
       <Sequence key={l.id} from={l.from} durationInFrames={Math.ceil((l.dur + 1) * 30)} layout="none">
-        <Audio src={staticFile(`audio/vo/${l.id}.mp3`)} volume={1} />
+        <Audio src={staticFile(`audio/vo/${l.file}.mp3`)} volume={1} />
       </Sequence>
     ))}
     <Sequence from={MUSIC.at} layout="none">

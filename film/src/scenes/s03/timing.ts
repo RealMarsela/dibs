@@ -1,5 +1,5 @@
 import { SCENES } from "../../scene";
-import { TAIL } from "../../timeline.generated";
+import { HEAD, TAIL } from "../../timeline.generated";
 import { V as VARIANT } from "./variant";
 import { kf, lerp } from "../../lib/anim";
 import { EASE, IN_OUT_STRONG, LIST_SCALE, OUT_STRONG } from "../../tokens";
@@ -9,7 +9,7 @@ export const K = 1.5; // Leo's single-row card scale (BedRow is already film px)
 /** The pay-base slot box: 1150 wide (crop 450 CSS px -> x2.56), as tall as the 96 px margins allow. */
 export const WIN = { w: 1150, h: 888 };
 /** The window hugs each PaySheet step (the slot stays WIN-sized and centred, so this only trims the crop vertically). */
-export const FRONT_H = { passkey: 670, chain: 859, track: 757, done: 869 }; // CSS 262 / 336 / 296 / 340 tall at x2.556
+export const FRONT_H = { passkey: HEAD === "L03W" ? 850 : 670, chain: 859, track: 757, done: 869 }; // CSS 262 / 336 / 296 / 340 tall at x2.556
 /** Variant B: the window's pose while the testnet chip sits under it (stage y, scale). */
 export const TAIL_POSE = { y: -40, s: 0.9 };
 export const BACK = VARIANT === "A" ? { w: 1040, h: 657 } : { w: 1200, h: 560 };
@@ -27,7 +27,7 @@ export function timing(cue: Cue) {
   const c = (w: string, n = 0) => cue("L03", w, n);
   const D = SCENES.S03.to - SCENES.S03.from;
   const pays = c("pays");
-  const gas = c("gas");
+  const gas = HEAD === "L03W" ? c("none") : c("gas"); // wallet-first take: "...or with a passkey if he has none."
   const base = c("base");
   const near = c("near");
   const swaps = c("swaps");
@@ -49,7 +49,7 @@ export function timing(cue: Cue) {
     win0: pays + 9,
     win1: pays + 33,
     passkey: c("passkey"),
-    key: c("key"),
+    key: HEAD === "L03W" ? c("wallet") : c("key"),
     wallet: c("wallet"),
     gas,
     pkPress: gas + 6,

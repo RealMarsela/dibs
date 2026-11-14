@@ -66,6 +66,12 @@ export const FOOTAGE_READY: Record<string, { w: number; h: number; fps: number; 
   "fps": 24.0,
   "seconds": 11.542
  },
+ "s03-wallet-first": {
+  "w": 1280,
+  "h": 720,
+  "fps": 24.0,
+  "seconds": 9.042
+ },
  "wallet-near-testnet-take1": {
   "w": 2880,
   "h": 1620,
