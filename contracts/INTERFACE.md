@@ -1,4 +1,4 @@
-# Dibs contract interface (Lane A, v1.1)
+# Dibs contract interface (Lane A, v1.2: submit_proof also open to relayers)
 
 Binding for Lane B (outlayer verifier) and Lane C (api). All JSON; u128 and u64 as decimal strings.
 Stable error codes start with `E_`. A panic in a direct call carries the code as its message
@@ -92,7 +92,7 @@ Init (owner): `new{owner, usdc, outlayer, project_id, domains, run_fee}`. Owner 
 | `reserve_wait{trip, slot, buyer}` | buyer or relayer | 60 T | reserves `w<slot>-<trip>.<dibs>` |
 | `leave_waitlist{trip}` | buyer | 100 T | funded entry: `price` returned in USDC; bare reservation: freed |
 | `request_draw{trip}` | anyone, deposit >= 0.02 NEAR | 300 T | all beds Paid. Sets `drawn` (permutation of 1..n) and `drawn_out` |
-| `submit_proof{trip, blob_url, blob_sha256}` | booker, deposit >= 0.02 NEAR, before `book_by` | 300 T | all beds Paid. On acceptance stores `proof`, then DAO `add_proposal` Transfer(booker, total) and `act_proposal` VoteApprove; `payout` goes `None -> Added(id) -> Acted(id) -> Done` (Done only after the proposal reads back Approved) |
+| `submit_proof{trip, blob_url, blob_sha256}` | booker or a relayer (v1.2; anyone else gets `E_NOT_BOOKER`), deposit >= 0.02 NEAR, before `book_by` | 300 T | all beds Paid. On acceptance stores `proof`, then DAO `add_proposal` Transfer(booker, total; the payout goes only to the booker even when a relayer submits) and `act_proposal` VoteApprove; `payout` goes `None -> Added(id) -> Acted(id) -> Done` (Done only after the proposal reads back Approved) |
 | `retry_payout{trip}` | anyone | 300 T | re-runs a stuck payout step |
 | `refund_all{trip, limit?=2}` | anyone | 300 T | after `book_by`, no proof, none pending. `limit` 1..3 per call: DAO Transfer proposal per bed holder, then waitlist buyers directly. Call until `refunded` is true |
 | `set_paid_from{trip, n, chain}` | relayer | | display label only |

@@ -9,16 +9,16 @@ NEAR_NETWORK = "testnet"
 NEAR_RPC_URLS = "https://test.rpc.fastnear.com,https://rpc.testnet.near.org"
 ONECLICK_URL = "https://1click.chaindefuser.com"
 # TODO(coordinator): fill after Lane A deploys.
-DIBS_CONTRACT = "dibs-REPLACE.testnet"
-USDC_CONTRACT = "usdc-REPLACE.testnet"
-RELAYER_ACCOUNT_ID = "dibs-relayer-REPLACE.testnet"
-ALLOWED_ORIGIN = "*"
+DIBS_CONTRACT = "dibs-0eb9ae.testnet"
+USDC_CONTRACT = "usdc.own-0eb9ae.testnet"
+RELAYER_ACCOUNT_ID = "relayer.dao-0eb9ae.testnet"
+ALLOWED_ORIGIN = "https://preview.dibs-trips.pages.dev,http://localhost:4321"
 # Public base URL used to build blob capability URLs (no trailing slash). Empty = request origin.
-PUBLIC_BASE_URL = ""
+PUBLIC_BASE_URL = "https://dibs-api.gabrielaxy.workers.dev"
 
 [[r2_buckets]]
 binding = "BLOBS"
-bucket_name = "dibs-blobs-testnet"
+bucket_name = "dibs-proof-blobs"
 
 [env.mainnet]
 name = "dibs-api-mainnet"

@@ -11,7 +11,13 @@ import { tripRoute } from "./trip";
 
 export function createApp() {
   const app = new Hono<{ Bindings: Env }>();
-  app.use("*", (c, next) => cors({ origin: c.env.ALLOWED_ORIGIN || "*", maxAge: 600 })(c, next));
+  app.use("*", (c, next) => {
+    const allowed = (c.env.ALLOWED_ORIGIN || "*").split(",").map((o) => o.trim()).filter(Boolean);
+    return cors({
+      origin: (origin) => (allowed.includes("*") ? "*" : allowed.includes(origin) ? origin : null),
+      maxAge: 600,
+    })(c, next);
+  });
   app.get("/health", (c) =>
     c.json({ ok: true, network: c.env.NEAR_NETWORK, contract: c.env.DIBS_CONTRACT, usdc: c.env.USDC_CONTRACT, relayer: c.env.RELAYER_ACCOUNT_ID }),
   );

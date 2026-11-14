@@ -235,7 +235,7 @@
   "generated_by": "contracts/tests (near-workspaces sandbox)",
   "unmet_or_unenforced": [
     {
-      "detail": "283746 bytes; see HANDBACK.md for the cost and the options",
+      "detail": "283757 bytes; see HANDBACK.md for the cost and the options",
       "rule": "dibs wasm <= 110 KB after wasm-opt -Oz",
       "status": "NOT MET"
     },

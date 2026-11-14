@@ -9,8 +9,8 @@ import { bedIndex, tripCode } from "./schemas";
 
 export const holdRoute = new Hono<{ Bindings: Env }>();
 
-/** 0.00125 NEAR USDC storage deposit plus margin; the contract refunds the excess to the relayer. */
-const HOLD_DEPOSIT = 1_300_000_000_000_000_000_000n;
+/** hold / reserve_wait are not payable: the dibs contract pays the USDC registration from its own balance. */
+const HOLD_DEPOSIT = 0n;
 const GAS = 100_000_000_000_000n;
 
 const accountId = z.string().min(2).max(64).regex(/^[a-z0-9]([a-z0-9._-]*[a-z0-9])?$/);

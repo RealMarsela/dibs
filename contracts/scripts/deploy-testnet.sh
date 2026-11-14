@@ -7,7 +7,7 @@ set -euo pipefail
 . "$(dirname "$0")/near-lib.sh"
 R=${1:-$(( RANDOM % 90000 + 10000 ))}
 DIBS=dibs-$R.testnet
-USDC=usdc-$R.testnet
+USDC=${USDC:-usdc-$R.testnet}
 OUTLAYER=${OUTLAYER:-outlayer.testnet}
 PROJECT_ID=${PROJECT_ID:-dibs-owner.testnet/dibs-verifier}
 if [ -f "$DEPLOY_JSON" ]; then echo "already deployed: $(cat "$DEPLOY_JSON")"; exit 0; fi

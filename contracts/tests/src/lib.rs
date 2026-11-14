@@ -217,6 +217,17 @@ impl World {
             .await?)
     }
 
+    /// Same call as `submit_proof` but signed by `who` (a relayer or a stranger).
+    pub async fn submit_proof_by(&self, who: &Account, trip: &str) -> anyhow::Result<ExecutionFinalResult> {
+        Ok(who
+            .call(self.dibs.id(), "submit_proof")
+            .args_json(json!({"trip": trip, "blob_url": "https://dibs-blobs.example/b/abc123", "blob_sha256": "ef".repeat(32)}))
+            .deposit(NearToken::from_millinear(20))
+            .gas(Gas::from_tgas(300))
+            .transact()
+            .await?)
+    }
+
     pub async fn request_draw(&self, trip: &str) -> anyhow::Result<ExecutionFinalResult> {
         Ok(self.relayer.call(self.dibs.id(), "request_draw").args_json(json!({"trip": trip})).deposit(NearToken::from_millinear(20)).gas(Gas::from_tgas(300)).transact().await?)
     }

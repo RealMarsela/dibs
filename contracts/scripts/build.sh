@@ -14,14 +14,15 @@ OUT="$ROOT/build/$NET"; mkdir -p "$OUT"
 T=wasm32-unknown-unknown
 OPT=(-Oz --converge --enable-bulk-memory --enable-sign-ext --enable-mutable-globals --enable-nontrapping-float-to-int --strip-debug --strip-producers)
 cd "$ROOT"
+TD="$(cd "$ROOT/.." && pwd)/target"  # one Rust target dir per repo (.cargo/config.toml)
 DIBS_USDC=$USDC cargo build --release --target $T -p dibs-bed
-wasm-opt "${OPT[@]}" target/$T/release/dibs_bed.wasm -o "$OUT/bed.wasm"
+wasm-opt "${OPT[@]}" "$TD/$T/release/dibs_bed.wasm" -o "$OUT/bed.wasm"
 DIBS_BED_WASM="$OUT/bed.wasm" cargo build --release --target $T -p dibs
-wasm-opt "${OPT[@]}" target/$T/release/dibs.wasm -o "$OUT/dibs.wasm"
+wasm-opt "${OPT[@]}" "$TD/$T/release/dibs.wasm" -o "$OUT/dibs.wasm"
 if [ "$NET" != mainnet ]; then
   cargo build --release --target $T -p usdc-test -p mock-outlayer
-  wasm-opt "${OPT[@]}" target/$T/release/usdc_test.wasm -o "$OUT/usdc_test.wasm"
-  wasm-opt "${OPT[@]}" target/$T/release/mock_outlayer.wasm -o "$OUT/mock_outlayer.wasm"
+  wasm-opt "${OPT[@]}" "$TD/$T/release/usdc_test.wasm" -o "$OUT/usdc_test.wasm"
+  wasm-opt "${OPT[@]}" "$TD/$T/release/mock_outlayer.wasm" -o "$OUT/mock_outlayer.wasm"
 fi
 echo "usdc baked: $USDC"
 ls -l "$OUT"

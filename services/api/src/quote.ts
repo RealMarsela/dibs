@@ -35,9 +35,8 @@ quoteRoute.post("/quote", async (c) => {
       token: env.USDC_CONTRACT,
       expiresAt: null,
       instructions: [
-        { step: 1, text: "Get testnet USDC from the faucet", call: { contract: env.USDC_CONTRACT, method: "mint", args: { amount: price } } },
-        { step: 2, text: "Send the price to the receipt account", call: { contract: env.USDC_CONTRACT, method: "ft_transfer", args: { receiver_id: recipient, amount: price }, deposit_yocto: "1" } },
-        { step: 3, text: "Poll GET /status/<depositAddress>; the API sweeps the receipt account into the trip" },
+        { step: 1, text: "Mint testnet USDC straight into the receipt account (open faucet)", call: { contract: env.USDC_CONTRACT, method: "mint", args: { account_id: recipient, amount: price } } },
+        { step: 2, text: "Poll GET /status/<depositAddress>; the API sweeps the receipt account into the trip" },
       ],
     });
   }

@@ -1,7 +1,21 @@
 {
-  "display": {"name": "Dibs verifier"},
-  "operations": ["public_key", "vrf", "booking"],
+  "display": {
+    "name": "Dibs verifier"
+  },
+  "operations": [
+    "public_key",
+    "vrf",
+    "booking",
+    "card"
+  ],
   "signing_keys": [
-    {"path": "dibs", "type": "ed25519", "caller": "none"}
-  ]
+    {
+      "path": "dibs",
+      "type": "ed25519",
+      "caller": "none"
+    }
+  ],
+  "author_secrets": {
+    "profile": "default"
+  }
 }

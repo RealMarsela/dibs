@@ -96,14 +96,17 @@ impl Dibs {
         ))
     }
 
-    /// Booker submits the encrypted booking email; OutLayer verifies it and signs the facts.
+    /// Booker (or a relayer acting for the inbox) submits the encrypted booking email; OutLayer verifies it and signs the facts.
     #[payable]
     pub fn submit_proof(&mut self, trip: String, blob_url: String, blob_sha256: String) -> Promise {
         let dep = env::attached_deposit();
         ensure(dep >= MIN_RUN, "E_DEPOSIT");
         ensure(blob_url.len() <= 512 && is_hex64(&blob_sha256), "E_BAD_ARGS");
+        let caller = env::predecessor_account_id();
+        let by_relayer = self.is_relayer(&caller);
         let t = self.trip_mut(&trip);
-        ensure(env::predecessor_account_id() == t.booker, "E_NOT_BOOKER");
+        // The DKIM-verified booking is the authority; the payout still goes only to the booker.
+        ensure(caller == t.booker || by_relayer, "E_NOT_BOOKER");
         ensure(!t.refunded, "E_REFUNDED");
         ensure(env::block_timestamp() <= t.book_by.0, "E_DEADLINE");
         ensure(t.all_paid(), "E_NOT_FULL");

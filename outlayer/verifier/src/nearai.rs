@@ -92,6 +92,10 @@ fn verify_signature(model: &str, req: &[u8], resp: &[u8], sig: &Value, chat_id: 
 
 impl Extractor for NearAi<'_> {
     fn extract(&self, email_text: &str) -> Result<Extraction, String> {
+        // Looked up lazily so DKIM and domain refusals fire before the key is needed, and no key means no call.
+        if self.api_key.is_empty() {
+            return Err("NEAR_AI_KEY is not set".into());
+        }
         // Spend guard (Gabriel, 14 Nov): one call per proof, input trimmed, output capped.
         let email_text: String = email_text.chars().take(MAX_INPUT_CHARS).collect();
         let req = json!({

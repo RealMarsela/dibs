@@ -53,8 +53,8 @@ Signed formats are the ones in `contracts/INTERFACE.md`; the code is in `verifie
 
 ```bash
 cd verifier
-./build.sh testnet   # tests + wasm with the fixture domain   -> target/dibs-verifier-testnet.wasm
-./build.sh mainnet   # tests + wasm without it                -> target/dibs-verifier-mainnet.wasm
+./build.sh testnet   # tests + wasm with the fixture domain   -> <repo>/target/dibs-verifier-testnet.wasm
+./build.sh mainnet   # tests + wasm without it                -> <repo>/target/dibs-verifier-mainnet.wasm
 ```
 
 Tests: `cargo test --release` (21 tests, no network). `tests/fixtures/*.eml` are signed with the committed
@@ -66,7 +66,7 @@ Deploy (same flow as `near-standin/outlayer`, needs a funded testnet account, no
 
 ```bash
 outlayer login testnet                       # key of the owner account
-outlayer upload verifier/target/dibs-verifier-testnet.wasm
+outlayer upload <repo>/target/dibs-verifier-testnet.wasm
 outlayer deploy dibs-verifier <FastFS URL>   # ~0.1 NEAR attached, unused refunded
 outlayer run <owner>/dibs-verifier '{"op":"public_key"}'    # the key for set_verifier_key
 outlayer secrets set '{"DIBS_BLOB_KEY":"<64 hex>","NEAR_AI_KEY":"<key>"}' --project <owner>/dibs-verifier
