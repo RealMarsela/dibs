@@ -16,9 +16,10 @@ import { ResaleSheet } from "@/components/trip/resale-sheet";
 import { ProofSheet } from "@/components/trip/proof-sheet";
 import { DrawSheet } from "@/components/trip/draw-sheet";
 import { CardSheet } from "@/components/trip/card-sheet";
-import { deviceKey } from "@/live/passkey";
+import { rememberedDevice } from "@/live/passkey";
 import { devAccounts } from "@/live/dev-keys";
 import { rememberedNear } from "@/live/near-wallet";
+import { rememberedEvm } from "@/live/evm-wallet";
 import { cn, countdown } from "@/lib/utils";
 
 const VIEWERS = [
@@ -35,29 +36,41 @@ export function TripPage() {
   const [card, setCard] = useState(false);
   const dev = live ? devAccounts() : [];
   const [wallet, setWallet] = useState(() => (live ? rememberedNear(network) : null));
+  const [evmAcc, setEvmAcc] = useState(() => (live ? rememberedEvm(network) : null));
 
   // Live: you are the NEAR wallet you signed in with; without one, this device's passkey account (the judge demo).
   // On localhost, demo personas can be picked for filming.
   useEffect(() => {
     // Shown inside the landing page's phone frame (?embed): read-only, never asks for a passkey.
     if (!live || new URLSearchParams(location.search).has("embed")) return;
+    // A wallet or passkey sign-in inside a sheet (always after a tap) updates who you are without a reload.
     const signedIn = () => {
       const w = rememberedNear(network);
       setWallet(w);
+      const e = rememberedEvm(network);
+      setEvmAcc(e);
+      if (!w && e) setViewer(e);
+      const d = rememberedDevice();
+      if (d) setMe(d);
       if (w) setViewer(w.accountId);
+      else if (d) setViewer((v) => v || d);
     };
     addEventListener("dibs:wallet", signedIn);
+    // Never ask for a passkey on page load: this device is whoever it last signed in as, read without a prompt.
+    const known = rememberedDevice();
+    if (known) setMe(known);
     if (wallet) setViewer((v) => v || dev[0] || wallet.accountId);
-    else
-      deviceKey().then((k) => {
-        setMe(k.accountId);
-        setViewer((v) => v || dev[0] || k.accountId);
-      });
+    else if (evmAcc) setViewer((v) => v || dev[0] || evmAcc);
+    else if (known || dev[0]) setViewer((v) => v || dev[0] || known!);
     return () => removeEventListener("dibs:wallet", signedIn);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [live, network]);
   const viewers = live
-    ? [...dev.map((id) => ({ id, role: roleOf(id, trip) })), ...(wallet ? [{ id: wallet.accountId, role: "your wallet" }] : []), ...(me && me !== wallet?.accountId ? [{ id: me, role: "this device" }] : [])]
+    ? [
+        ...dev.map((id) => ({ id, role: roleOf(id, trip) })),
+        ...(wallet ? [{ id: wallet.accountId, role: "your wallet" }] : evmAcc ? [{ id: evmAcc, role: "your wallet" }] : []),
+        ...(me && me !== wallet?.accountId ? [{ id: me, role: "this device" }] : []),
+      ]
     : VIEWERS;
   const [pay, setPay] = useState<number | null>(null);
   const [exit, setExit] = useState<number | null>(null);

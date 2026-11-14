@@ -25,7 +25,7 @@ export function walletChain(chain: ChainId, network: Net): EvmChain | "solana" |
 const usdc = (base: bigint) => (Number(base) / 1e6).toFixed(6).replace(/0{1,4}$/, "");
 const short = (a: string) => (a.length > 18 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a);
 
-export function WalletPay({ chain, network, price, pay, getQuote, onSent, compact }: {
+export function WalletPay({ chain, network, price, pay, getQuote, onSent, compact, onConnected }: {
   chain: ChainId;
   network: Net;
   price: number;
@@ -33,6 +33,7 @@ export function WalletPay({ chain, network, price, pay, getQuote, onSent, compac
   getQuote: (refundTo: string) => Promise<Pay>;
   onSent: (p: Pay, tx: string, wallet: string) => void;
   compact?: boolean;
+  onConnected?: (on: boolean) => void;
 }) {
   const wc = walletChain(chain, network);
   const evm = wc && wc !== "near" && wc !== "solana" ? wc : null;
@@ -50,6 +51,7 @@ export function WalletPay({ chain, network, price, pay, getQuote, onSent, compac
   const need = (p: Pay | null) => (p ? BigInt(p.amountIn) : testnet ? floor : (floor * 1011n) / 1000n);
 
   useEffect(() => (evm ? discoverEvmWallets(setWallets) : undefined), [evm]);
+  useEffect(() => onConnected?.(!!conn), [conn, onConnected]);
   useEffect(() => (sol ? discoverSolanaWallets(setSolWallets) : undefined), [sol]);
 
   async function run(id: string, label: string, body: () => Promise<void>, toMsg: (e: unknown) => string) {

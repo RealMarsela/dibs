@@ -23,6 +23,25 @@ const CHAIN: Record<EvmChain, { id: number; usdc: string; name: string; rpc: str
 };
 
 export const isEvmChain = (c: string): c is EvmChain => c in CHAIN;
+
+/* An EVM payer holds their bed as the NEAR account named by their own 0x address (no passkey). Remembered per
+   network so the trip page knows it is you; a public address, nothing secret. */
+const EVM_ME = (net: string) => `dibs.evm.${net}`;
+export function rememberedEvm(net: string): string | null {
+  try {
+    return localStorage.getItem(EVM_ME(net));
+  } catch {
+    return null;
+  }
+}
+export function rememberEvm(net: string, address: string) {
+  try {
+    localStorage.setItem(EVM_ME(net), address.toLowerCase());
+  } catch {
+    /* private window */
+  }
+  window.dispatchEvent(new Event("dibs:wallet"));
+}
 export const evmTxUrl = (c: EvmChain, hash: string) => `${CHAIN[c].explorer}/tx/${hash}`;
 
 const found = new Map<string, EvmWallet>();

@@ -30,6 +30,7 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
   const [tx, setTx] = useState<string | undefined>();
   const [err, setErr] = useState<string | null>(null);
   const [me, setMe] = useState<string | null>(null);
+  const [evm, setEvm] = useState(false);
 
   useEffect(() => {
     if (n !== null) {
@@ -68,6 +69,7 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
   /* The bed is claimed by the account that signs in: a NEAR Connect wallet (an Ethereum Wallets sign-in is its 0x
      address, which then pays from Base by default), or for the judge demo this device's passkey account. */
   async function withWallet() {
+    setEvm(false);
     setBusy(true);
     setErr(null);
     try {
@@ -81,7 +83,16 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
       setBusy(false);
     }
   }
+  /* EVM payers skip the passkey: the wallet they pay with names the account that holds the bed (its 0x address). */
+  function withEvm() {
+    setErr(null);
+    setEvm(true);
+    setMe("");
+    setChain("base");
+    setStep("chain");
+  }
   async function withPasskey() {
+    setEvm(false);
     setBusy(true);
     setErr(null);
     try {
@@ -102,16 +113,18 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
     <Sheet open={n !== null} onOpenChange={(o) => !o && onClose()} eyebrow={`Bed ${pad2(n ?? 0)} · ${trip.place}`} title={titles[step]}>
       {step === "passkey" && live && (
         <div>
-          <p className="text-[15px] leading-relaxed text-fg-2">
-            Claim bed {pad2(n ?? 0)} with your own NEAR wallet. Paying from OKX, MetaMask or Phantom works either way.
-          </p>
+          <p className="text-[15px] leading-relaxed text-fg-2">Claim bed {pad2(n ?? 0)} with your own wallet. It holds the bed and pays for it.</p>
           <button className="pill-light focus-ring mt-6 w-full" disabled={busy} onClick={withWallet}>
             {busy ? <Loader2 className="size-4 animate-spin" /> : <Wallet className="size-4" />}
             Connect a NEAR wallet
           </button>
+          <button className="pill-light focus-ring mt-2.5 w-full" disabled={busy} onClick={withEvm}>
+            <Wallet className="size-4" />
+            Pay with an EVM wallet (OKX, MetaMask…)
+          </button>
           {err && <p className="mt-3 rounded-xl bg-refused/10 px-3 py-2 text-[13.5px] text-refused" role="alert">{err}</p>}
-          <button className="focus-ring mt-3 flex w-full items-center justify-center gap-1.5 rounded-md text-[12.5px] text-fg-3 underline decoration-white/20 underline-offset-4 hover:text-fg" disabled={busy} onClick={withPasskey}>
-            <Fingerprint className="size-3.5" /> {mainnet ? "No NEAR wallet? Hold it with a passkey, then pay from MetaMask or any wallet" : "Judge demo: no wallet, use a passkey on this device"}
+          <button className="focus-ring mt-4 flex w-full items-center justify-center gap-1.5 rounded-md text-[12.5px] text-fg-3 underline decoration-white/20 underline-offset-4 hover:text-fg" disabled={busy} onClick={withPasskey}>
+            <Fingerprint className="size-3.5" /> {mainnet ? "No wallet here? Hold it with a passkey on this device" : "Judge demo: no wallet, use a passkey on this device"}
           </button>
         </div>
       )}
@@ -131,7 +144,7 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
         <div>
           <p className="text-[15px] text-fg-2">Pay from wherever your money already is. Your bed receives exactly {usd(trip.price)}.</p>
           <div className="mt-4 flex flex-col gap-2" role="radiogroup" aria-label="Pay from">
-            {(Object.keys(CHAINS) as ChainId[]).map((id) => {
+            {(Object.keys(CHAINS) as ChainId[]).filter((id) => !evm || (mainnet ? ["base", "arbitrum", "ethereum"] : ["base"]).includes(id)).map((id) => {
               const ch = CHAINS[id];
               const on = chain === id;
               return (
@@ -164,7 +177,7 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
         </div>
       )}
 
-      {live && n !== null && me && (step === "deposit" || step === "tracking" || step === "done") && <LivePay n={n} chain={chain} me={me} step={step} setStep={setStep} />}
+      {live && n !== null && (me || evm) && (step === "deposit" || step === "tracking" || step === "done") && <LivePay n={n} chain={chain} me={me ?? ""} step={step} setStep={setStep} />}
       {live && step === "done" && (
         <button className="pill-light focus-ring mt-6 w-full" onClick={onClose}>
           Back to the trip

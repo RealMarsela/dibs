@@ -10,6 +10,8 @@ import { pad2 } from "@/lib/utils";
 import * as api from "@/live/api";
 import { evmTxUrl, isEvmChain } from "@/live/evm-wallet";
 import { isEthAccount } from "@/live/near-wallet";
+import { rememberEvm } from "@/live/evm-wallet";
+import { deviceKey } from "@/live/passkey";
 import { solTxUrl } from "@/live/solana-wallet";
 
 /* Paying a bed on a live trip, wallet first. The bed is held for this device's passkey key, then the friend's own
@@ -60,22 +62,27 @@ export function LivePay({ n, chain, me, step, setStep }: { n: number; chain: Cha
   const [err, setErr] = useState<string | null>(null);
   const [done, setDone] = useState(0);
   const [tx, setTx] = useState<string | undefined>();
+  const [walletOn, setWalletOn] = useState(false);
+  const [manual, setManual] = useState(false);
   const sweepTx = useRef<string | undefined>(undefined);
   const evmTestnet = testnet && chain === "base";
   const track = testnet ? (pay?.route === "faucet" ? TRACKS.faucet : chain === "near" ? TRACKS.testNear : TRACKS.testEvm) : chain === "near" ? TRACKS.near : TRACKS.swap;
 
-  async function holdBed() {
+  async function holdBed(holder: string) {
     try {
-      await api.hold({ trip: code, kind: "bed", n, holder: me });
+      await api.hold({ trip: code, kind: "bed", n, holder });
     } catch (e) {
       const t = await api.getTrip(code).catch(() => null);
-      if (t?.trip.beds[n - 1]?.holder !== me) throw e;
+      if (t?.trip.beds[n - 1]?.holder !== holder) throw e;
     }
   }
 
-  /** Holds the bed, then the one address and amount: the bed itself (NEAR), the Base Sepolia deposit (testnet) or a 1Click quote. */
+  /** Holds the bed, then the one address and amount: the bed itself (NEAR), the Base Sepolia deposit (testnet) or a 1Click quote.
+      An EVM payer with no NEAR sign-in (`me` empty) holds the bed as the NEAR account named by their own 0x address. */
   async function quoteFor(refund: string): Promise<Pay> {
-    await holdBed();
+    const holder = me || refund.toLowerCase();
+    await holdBed(holder);
+    if (!me) rememberEvm(network, holder);
     let p: Pay;
     if (chain === "near") p = { depositAddress: bed, amountIn: price, expiresAt: null, refundTo: me };
     else if (testnet) p = { depositAddress: (await api.evmInfo()).address, amountIn: price, expiresAt: null, refundTo: refund };
@@ -106,7 +113,13 @@ export function LivePay({ n, chain, me, step, setStep }: { n: number; chain: Cha
       setBusy(false);
     }
   }
-  const faucet = () => run(async () => (await holdBed(), setPay({ depositAddress: bed, amountIn: price, expiresAt: null, refundTo: me, route: "faucet" }), setStep("tracking")));
+  const faucet = () =>
+    run(async () => {
+      const holder = me || (await deviceKey()).accountId; // the judge demo: this device's passkey holds the bed
+      await holdBed(holder);
+      setPay({ depositAddress: bed, amountIn: price, expiresAt: null, refundTo: holder, route: "faucet" });
+      setStep("tracking");
+    });
 
   useEffect(() => {
     if (step !== "tracking" || !pay) return;
@@ -186,7 +199,7 @@ export function LivePay({ n, chain, me, step, setStep }: { n: number; chain: Cha
     );
   }
 
-  const wallet = <WalletPay chain={chain} network={network} price={trip.price} pay={pay} getQuote={quoteFor} onSent={sent} compact={!!pay && !testnet} />;
+  const wallet = <WalletPay chain={chain} network={network} price={trip.price} pay={pay} getQuote={quoteFor} onSent={sent} compact={!!pay && !testnet} onConnected={setWalletOn} />;
   const divider = (label: string) => <div className="my-5 flex items-center gap-3 text-[12px] text-fg-3"><span className="h-px flex-1 bg-line" />{label}<span className="h-px flex-1 bg-line" /></div>;
 
   if (testnet && !pay?.sentTx) {
@@ -208,8 +221,17 @@ export function LivePay({ n, chain, me, step, setStep }: { n: number; chain: Cha
     return (
       <div>
         {wallet}
-        {divider("or send it yourself")}
-        <ManualStart chain={chain} busy={busy} err={err} initial={isEthAccount(me) ? me : ""} onStart={(refund) => void run(async () => void (await quoteFor(refund)))} />
+        {/* Once a wallet is connected, the copy-and-send route folds away (it confused next to the wallet rows). */}
+        {walletOn && !manual ? (
+          <button className="focus-ring mt-4 w-full rounded-md text-center text-[12.5px] text-fg-3 underline decoration-white/20 underline-offset-4 hover:text-fg" onClick={() => setManual(true)}>
+            Send it yourself instead
+          </button>
+        ) : (
+          <>
+            {divider("or send it yourself")}
+            <ManualStart chain={chain} busy={busy} err={err} initial={isEthAccount(me) ? me : ""} onStart={(refund) => void run(async () => void (await quoteFor(refund)))} />
+          </>
+        )}
       </div>
     );
   }
