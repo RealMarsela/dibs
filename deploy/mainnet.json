@@ -22,7 +22,11 @@
     "relayer_topup_2": "9RasHHhzjPLZ8h6XCkdchWAL5jqJSg2ga6Enc7F6DDHW",
     "bed1_hold_via_app": "7T8DCg3jtCMb7n4nrRqmxmXmZVeLfQNUq2bpDWxdM1Qo",
     "owner_topup_for_lismain2": "H2iiqp9rwsb3tJ6GJaEAx1fcbGii8bf4fCDunmpkLDbH",
-    "create_trip_lismain2": "ANqD3MWp5157U49UVvMt5wtGzYeku17Uh7ZDSYfZXNh3"
+    "create_trip_lismain2": "ANqD3MWp5157U49UVvMt5wtGzYeku17Uh7ZDSYfZXNh3",
+    "bed1_base_deposit": "0x614134754d46801a9b17a2efab916c02aed4396638e5af08cae590e698b973bf",
+    "bed1_1click_delivery": "4biJqUmi8YwJD9uPUDehg7VPQ18SUFcSBSQLPSQtv3Lg",
+    "bed1_sweep_to_dao": "9nPPmuaZcBv6YYrB77d6jjNaHGzkbeTY3Fu5CzqMQ7YU",
+    "bed1_excess_refund_base": "0x4c0fec741047c2cfc01638e2a617df58214dd079d0c827fb35e7bc5f714d7d5f"
   },
   "trips": {
     "lismain": {
@@ -37,7 +41,7 @@
         "b01-lismain.dibsapp.near",
         "b02-lismain.dibsapp.near"
       ],
-      "state": "bed 2 Paid with USDC on NEAR (DAO holds 0.25 USDC); bed 1 Held via the app, 1Click quote from Base: deposit 0xfdF223c4438053E9F84B9342CCd56575ae4039D2, 0.252579 USDC in, 0.25 out; awaiting the deposit"
+      "state": "both beds Paid; DAO holds 0.50 USDC. Bed 2: USDC on NEAR. Bed 1: 0.5 USDC sent from Base to the 1Click deposit; 0.250053 used for exactly 0.25 out, 0.247547 refunded to the sender"
     },
     "lismain2": {
       "dao": "dibs-lismain.sputnik-dao.near",

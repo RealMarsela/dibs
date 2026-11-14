@@ -56,7 +56,7 @@ switches to mainnet for trips [`lismain`](https://dibs.larinova.com/t/lismain) a
 | Contract deployed and initialised; bed accounts carry mainnet USDC in their code | [`A2FUVBt9…`](https://nearblocks.io/txns/A2FUVBt9MDmu1hSWmBPFKeEHjDoCapgWZ8Js2akhzym5) |
 | Trip `lismain` (2 beds at 0.25 USDC) created with its own keyless bed accounts | [`9ozojmPQ…`](https://nearblocks.io/txns/9ozojmPQeaVxggfLG7HzD1UcP1SNhRuUjA6LtcYKGYTM) |
 | Bed 2 paid with **real USDC on NEAR**: held, sent to the bed's own account, swept into the crew DAO | hold [`bSgWocNV…`](https://nearblocks.io/txns/bSgWocNVUk3ce7EXSemN49PA5bTZDvJYGmBZvgniKfY), deposit [`6W5hd6Bu…`](https://nearblocks.io/txns/6W5hd6BUuQUYnACD792DaEVb7osLBXdQNGB1MMSvGZYf), sweep [`GKYgYFwf…`](https://nearblocks.io/txns/GKYgYFwfTdEbqe1wPcaxFQBNDvmM2btG8zb5fE2YPp1N) |
-| Bed 1 held through the app for a live NEAR Intents 1Click quote from Base (0.252579 USDC in, exactly 0.25 out) | awaiting the Base deposit |
+| Bed 1 paid **from Base through NEAR Intents 1Click**: held in the app, a live exact-output quote, USDC sent from an external wallet on Base, exactly 0.25 USDC delivered to the bed's own account, swept into the crew DAO (now 0.50 USDC, both beds). The friend sent 0.5; 1Click took the quoted 0.250053 and refunded 0.247547 to the sender | Base [`0x6141…73bf`](https://basescan.org/tx/0x614134754d46801a9b17a2efab916c02aed4396638e5af08cae590e698b973bf), delivery [`4biJqUmi…`](https://nearblocks.io/txns/4biJqUmi8YwJD9uPUDehg7VPQ18SUFcSBSQLPSQtv3Lg), sweep [`9nPPmuaZ…`](https://nearblocks.io/txns/9nPPmuaZcBv6YYrB77d6jjNaHGzkbeTY3Fu5CzqMQ7YU), refund [`0x4c0f…7d5f`](https://basescan.org/tx/0x4c0fec741047c2cfc01638e2a617df58214dd079d0c827fb35e7bc5f714d7d5f) |
 
 Mainnet is deliberately narrow. Its API answers only the pay-in (trip reads, hold, 1Click quote, deposit submit, status
 and sweep); trip creation, proofs, the draw, the card and gasless relays are refused with `E_MAINNET_SCOPE` and run on
@@ -76,6 +76,11 @@ Every live trip pays from the friend's own wallet first. On mainnet:
 - **NEAR wallets** through NEAR Connect (`@hot-labs/near-connect`: HOT, Meteor, Intear, MyNearWallet, NEAR Mobile,
   Ledger and more). The wallet sends USDC straight to the bed's own account with one `ft_transfer`; no swap is needed.
 - **No wallet:** the one-time address, the exact amount and a QR that wallets read (EIP-681 on EVM, Solana Pay).
+
+Tested with a real Meteor wallet (`realmarsela.testnet`) on testnet: a friend claimed and paid a bed from it
+([`CVGhw9Jz…`](https://testnet.nearblocks.io/txns/CVGhw9Jz8KV6b4Vr2itVphsf7Ye2SrhhsXXXHk2i1p2i), then the sweep
+[`Aqmp5Gyp…`](https://testnet.nearblocks.io/txns/Aqmp5GypRR7yT53dUDGrMgiZdSjA35vtfzYkP6v9dk8C)), and a booker signed in with
+NEP-413 and created trip `sintq0mg` ([`Grcn3FXi…`](https://testnet.nearblocks.io/txns/Grcn3FXiAMycNJpUeNGSqJhU7RBSfLeM39dtF4joVPno)).
 
 On testnet trips:
 
