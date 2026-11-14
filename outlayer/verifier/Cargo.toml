@@ -28,11 +28,14 @@ aes-gcm = "0.10"
 ed25519-dalek = { version = "2", default-features = false }
 wasi-http-client = "0.2"
 outlayer = { version = "0.2", features = ["signing-keys"] }
+blake2 = "0.10"
+crypto_box = { version = "0.9", default-features = false, features = ["salsa20"] }
 
 [dev-dependencies]
 rsa = { version = "0.9", features = ["pem", "sha2"] }
 ed25519-dalek = { version = "2", features = ["rand_core"] }
 rand = "0.8"
+ureq = "2"
 
 [profile.release]
 opt-level = "z"

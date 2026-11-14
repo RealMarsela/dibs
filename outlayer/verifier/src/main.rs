@@ -50,7 +50,8 @@ fn read(resp: wasi_http_client::Response) -> Result<Vec<u8>, String> {
     let status = resp.status();
     let body = resp.body().map_err(|e| format!("body: {e}"))?;
     if !(200..300).contains(&status) {
-        return Err(format!("HTTP {status}"));
+        // The body of an error response (a Lithic 409 names the conflicting rule); capped, never a request header.
+        return Err(format!("HTTP {status}: {}", String::from_utf8_lossy(&body[..body.len().min(300)])));
     }
     Ok(body)
 }

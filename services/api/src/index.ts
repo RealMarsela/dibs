@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { blobRoute } from "./blob";
+import { cardRoute } from "./card";
 import type { Env } from "./env";
 import { onError } from "./errors";
 import { holdRoute } from "./hold";
@@ -27,6 +28,7 @@ export function createApp() {
   app.route("/", holdRoute);
   app.route("/", blobRoute);
   app.route("/", tripRoute);
+  app.route("/", cardRoute);
   app.notFound((c) => c.json({ error: "not found", code: "E_NOT_FOUND" }, 404));
   app.onError(onError);
   return app;

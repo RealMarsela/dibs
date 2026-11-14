@@ -7,10 +7,16 @@ export interface Env {
   RELAYER_ACCOUNT_ID: string;
   ALLOWED_ORIGIN?: string;
   PUBLIC_BASE_URL?: string;
+  /** Hex ed25519 public key of the dibs-verifier project (`outlayer run ... '{"op":"public_key"}'`). */
+  VERIFIER_PUBLIC_KEY?: string;
+  /** Override for tests; default https://sandbox.lithic.com */
+  LITHIC_BASE?: string;
   // secrets
   RELAYER_PRIVATE_KEY: string;
   DIBS_BLOB_KEY: string;
   ONECLICK_JWT?: string;
+  /** Lithic SANDBOX key, used only by POST /card/:trip/simulate. */
+  LITHIC_SIM_KEY?: string;
   BLOBS: R2Bucket;
 }
 
