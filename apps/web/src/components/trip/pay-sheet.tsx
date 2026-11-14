@@ -13,10 +13,13 @@ import { devKey } from "@/live/dev-keys";
 import { explorer } from "@/live/api";
 
 type Step = "passkey" | "chain" | "deposit" | "tracking" | "done";
-const TRACK = ["Deposit seen on your chain", "Swapped by NEAR Intents", "Landed in your bed’s own account", "Counted in the crew DAO"];
+const MAINNET_TRACK = ["Deposit seen on your chain", "Swapped by NEAR Intents", "Landed in your bed’s own account", "Counted in the crew DAO"];
+/* On testnet nothing is swapped: the faucet sends the exact amount. The steps say so rather than tick a swap that never ran. */
+const TESTNET_TRACK = ["Test deposit sent by the faucet", "No swap needed on testnet", "Landed in your bed’s own account", "Counted in the crew DAO"];
 
 export function PaySheet({ n, who, onClose }: { n: number | null; who: string; onClose: () => void }) {
   const { trip, act, live, code, contract } = useTrip();
+  const TRACK = live && import.meta.env.VITE_DIBS_NETWORK !== "mainnet" ? TESTNET_TRACK : MAINNET_TRACK;
   const [step, setStep] = useState<Step>("passkey");
   const [chain, setChain] = useState<ChainId>("base");
   const [track, setTrack] = useState(0);
