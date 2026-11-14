@@ -3,6 +3,7 @@ import { ApiError, parse } from "./errors";
 import { type Env, receiptAccount } from "./env";
 import { view } from "./near";
 import { tripCode } from "./schemas";
+import { readMeta } from "./create";
 
 export const tripRoute = new Hono<{ Bindings: Env }>();
 
@@ -18,9 +19,10 @@ tripRoute.get("/trip/:code", async (c) => {
   c.header("cache-control", "public, max-age=2");
   if (hit && Date.now() - hit.at < CACHE_MS) return c.json(hit.body);
 
-  const [trip, waitlist] = await Promise.all([
+  const [trip, waitlist, meta] = await Promise.all([
     view<{ n_beds: number; [k: string]: unknown }>(env, env.DIBS_CONTRACT, "get_trip", { trip: code }),
     view<unknown[]>(env, env.DIBS_CONTRACT, "get_waitlist", { trip: code }),
+    readMeta(env, code),
   ]);
   if (!trip) throw new ApiError(404, "E_TRIP_NOT_FOUND", `trip ${code} not found`);
 
@@ -30,6 +32,7 @@ tripRoute.get("/trip/:code", async (c) => {
     contract: env.DIBS_CONTRACT,
     usdc: env.USDC_CONTRACT,
     trip,
+    ...(meta ? { meta: { place: meta.place, stay: meta.stay } } : {}),
     proof_pending: trip.proof_pending ?? false,
     proof: trip.proof ?? null,
     payout: trip.payout ?? "None",

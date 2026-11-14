@@ -4,6 +4,7 @@ import { blobRoute } from "./blob";
 import { activityRoute } from "./activity";
 import { bootstrapRoute } from "./bootstrap";
 import { cardRoute } from "./card";
+import { createRoute } from "./create";
 import { fundRoute } from "./fund";
 import { namesRoute } from "./names";
 import { proofRoute } from "./proof";
@@ -39,6 +40,7 @@ export function createApp() {
   app.route("/", fundRoute);
   app.route("/", namesRoute);
   app.route("/", proofRoute);
+  app.route("/", createRoute);
   app.notFound((c) => c.json({ error: "not found", code: "E_NOT_FOUND" }, 404));
   app.onError(onError);
   return app;

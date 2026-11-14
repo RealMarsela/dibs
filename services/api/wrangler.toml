@@ -16,6 +16,9 @@ ALLOWED_ORIGIN = "https://preview.dibs-trips.pages.dev,http://localhost:4321"
 # Public base URL used to build blob capability URLs (no trailing slash). Empty = request origin.
 PUBLIC_BASE_URL = "https://dibs-api.gabrielaxy.workers.dev"
 VERIFIER_PUBLIC_KEY = "706445d7daa364e38ea0f410fc3279c83b6200c5cfd89983546b8fecbb3706bf"
+TRIP_DAO = "lis0312-0eb9ae.sputnik-v2.testnet"
+CF_ZONE_ID = "bbaaf33c5998f5ebb76ea82164662d98"
+MAIL_DOMAIN = "dibs.larinova.com"
 
 [[r2_buckets]]
 binding = "BLOBS"

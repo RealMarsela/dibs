@@ -21,20 +21,33 @@ export function relayerAccount(env: Env): Account {
   return new Account(env.RELAYER_ACCOUNT_ID, provider(env), signer);
 }
 
-/** View call. Returns undefined when the contract returns null/empty. */
+/**
+ * View call over raw JSON-RPC (so a contract panic is told apart from a dead RPC; the failover provider hides the cause).
+ * Returns undefined when the contract returns null/empty or panics E_NO_TRIP (an unknown trip).
+ */
 export async function view<T>(env: Env, contractId: string, method: string, args: Record<string, unknown>): Promise<T | undefined> {
-  try {
-    const r = (await provider(env).callFunction<any>({ contractId, method, args })) as T | null | undefined;
-    return r ?? undefined;
-  } catch (e) {
-    if (isMissingAccount(e)) throw new ApiError(404, "E_ACCOUNT_NOT_FOUND", `account ${contractId} does not exist`);
-    throw new ApiError(502, "E_RPC", "NEAR RPC view call failed");
+  const body = JSON.stringify({
+    jsonrpc: "2.0", id: "dibs", method: "query",
+    params: { request_type: "call_function", finality: "optimistic", account_id: contractId, method_name: method, args_base64: btoa(unescape(encodeURIComponent(JSON.stringify(args)))) },
+  });
+  for (const url of rpcUrls(env)) {
+    let j: { result?: { result?: number[]; error?: string }; error?: { cause?: { name?: string }; data?: unknown } };
+    try {
+      j = (await (await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body })).json()) as typeof j;
+    } catch {
+      continue;
+    }
+    if (j.result?.error) {
+      if (/E_NO_TRIP/.test(j.result.error)) return undefined;
+      throw new ApiError(502, "E_RPC", "NEAR RPC view call failed");
+    }
+    if (j.result?.result) {
+      const text = new TextDecoder().decode(Uint8Array.from(j.result.result));
+      return text ? ((JSON.parse(text) as T | null) ?? undefined) : undefined;
+    }
+    if (j.error?.cause?.name === "UNKNOWN_ACCOUNT") throw new ApiError(404, "E_ACCOUNT_NOT_FOUND", `account ${contractId} does not exist`);
   }
-}
-
-function isMissingAccount(e: unknown): boolean {
-  const x = e as { type?: string; name?: string; message?: string };
-  return /AccountDoesNotExist|does not exist/i.test(`${x?.type ?? ""} ${x?.name ?? ""} ${x?.message ?? ""}`);
+  throw new ApiError(502, "E_RPC", "NEAR RPC view call failed");
 }
 
 export async function accountExists(env: Env, accountId: string): Promise<boolean> {
@@ -73,4 +86,13 @@ export async function ftBalance(env: Env, accountId: string): Promise<bigint> {
 export async function isStorageRegistered(env: Env, accountId: string): Promise<boolean> {
   const r = await view<unknown>(env, env.USDC_CONTRACT, "storage_balance_of", { account_id: accountId });
   return r != null;
+}
+
+/** Spendable-ish balance of an account in yoctoNEAR (the `amount` field). */
+export async function nearBalance(env: Env, accountId: string): Promise<bigint> {
+  try {
+    return (await provider(env).viewAccount({ accountId })).amount;
+  } catch {
+    throw new ApiError(502, "E_RPC", "NEAR RPC account lookup failed");
+  }
 }

@@ -9,6 +9,11 @@ export interface Env {
   PUBLIC_BASE_URL?: string;
   /** Hex ed25519 public key of the dibs-verifier project (`outlayer run ... '{"op":"public_key"}'`). */
   VERIFIER_PUBLIC_KEY?: string;
+  /** Shared crew DAO every API-created trip pays into (its policy gives dibs the trip role). */
+  TRIP_DAO?: string;
+  /** Cloudflare zone and mail domain for per-trip inbox rules. */
+  CF_ZONE_ID?: string;
+  MAIL_DOMAIN?: string;
   /** Override for tests; default https://sandbox.lithic.com */
   LITHIC_BASE?: string;
   // secrets
@@ -17,6 +22,8 @@ export interface Env {
   ONECLICK_JWT?: string;
   /** Lithic SANDBOX key, used only by POST /card/:trip/simulate. */
   LITHIC_SIM_KEY?: string;
+  /** Cloudflare API token with Email Routing edit scope (per-trip inbox rules). Optional: without it inbox is null. */
+  CF_EMAIL_TOKEN?: string;
   BLOBS: R2Bucket;
   /** Display names and the per-trip activity log. */
   NAMES: KVNamespace;
