@@ -8,11 +8,17 @@ import { PEOPLE } from "@/data/sample";
 import { useTrip } from "@/data/store";
 import type { ChainId } from "@/data/types";
 import { pad2, stayDates, usd } from "@/lib/utils";
+import { explorer } from "@/live/api";
+import { deviceKey } from "@/live/passkey";
+import { devKey } from "@/live/dev-keys";
 
 type Step = "ask" | "refused" | "tear" | "matching" | "sold";
 
 export function ResaleSheet({ n, onClose }: { n: number | null; onClose: () => void }) {
-  const { trip, dispatch } = useTrip();
+  const { trip, act, live } = useTrip();
+  const [refusal, setRefusal] = useState<{ code?: string; tx?: string } | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [startHolder, setStartHolder] = useState<string | undefined>();
   const [step, setStep] = useState<Step>("ask");
   const [buyer, setBuyer] = useState<string | null>(null);
   const [sellerChain, setSellerChain] = useState<ChainId | undefined>();
@@ -33,16 +39,33 @@ export function ResaleSheet({ n, onClose }: { n: number | null; onClose: () => v
   }, [n]);
 
   useEffect(() => {
-    if (step !== "matching" || n === null) return;
+    if (step !== "matching" || n === null || live) return;
     const next = trip.waitlist[0] ?? null;
     const id = setTimeout(() => {
       setBuyer(next);
-      if (next) dispatch({ type: "resell", n });
+      if (next) act.resell(n);
       setStep("sold");
     }, 1400);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
+
+  // Live: the contract fills a listed bed from the funded waitlist in the same call; read it back.
+  useEffect(() => {
+    if (!live || step !== "matching" || !spot) return;
+    if (spot.holder && spot.holder !== startHolder && spot.status === "paid") {
+      setBuyer(spot.holder);
+      setStep("sold");
+    } else if (spot.status === "listed" && trip.waitlist.length === 0) {
+      setBuyer(null);
+      setStep("sold");
+    }
+  }, [live, step, spot, startHolder, trip.waitlist.length]);
+
+  async function signer() {
+    const h = spot?.holder;
+    return (h && devKey(h)) || (await deviceKey());
+  }
 
   return (
     <Sheet open={n !== null} onOpenChange={(o) => !o && onClose()} eyebrow={`Bed ${pad2(n ?? 0)} · ${sellerName}`} title={titles[step]}>
@@ -54,7 +77,11 @@ export function ResaleSheet({ n, onClose }: { n: number | null; onClose: () => v
           <button
             className="pill-dark focus-ring w-full justify-between"
             onClick={() => {
-              dispatch({ type: "refuse", n: n! });
+              setErr(null);
+              act
+                .refuse(n!)
+                .then((r) => setRefusal(r))
+                .catch((e) => setRefusal({ code: e?.code ?? "E_NO_REFUND", tx: undefined }));
               setStep("refused");
             }}
           >
@@ -76,7 +103,14 @@ export function ResaleSheet({ n, onClose }: { n: number | null; onClose: () => v
               Refunds don’t exist in this trip. Your {usd(trip.price, 0)} holds a bed that {trip.spots.length - 1} friends are counting on, and the booker
               shouldn’t pay for your change of plans.
             </p>
-            <p className="mt-2 font-mono text-[12px] text-fg-2">The contract has no refund call for paid beds.</p>
+            <p className="mt-2 font-mono text-[12px] text-fg-2">
+              {refusal?.code ? `Contract answered ${refusal.code}` : "Asking the contract…"}
+              {refusal?.tx && (
+                <a href={explorer(refusal.tx)} target="_blank" rel="noreferrer" className="ml-2 underline decoration-white/20 underline-offset-4 hover:text-fg">
+                  receipt ↗
+                </a>
+              )}
+            </p>
           </div>
           <button className="pill-light focus-ring mt-5 w-full" onClick={() => setStep("tear")}>
             Sell it instead, for exactly {usd(trip.price, 0)}
@@ -98,8 +132,16 @@ export function ResaleSheet({ n, onClose }: { n: number | null; onClose: () => v
             holes={10}
             rotate={-2}
             ariaLabel={`Tear off the stub to list bed ${pad2(n ?? 0)} for resale`}
-            onTear={() => {
-              dispatch({ type: "list", n: n! });
+            onTear={async () => {
+              setStartHolder(spot?.holder);
+              if (live) {
+                try {
+                  await act.list(n!, await signer());
+                } catch (e) {
+                  setErr(e instanceof Error ? e.message : "Listing failed");
+                  return;
+                }
+              } else act.list(n!);
               setTimeout(() => setStep("matching"), 650);
             }}
             stub={
@@ -123,6 +165,7 @@ export function ResaleSheet({ n, onClose }: { n: number | null; onClose: () => v
             </div>
           </TearTicket>
           <p className="mt-4 text-[12px] text-fg-3">Drag the stub away, or focus it and press Enter.</p>
+          {err && <p className="mt-3 rounded-xl bg-refused/10 px-3 py-2 text-[13.5px] text-refused">{err}</p>}
         </div>
       )}
 

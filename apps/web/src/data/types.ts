@@ -35,6 +35,7 @@ export interface Activity {
   kind: ActivityKind;
   text: string;
   chain?: ChainId;
+  tx?: string;
 }
 
 export interface ProofFacts {

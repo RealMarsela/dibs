@@ -1,101 +1,136 @@
 import { createContext, useContext, useMemo, useReducer, type ReactNode } from "react";
-import { PEOPLE, sampleTrip } from "./sample";
-import type { Activity, ChainId, ProofFacts, Trip } from "./types";
+import { sampleTrip } from "./sample";
+import { reduce, type Action } from "./reduce";
+import type { ChainId, Trip } from "./types";
+import * as api from "@/live/api";
+import { gasless } from "@/live/relay";
+import { useLiveTrip } from "@/live/use-live-trip";
+import type { DeviceKey } from "@/live/passkey";
 
-/* Preview store. Every action here maps to one contract call in the wired build:
-   pay -> bed account sweep, refuse -> request_refund (always panics), list -> list_for_resale,
-   resell -> fill_from_waitlist, proof -> submit_booking_proof (OutLayer callback),
-   draw -> draw_beds (OutLayer VRF), drawOut -> booker_draw (Sputnik transfer proposal). */
+/* One interface for the trip, two engines. Preview (sample data, local reducer) for the showcase, and live
+   (the NEAR contract through the API) for real trips. Every action returns the tx it caused when there is one,
+   so the UI can link the receipt. */
+export const LIVE_TRIPS = ["lis0312", "sin1025", "drw0001"];
 
-type Action =
-  | { type: "pay"; n: number; who: string; chain: ChainId }
-  | { type: "refuse"; n: number }
-  | { type: "list"; n: number }
-  | { type: "resell"; n: number }
-  | { type: "join"; who: string }
-  | { type: "proof"; facts: ProofFacts }
-  | { type: "draw"; order: number[] }
-  | { type: "drawOut" }
-  | { type: "reset" };
-
-let seq = 100;
-const log = (kind: Activity["kind"], text: string, chain?: ChainId): Activity => ({
-  id: `x${seq++}`,
-  at: "just now",
-  kind,
-  text,
-  chain,
-});
-
-function reduce(t: Trip, a: Action): Trip {
-  const name = (id?: string) => (id ? PEOPLE[id]?.name ?? id : "someone");
-  switch (a.type) {
-    case "pay":
-      return {
-        ...t,
-        spots: t.spots.map((s) => (s.n === a.n ? { ...s, status: "paid", holder: a.who, paidWith: a.chain } : s)),
-        activity: [log("paid", `${name(a.who)} paid for spot ${a.n}`, a.chain), ...t.activity],
-      };
-    case "refuse": {
-      const s = t.spots.find((x) => x.n === a.n);
-      return { ...t, activity: [log("refused", `${name(s?.holder)} asked for a refund on spot ${a.n}. Refused by the contract.`), ...t.activity] };
-    }
-    case "list": {
-      const s = t.spots.find((x) => x.n === a.n);
-      return {
-        ...t,
-        spots: t.spots.map((x) => (x.n === a.n ? { ...x, status: "listed" } : x)),
-        activity: [log("listed", `${name(s?.holder)} listed spot ${a.n} at face value`), ...t.activity],
-      };
-    }
-    case "resell": {
-      const s = t.spots.find((x) => x.n === a.n);
-      const buyer = t.waitlist[0];
-      if (!s || !buyer) return t;
-      return {
-        ...t,
-        waitlist: t.waitlist.slice(1),
-        spots: t.spots.map((x) => (x.n === a.n ? { ...x, status: "paid", holder: buyer, paidWith: "solana" } : x)),
-        activity: [
-          log("resold", `${name(buyer)} took spot ${a.n} from the waitlist. $${t.price} went to ${name(s.holder)} on ${s.paidWith === "solana" ? "Solana" : "their own chain"}.`, s.paidWith),
-          ...t.activity,
-        ],
-      };
-    }
-    case "join":
-      return t.waitlist.includes(a.who) ? t : { ...t, waitlist: [...t.waitlist, a.who] };
-    case "proof":
-      return { ...t, proof: a.facts, activity: [log("proof", `Booking verified: ${a.facts.signedBy}, ${a.facts.guests} guests, $${a.facts.total}`), ...t.activity] };
-    case "draw":
-      return {
-        ...t,
-        drawn: true,
-        spots: t.spots.map((s, i) => ({ ...s, bed: t.beds[a.order[i]] })),
-        activity: [log("draw", "Beds drawn fairly by OutLayer VRF"), ...t.activity],
-      };
-    case "drawOut":
-      return { ...t, drawnOut: true, activity: [log("draw-out", `The crew DAO paid ${name(t.booker)} $${t.price * t.spots.length} for the booking`), ...t.activity] };
-    case "reset":
-      return sampleTrip();
-  }
+export interface ActResult {
+  tx?: string;
+  code?: string;
+}
+export interface Actions {
+  pay: (n: number, who: string, chain: ChainId) => Promise<ActResult>;
+  refuse: (n: number) => Promise<ActResult>;
+  list: (n: number, key?: DeviceKey) => Promise<ActResult>;
+  resell: (n: number) => Promise<ActResult>;
+  join: (who: string) => Promise<ActResult>;
+  draw: (order?: number[]) => Promise<ActResult>;
+  proof: (blob?: { blob_url: string; blob_sha256: string }) => Promise<ActResult>;
+  drawOut: () => Promise<ActResult>;
+  reset: () => void;
 }
 
 interface Ctx {
   trip: Trip;
-  dispatch: (a: Action) => void;
+  live: boolean;
+  code: string;
+  contract: string;
   paidCount: number;
   funded: boolean;
+  lastError: string;
+  proofPending: boolean;
+  act: Actions;
+  refresh: () => Promise<void>;
 }
 
 const TripCtx = createContext<Ctx | null>(null);
+const noop = async () => ({});
 
-export function TripProvider({ children }: { children: ReactNode }) {
-  const [trip, dispatch] = useReducer(reduce, undefined, sampleTrip);
-  const value = useMemo(() => {
+export function TripProvider({ code, children }: { code: string; children: ReactNode }) {
+  const live = LIVE_TRIPS.includes(code.toLowerCase());
+  const [sample, dispatch] = useReducer(reduce, undefined, sampleTrip);
+  const liveTrip = useLiveTrip(code.toLowerCase(), live);
+  const trip = live ? liveTrip.trip : sample;
+
+  const value = useMemo<Ctx | null>(() => {
+    if (!trip) return null;
     const paidCount = trip.spots.filter((s) => s.status === "paid" || s.status === "listed").length;
-    return { trip, dispatch, paidCount, funded: paidCount === trip.spots.length };
-  }, [trip]);
+    const funded = paidCount === trip.spots.length;
+    const c = code.toLowerCase();
+    const after = async (r: ActResult) => {
+      await liveTrip.refresh();
+      return r;
+    };
+    const act: Actions = live
+      ? {
+          pay: async (n) => after({ tx: (await api.fund({ trip: c, kind: "bed", n })).sweep_tx }),
+          refuse: async (n) => after(await api.refundCheck({ trip: c, n })),
+          list: async (n, key) => {
+            if (!key) throw new Error("Sign in with your passkey first");
+            return after({ tx: (await gasless(key, CONTRACT, "list_for_resale", { trip: c, n }, 300)).tx_hash });
+          },
+          resell: async () => after({}),
+          join: async (who) => {
+            const slot = trip.waitlist.length + 1;
+            await api.hold({ trip: c, kind: "wait", n: slot, holder: who });
+            return after({ tx: (await api.fund({ trip: c, kind: "wait", n: slot })).sweep_tx });
+          },
+          draw: async () => after({ tx: (await api.draw(c)).tx_hash }),
+          proof: async (blob) => (blob ? after({ tx: (await api.proofSubmit({ trip: c, ...blob })).tx_hash }) : after({})),
+          drawOut: async () => after({}),
+          reset: () => undefined,
+        }
+      : {
+          pay: async (n, who, chain) => (dispatch({ type: "pay", n, who, chain }), {}),
+          refuse: async (n) => (dispatch({ type: "refuse", n }), { code: "E_NO_REFUND" }),
+          list: async (n) => (dispatch({ type: "list", n }), {}),
+          resell: async (n) => (dispatch({ type: "resell", n }), {}),
+          join: async (who) => (dispatch({ type: "join", who }), {}),
+          draw: async (order) => (dispatch({ type: "draw", order: order ?? trip.beds.map((_, i) => i) }), {}),
+          proof: async () => (
+            dispatch({
+              type: "proof",
+              facts: { stay: trip.stay, checkIn: trip.checkIn, checkOut: trip.checkOut, guests: trip.spots.length, total: trip.price * trip.spots.length, signedBy: "booking.com" },
+            }),
+            {}
+          ),
+          drawOut: async () => (dispatch({ type: "drawOut" }), {}),
+          reset: () => dispatch({ type: "reset" }),
+        };
+    return {
+      trip,
+      live,
+      code: c,
+      contract: CONTRACT,
+      paidCount,
+      funded,
+      lastError: live ? liveTrip.lastError : "",
+      proofPending: live ? liveTrip.proofPending : false,
+      act,
+      refresh: live ? liveTrip.refresh : noop.bind(null) as unknown as () => Promise<void>,
+    };
+  }, [trip, live, code, liveTrip]);
+
+  if (!value) return <LiveLoading error={liveTrip.error} />;
   return <TripCtx.Provider value={value}>{children}</TripCtx.Provider>;
+}
+
+const CONTRACT = (import.meta.env.VITE_DIBS_CONTRACT as string | undefined) ?? "dibs-0eb9ae.testnet";
+
+function LiveLoading({ error }: { error: string | null }) {
+  return (
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-3 px-6 text-center">
+      {error ? (
+        <>
+          <p className="display text-[22px]">Can’t reach the trip right now.</p>
+          <p className="text-[14.5px] text-fg-2">{error}. It retries on its own every few seconds.</p>
+        </>
+      ) : (
+        <>
+          <span className="size-8 animate-spin rounded-full border-2 border-white/15 border-t-fg" aria-hidden />
+          <p className="text-[14.5px] text-fg-2">Reading the trip from NEAR…</p>
+        </>
+      )}
+    </div>
+  );
 }
 
 export function useTrip(): Ctx {
@@ -103,6 +138,8 @@ export function useTrip(): Ctx {
   if (!v) throw new Error("useTrip outside TripProvider");
   return v;
 }
+
+export type { Action };
 
 /** Fisher-Yates on [0..n). Stand-in for the VRF output in the preview. */
 export function shuffledOrder(n: number): number[] {

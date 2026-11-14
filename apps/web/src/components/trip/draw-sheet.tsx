@@ -6,13 +6,27 @@ import { Face } from "@/components/bits";
 import { PEOPLE } from "@/data/sample";
 import { shuffledOrder, useTrip } from "@/data/store";
 import { pad2 } from "@/lib/utils";
+import { explorer } from "@/live/api";
 
 /* The fair bed draw. Wired build: draw_beds() asks OutLayer for a VRF output, then assigns beds
    by a Fisher-Yates shuffle seeded with it. Anyone can re-run the shuffle from the proof. */
 export function DrawSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { trip, dispatch } = useTrip();
+  const { trip, act, live } = useTrip();
   const [phase, setPhase] = useState<"ready" | "rolling" | "done">(trip.drawn ? "done" : "ready");
   const [tick, setTick] = useState(0);
+  const [tx, setTx] = useState<string | undefined>();
+  const [err, setErr] = useState<string | null>(null);
+
+  // Live: ask the contract for the draw once; OutLayer's VRF answers in a callback, so keep rolling until the
+  // trip reads back as drawn.
+  useEffect(() => {
+    if (!live || phase !== "rolling") return;
+    act.draw().then((r) => setTx(r.tx)).catch((e) => setErr(e instanceof Error ? e.message : "Draw failed"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+  useEffect(() => {
+    if (live && phase === "rolling" && trip.drawn) setPhase("done");
+  }, [live, phase, trip.drawn]);
 
   useEffect(() => {
     if (open) setPhase(trip.drawn ? "done" : "ready");
@@ -21,12 +35,12 @@ export function DrawSheet({ open, onClose }: { open: boolean; onClose: () => voi
 
   useEffect(() => {
     if (phase !== "rolling") return;
-    if (tick > 14) {
-      dispatch({ type: "draw", order: shuffledOrder(trip.beds.length) });
+    if (!live && tick > 14) {
+      act.draw(shuffledOrder(trip.beds.length));
       setPhase("done");
       return;
     }
-    const id = setTimeout(() => setTick((t) => t + 1), 70 + tick * 12);
+    const id = setTimeout(() => setTick((t) => t + 1), live ? 90 : 70 + tick * 12);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, tick]);
@@ -70,9 +84,16 @@ export function DrawSheet({ open, onClose }: { open: boolean; onClose: () => voi
             );
           })}
       </ol>
+      {err && <p className="mt-4 rounded-xl bg-refused/10 px-3 py-2 text-[13.5px] text-refused">{err}</p>}
       {phase === "done" && (
         <>
-          <p className="mt-4 font-mono text-[11.5px] text-fg-3">Proof: OutLayer VRF output and attestation, linked on the receipt.</p>
+          {tx ? (
+            <a href={explorer(tx)} target="_blank" rel="noreferrer" className="mt-4 inline-flex text-[12.5px] text-fg-2 underline decoration-white/20 underline-offset-4 hover:text-fg">
+              Draw receipt: OutLayer VRF, checked on-chain ↗
+            </a>
+          ) : (
+            <p className="mt-4 text-[12px] text-fg-3">Proof: OutLayer VRF output, verified by the trip contract.</p>
+          )}
           <button className="pill-light focus-ring mt-4 w-full" onClick={onClose}>
             See my bed
           </button>

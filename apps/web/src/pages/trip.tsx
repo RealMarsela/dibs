@@ -15,7 +15,10 @@ import { PaySheet } from "@/components/trip/pay-sheet";
 import { ResaleSheet } from "@/components/trip/resale-sheet";
 import { ProofSheet } from "@/components/trip/proof-sheet";
 import { DrawSheet } from "@/components/trip/draw-sheet";
-import { cn } from "@/lib/utils";
+import { CardSheet } from "@/components/trip/card-sheet";
+import { deviceKey } from "@/live/passkey";
+import { devAccounts } from "@/live/dev-keys";
+import { cn, countdown } from "@/lib/utils";
 
 const VIEWERS = [
   { id: "maya", role: "booker" },
@@ -25,14 +28,28 @@ const VIEWERS = [
 ];
 
 export function TripPage() {
-  const { trip, dispatch, paidCount } = useTrip();
-  const [viewer, setViewer] = useState("leo");
+  const { trip, act, paidCount, live } = useTrip();
+  const [viewer, setViewer] = useState(live ? "" : "leo");
+  const [me, setMe] = useState<string | null>(null);
+  const [card, setCard] = useState(false);
+  const dev = live ? devAccounts() : [];
+
+  // Live: you are your passkey (or device) account. On localhost, demo personas can be picked for filming.
+  useEffect(() => {
+    if (!live) return;
+    deviceKey().then((k) => {
+      setMe(k.accountId);
+      setViewer((v) => v || dev[0] || k.accountId);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [live]);
+  const viewers = live ? [...dev.map((id) => ({ id, role: roleOf(id, trip) })), ...(me ? [{ id: me, role: "this device" }] : [])] : VIEWERS;
   const [pay, setPay] = useState<number | null>(null);
   const [exit, setExit] = useState<number | null>(null);
   const [proof, setProof] = useState(false);
   const [draw, setDraw] = useState(false);
   const [float, setFloat] = useState(false);
-  const opens: Opens = { pay: setPay, exit: setExit, proof: () => setProof(true), draw: () => setDraw(true) };
+  const opens: Opens = { pay: setPay, exit: setExit, proof: () => setProof(true), draw: () => setDraw(true), card: () => setCard(true) };
   const active = pay !== null ? viewer : exit !== null ? viewer : proof ? trip.booker : undefined;
 
   useEffect(() => {
@@ -52,7 +69,12 @@ export function TripPage() {
         <div className="relative mx-auto flex h-16 max-w-[1120px] items-center justify-between gap-4 px-5">
           <Wordmark />
           <div className="hidden md:block">
-            <TripStrip paid={paidCount} active={active} clock={paidCount === trip.spots.length ? "ready" : "2d 17h"} />
+            <TripStrip
+              paid={paidCount}
+              active={active}
+              clock={paidCount === trip.spots.length ? "ready" : countdown(trip.bookBy)}
+              crew={trip.spots.filter((s) => s.holder).map((s) => ({ id: s.holder!, name: PEOPLE[s.holder!]?.name ?? "?" }))}
+            />
           </div>
           <button
             className="pill-dark pill-sm focus-ring press"
@@ -68,23 +90,23 @@ export function TripPage() {
 
       <main className="mx-auto max-w-[1120px] px-5">
         <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
-          <span className="shrink-0 text-[12px] text-fg-3">Preview as</span>
+          <span className="shrink-0 text-[12px] text-fg-3">{live ? "Acting as" : "Preview as"}</span>
           <ToggleGroup type="single" value={viewer} onValueChange={(v) => v && setViewer(v)} className="gap-1">
-            {VIEWERS.map((v) => (
+            {viewers.map((v) => (
               <ToggleGroupItem
                 key={v.id}
                 value={v.id}
                 className="press h-8 shrink-0 gap-1.5 rounded-full border-0 py-1 pl-1 pr-3 text-[13px] text-fg-2 hover:bg-white/[0.05] hover:text-fg data-[state=on]:bg-fg data-[state=on]:text-void"
               >
                 <Face id={v.id} size={22} />
-                <span className="font-semibold">{PEOPLE[v.id].name}</span>
+                <span className="font-semibold">{PEOPLE[v.id]?.name ?? "You"}</span>
                 <span className="opacity-60">{v.role}</span>
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-          <button onClick={() => dispatch({ type: "reset" })} className="press focus-ring ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] text-fg-3 hover:text-fg" aria-label="Reset the preview trip">
+          {!live && <button onClick={() => act.reset()} className="press focus-ring ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] text-fg-3 hover:text-fg" aria-label="Reset the preview trip">
             <RotateCcw className="size-3.5" /> Reset
-          </button>
+          </button>}
         </div>
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16">
@@ -120,6 +142,14 @@ export function TripPage() {
       <ResaleSheet n={exit} onClose={() => setExit(null)} />
       <ProofSheet open={proof} onClose={() => setProof(false)} />
       <DrawSheet open={draw} onClose={() => setDraw(false)} />
+      <CardSheet open={card} onClose={() => setCard(false)} />
     </div>
   );
+}
+
+function roleOf(id: string, trip: { booker: string; waitlist: string[]; spots: { holder?: string; status: string }[] }): string {
+  if (id === trip.booker) return "booker";
+  if (trip.waitlist.includes(id)) return "waitlist";
+  const s = trip.spots.find((x) => x.holder === id);
+  return s ? (s.status === "held" ? "hasn’t paid" : "paid") : "guest";
 }

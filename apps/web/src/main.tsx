@@ -1,6 +1,6 @@
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router";
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from "react-router";
 import "./index.css";
 import { TripProvider } from "@/data/store";
 import { Toaster } from "@/components/ui/sonner";
@@ -19,7 +19,7 @@ function AppRoutes() {
     <div key={loc.pathname} className="page-in">
       <Routes location={loc}>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/t/:code" element={<TripPage />} />
+        <Route path="/t/:code" element={<TripRoute />} />
         <Route path="/new" element={<NewTripPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -27,14 +27,21 @@ function AppRoutes() {
   );
 }
 
+function TripRoute() {
+  const { code = "lis0312" } = useParams();
+  return (
+    <TripProvider key={code} code={code}>
+      <TripPage />
+    </TripProvider>
+  );
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <TooltipProvider>
-        <TripProvider>
-          <AppRoutes />
-          <Toaster theme="dark" position="bottom-center" toastOptions={{ className: "!rounded-2xl !border-line !bg-panel !text-fg" }} />
-        </TripProvider>
+        <AppRoutes />
+        <Toaster theme="dark" position="bottom-center" toastOptions={{ className: "!rounded-2xl !border-line !bg-panel !text-fg" }} />
       </TooltipProvider>
     </BrowserRouter>
   </StrictMode>,

@@ -8,16 +8,21 @@ import { CHAINS } from "@/data/sample";
 import { useTrip } from "@/data/store";
 import type { ChainId } from "@/data/types";
 import { cn, pad2, usd } from "@/lib/utils";
+import { deviceKey } from "@/live/passkey";
+import { explorer } from "@/live/api";
 
 type Step = "passkey" | "chain" | "deposit" | "tracking" | "done";
 const TRACK = ["Deposit seen on your chain", "Swapped by NEAR Intents", "Landed in your bed’s own account", "Counted in the crew DAO"];
 
 export function PaySheet({ n, who, onClose }: { n: number | null; who: string; onClose: () => void }) {
-  const { trip, dispatch } = useTrip();
+  const { trip, act, live, code, contract } = useTrip();
   const [step, setStep] = useState<Step>("passkey");
   const [chain, setChain] = useState<ChainId>("base");
   const [track, setTrack] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [tx, setTx] = useState<string | undefined>();
+  const [err, setErr] = useState<string | null>(null);
+  const [me, setMe] = useState<string | null>(null);
 
   useEffect(() => {
     if (n !== null) {
@@ -26,20 +31,36 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
     }
   }, [n]);
 
+  // The pay call starts as tracking begins; the visual steps advance on their own but the last one waits
+  // for the chain, so "Counted in the crew DAO" is only ticked once the contract says Paid.
   useEffect(() => {
-    if (step !== "tracking") return;
-    if (track >= TRACK.length) {
-      dispatch({ type: "pay", n: n!, who, chain });
-      setStep("done");
-      return;
-    }
-    const id = setTimeout(() => setTrack((t) => t + 1), 900);
+    if (step !== "tracking" || n === null) return;
+    let alive = true;
+    setErr(null);
+    act
+      .pay(n, who, chain)
+      .then((r) => {
+        if (!alive) return;
+        setTx(r.tx);
+        setTrack(TRACK.length);
+        setStep("done");
+      })
+      .catch((e) => alive && setErr(e instanceof Error ? e.message : "Payment failed"));
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+  useEffect(() => {
+    if (step !== "tracking" || track >= TRACK.length - 1) return;
+    const id = setTimeout(() => setTrack((t) => t + 1), live ? 1400 : 900);
     return () => clearTimeout(id);
-  }, [step, track, dispatch, n, who, chain]);
+  }, [step, track, live]);
 
   const c = CHAINS[chain];
   const send = trip.price * (1 + c.fee);
-  const bedAccount = `bed-${pad2(n ?? 0)}.${trip.code.toLowerCase()}.dibs.near`;
+  const bedAccount = live ? `b${pad2(n ?? 0)}-${code}.${contract}` : `b${pad2(n ?? 0)}-${trip.code.toLowerCase()}.dibs.near`;
 
   return (
     <Sheet open={n !== null} onOpenChange={(o) => !o && onClose()} eyebrow={`Bed ${pad2(n ?? 0)} · ${trip.place}`} title={titles[step]}>
@@ -51,12 +72,15 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
           <button
             className="pill-light focus-ring mt-6 w-full"
             disabled={busy}
-            onClick={() => {
+            onClick={async () => {
               setBusy(true);
-              setTimeout(() => {
-                setBusy(false);
+              try {
+                if (live) setMe((await deviceKey()).accountId);
+                else await new Promise((r) => setTimeout(r, 700));
                 setStep("chain");
-              }, 700);
+              } finally {
+                setBusy(false);
+              }
             }}
           >
             {busy ? <Loader2 className="size-4 animate-spin" /> : <Fingerprint className="size-4" />}
@@ -114,14 +138,17 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
               <ChainTag id={chain} />
             </div>
           </div>
-          <p className="mt-3 break-all rounded-lg bg-white/[0.06] px-3 py-2 font-mono text-[12px] text-fg-2">
-            Preview: the real one-time {c.name} deposit address appears here
+          <p className="mt-3 break-all rounded-xl bg-white/[0.06] px-3 py-2 text-[12.5px] leading-relaxed text-fg-2">
+            {live
+              ? "Testnet: NEAR Intents runs on mainnet only, so the test faucet stands in for your deposit and lands the exact amount in your bed's account."
+              : `Preview: the real one-time ${c.name} deposit address appears here.`}
           </p>
+          {me && <p className="mt-2 text-[12px] text-fg-3">Your key: {me.length > 24 ? `${me.slice(0, 8)}…${me.slice(-6)}` : me}</p>}
           <p className="mt-4 text-[14px] text-fg-2">
             It arrives in <span className="font-mono text-[13px] text-fg">{bedAccount}</span>, an account with no keys. Its code can only count you in.
           </p>
           <button className="pill-light focus-ring mt-5 w-full" onClick={() => setStep("tracking")}>
-            I’ve sent it
+            {live ? "Send the test deposit" : "I’ve sent it"}
           </button>
         </div>
       )}
@@ -129,6 +156,12 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
       {(step === "tracking" || step === "done") && (
         <div>
           <ProgressSteps steps={TRACK.map((title) => ({ title }))} done={step === "done" ? TRACK.length : track} />
+          {err && <p className="mt-4 rounded-xl bg-refused/10 px-3 py-2 text-[13.5px] text-refused">{err}</p>}
+          {step === "done" && tx && (
+            <a href={explorer(tx)} target="_blank" rel="noreferrer" className="mt-4 inline-flex text-[13px] text-fg-2 underline decoration-white/20 underline-offset-4 hover:text-fg">
+              Receipt on NEAR ↗
+            </a>
+          )}
           {step === "done" && (
             <button className="pill-light focus-ring mt-6 w-full" onClick={onClose}>
               Back to the trip

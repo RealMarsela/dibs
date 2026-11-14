@@ -1,4 +1,4 @@
-import { Dices, FileCheck2, ListPlus } from "lucide-react";
+import { CreditCard, Dices, FileCheck2, ListPlus } from "lucide-react";
 import { useTrip } from "@/data/store";
 import { PEOPLE } from "@/data/sample";
 import { ChainTag, Face } from "@/components/bits";
@@ -20,11 +20,12 @@ export interface Opens {
   exit: (n: number) => void;
   proof: () => void;
   draw: () => void;
+  card: () => void;
 }
 
 /* What this person should do next, said Hoy's way: a white statement and its grey continuation, then one button. */
 export function NextStep({ viewer, open }: { viewer: string; open: Opens }) {
-  const { trip, funded, paidCount, dispatch } = useTrip();
+  const { trip, funded, paidCount, act } = useTrip();
   const mine = trip.spots.find((s) => s.holder === viewer);
   const isBooker = viewer === trip.booker;
   const total = trip.price * trip.spots.length;
@@ -46,7 +47,7 @@ export function NextStep({ viewer, open }: { viewer: string; open: Opens }) {
   } else if (!mine) {
     a = "Every bed is taken.";
     b = `Join the waitlist with ${usd(trip.price, 0)} from any chain. When someone sells, you get their bed instantly.`;
-    cta = <button className="pill-light focus-ring press" onClick={() => dispatch({ type: "join", who: viewer })}><ListPlus className="size-4" /> Join the waitlist</button>;
+    cta = <button className="pill-light focus-ring press" onClick={() => act.join(viewer)}><ListPlus className="size-4" /> Join the waitlist</button>;
   } else if (!funded) {
     a = `Waiting on ${trip.spots.length - paidCount} bed${trip.spots.length - paidCount === 1 ? "" : "s"}.`;
     b = isBooker ? "You can’t book yet, and that’s the point: you never front the money." : "Nobody books until every bed is paid, so nobody covers for anyone.";
@@ -55,9 +56,14 @@ export function NextStep({ viewer, open }: { viewer: string; open: Opens }) {
     b = "Time to draw who sleeps where. One fair draw, the same for everyone.";
     cta = <button className="pill-light focus-ring press" onClick={open.draw}><Dices className="size-4" /> Draw the beds</button>;
   } else if (isBooker && !trip.proof) {
-    a = "Book it, then prove it.";
-    b = `Book the stay for ${usd(total, 0)} or less and add the confirmation email. The crew’s DAO pays you the moment it checks out.`;
-    cta = <button className="pill-light focus-ring press" onClick={open.proof}><FileCheck2 className="size-4" /> Add booking proof</button>;
+    a = "Book it with the trip’s own card.";
+    b = `It works at hotels only, once, for up to ${usd(total, 0)}. Then the confirmation lands in the trip’s inbox and proves it.`;
+    cta = (
+      <div className="flex flex-wrap gap-2">
+        <button className="pill-light focus-ring press" onClick={open.card}><CreditCard className="size-4" /> The trip’s card</button>
+        <button className="pill-dark focus-ring press" onClick={open.proof}><FileCheck2 className="size-4" /> Booking proof</button>
+      </div>
+    );
   } else if (isBooker) {
     a = "Booking verified.";
     b = `Release ${usd(total, 0)} from the crew’s DAO to yourself.`;

@@ -28,7 +28,8 @@ const FACE_COLORS: Record<string, string> = {
 
 export function Face({ id, size = 32, ring = false, className }: { id: string; size?: number; ring?: boolean; className?: string }) {
   const name = PEOPLE[id]?.name ?? "?";
-  return <LetterFace name={name} seed={id} color={FACE_COLORS[id]} size={size} className={cn(ring && "ring-2 ring-void", className)} />;
+  const short = id.split(".")[0];
+  return <LetterFace name={name} seed={FACE_COLORS[short] ? short : id} color={FACE_COLORS[id] ?? FACE_COLORS[short]} size={size} className={cn(ring && "ring-2 ring-void", className)} />;
 }
 
 export function FaceStack({ ids, size = 26, max = 8 }: { ids: string[]; size?: number; max?: number }) {

@@ -84,3 +84,55 @@ export async function uploadProof(file: File): Promise<{ blob_url: string; blob_
 }
 
 export const explorer = (tx: string) => `https://${NETWORK === "mainnet" ? "" : "testnet."}nearblocks.io/txns/${tx}`;
+
+/* Live wiring endpoints (services/api, Lane G) and the trip inbox / card. */
+export const INBOX = (import.meta.env.VITE_DIBS_INBOX as string | undefined)?.replace(/\/$/, "") ?? "";
+
+export const fund = (b: { trip: string; kind: "bed" | "wait"; n: number }) => post<{ mint_tx?: string; sweep_tx?: string; status?: string }>("/testnet/fund", b);
+export const refundCheck = (b: { trip: string; n: number }) => post<{ code: string; tx_hash?: string }>("/refund-check", b);
+export const draw = (trip: string) => post<{ tx_hash: string }>("/draw", { trip });
+export const proofSubmit = (b: { trip: string; blob_url: string; blob_sha256: string }) => post<{ tx_hash: string }>("/proof/submit", b);
+export const bootstrap = (account: string) => post<{ tx_hash?: string; existed?: boolean }>("/account/bootstrap", { account });
+export const names = (accounts: string[]) =>
+  accounts.length ? call<Record<string, string>>(`/names?accounts=${accounts.map(encodeURIComponent).join(",")}`) : Promise.resolve({});
+export const putName = (b: { account: string; name: string; ts: number; sig: string }) => call<{ ok: boolean }>("/names", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(b) });
+
+export interface ActivityRow {
+  at: string;
+  kind: string;
+  text: string;
+  tx?: string;
+  chain?: string;
+}
+export const activity = (trip: string) => call<ActivityRow[]>(`/trip/${encodeURIComponent(trip)}/activity`).catch(() => [] as ActivityRow[]);
+
+export interface InboxItem {
+  id: string;
+  blob_url: string;
+  blob_sha256: string;
+  received_at: string;
+  from_domain?: string;
+  dkim_domain?: string;
+  wrapped?: boolean;
+  status: string;
+  tx_hash?: string;
+  note?: string;
+}
+export async function inbox(trip: string): Promise<{ address: string; items: InboxItem[] }> {
+  const r = await fetch(`${INBOX}/inbox/${encodeURIComponent(trip)}`);
+  if (!r.ok) throw new ApiError(`inbox HTTP ${r.status}`);
+  return r.json();
+}
+
+export interface CardInfo {
+  last4: string;
+  spend_limit: string | number;
+  mcc: string | number;
+  sealed_hex: string;
+  issued_at: string;
+  simulations: { merchant: string; descriptor: string; approved: boolean; reason?: string; result?: string; at: string }[];
+}
+export const cardIssue = (trip: string) => post<{ last4: string; spend_limit: string | number; mcc: string | number }>(`/card/${encodeURIComponent(trip)}/issue`, {});
+export const cardGet = (trip: string) => call<CardInfo>(`/card/${encodeURIComponent(trip)}`);
+export const cardSimulate = (trip: string, merchant: "carlton" | "electronics") =>
+  post<{ approved: boolean; descriptor: string; reason?: string; result?: string; lithic_request_id?: string }>(`/card/${encodeURIComponent(trip)}/simulate`, { merchant });
