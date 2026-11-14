@@ -3,6 +3,7 @@ import { Composition, Folder } from "remotion";
 import "./fonts";
 import { Film, SceneAlone } from "./Film";
 import { HandoffSheet } from "./HandoffSheet";
+import { FilmJ, J_T } from "./journey/FilmJ";
 import { PayPatch, type PatchProps } from "./tools/PayPatch";
 import { SCENES, type SceneId } from "./scene";
 import { TOTAL, FPS } from "./timeline.generated";
@@ -11,6 +12,7 @@ import { W, H } from "./tokens";
 export const Root: React.FC = () => (
   <>
     <Composition id="Film" component={Film} durationInFrames={TOTAL} fps={FPS} width={W} height={H} defaultProps={{ audio: true }} />
+    <Composition id="FilmJ" component={FilmJ} durationInFrames={J_T.total} fps={FPS} width={W} height={H} />
     <Composition id="Handoffs" component={HandoffSheet} durationInFrames={8} fps={FPS} width={W} height={H} />
     <Folder name="Tools">
       <Composition id="PayPatch" component={PayPatch} durationInFrames={1} fps={FPS} width={1920} height={1080} defaultProps={{ rects: [], texts: [] } as PatchProps} />
