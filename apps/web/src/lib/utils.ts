@@ -6,11 +6,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function usd(n: number, digits = 2): string {
+  // Whole-dollar display never rounds real cents away (a $0.25 mainnet bed must not read "$0").
+  const d = digits === 0 && !Number.isInteger(Math.round(n * 100) / 100) ? 2 : digits;
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
+    minimumFractionDigits: d,
+    maximumFractionDigits: d,
   }).format(n);
 }
 

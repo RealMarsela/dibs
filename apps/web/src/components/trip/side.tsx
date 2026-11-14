@@ -25,8 +25,10 @@ export interface Opens {
 
 /* What this person should do next, said Hoy's way: a white statement and its grey continuation, then one button. */
 export function NextStep({ viewer, open }: { viewer: string; open: Opens }) {
-  const { trip, funded, paidCount, act } = useTrip();
+  const { trip, funded, paidCount, act, live, network } = useTrip();
   const mine = trip.spots.find((s) => s.holder === viewer);
+  const openSpot = trip.spots.find((s) => s.status === "open");
+  const mainnet = live && network === "mainnet";
   const isBooker = viewer === trip.booker;
   const total = trip.price * trip.spots.length;
   const pos = trip.waitlist.indexOf(viewer);
@@ -45,6 +47,15 @@ export function NextStep({ viewer, open }: { viewer: string; open: Opens }) {
   } else if (!mine && pos >= 0) {
     a = `You’re #${pos + 1} on the waitlist.`;
     b = `Your ${usd(trip.price, 0)} is ready. If anyone sells a bed, it’s yours on the spot. Leave any time and get it back.`;
+  } else if (!mine && openSpot) {
+    a = `Bed ${pad2(openSpot.n)} is open.`;
+    b = mainnet
+      ? `Real money on NEAR mainnet: hold it with a passkey and pay ${usd(trip.price, 0)} in USDC from Base, Solana, Arbitrum, Ethereum or NEAR.`
+      : `Hold it with a passkey and pay ${usd(trip.price, 0)} from any chain. Nobody books until every bed is paid.`;
+    cta = <button className="pill-light focus-ring press" onClick={() => open.pay(openSpot.n)}>Take bed {pad2(openSpot.n)} · {usd(trip.price, 0)}</button>;
+  } else if (!mine && mainnet) {
+    a = "Every bed is taken.";
+    b = "Both beds on this mainnet trip were paid with real USDC. The waitlist, resale, draw and booking proof run on the testnet trips.";
   } else if (!mine) {
     a = "Every bed is taken.";
     b = `Join the waitlist with ${usd(trip.price, 0)} from any chain. When someone sells, you get their bed instantly.`;

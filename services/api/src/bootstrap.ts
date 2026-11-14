@@ -19,6 +19,8 @@ export const isImplicit = (a: string): boolean => /^[0-9a-f]{64}$/.test(a);
  */
 export async function ensureImplicitAccount(env: Env, account: string): Promise<{ created: boolean; tx_hash: string | null }> {
   if (!isImplicit(account)) return { created: false, tx_hash: null };
+  // Mainnet never gives NEAR away: a hold only records the account id, and nothing on the mainnet path needs it to exist.
+  if (env.NEAR_NETWORK === "mainnet") return { created: false, tx_hash: null };
   if (await accountExists(env, account)) return { created: false, tx_hash: null };
   try {
     const res = await relayerAccount(env).transfer({ receiverId: account, amount: BOOTSTRAP_YOCTO });

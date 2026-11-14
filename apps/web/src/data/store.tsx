@@ -33,6 +33,7 @@ interface Ctx {
   live: boolean;
   code: string;
   contract: string;
+  network: api.Network;
   paidCount: number;
   funded: boolean;
   lastError: string;
@@ -46,6 +47,10 @@ const noop = async () => ({});
 
 export function TripProvider({ code, children }: { code: string; children: ReactNode }) {
   const live = code.toLowerCase() !== "demo" && (LIVE_TRIPS.includes(code.toLowerCase()) || /^[a-z0-9]{3,12}$/.test(code.toLowerCase()));
+  // Set before the first fetch below: a mainnet trip reads and pays through the API's /mainnet path.
+  const net = api.networkFor(code);
+  api.setNetwork(net);
+  const CONTRACT = api.CONTRACTS[net];
   const [sample, dispatch] = useReducer(reduce, undefined, sampleTrip);
   const liveTrip = useLiveTrip(code.toLowerCase(), live);
   const trip = live ? liveTrip.trip : sample;
@@ -100,6 +105,7 @@ export function TripProvider({ code, children }: { code: string; children: React
       live,
       code: c,
       contract: CONTRACT,
+      network: net,
       paidCount,
       funded,
       lastError: live ? liveTrip.lastError : "",
@@ -107,13 +113,12 @@ export function TripProvider({ code, children }: { code: string; children: React
       act,
       refresh: live ? liveTrip.refresh : noop.bind(null) as unknown as () => Promise<void>,
     };
-  }, [trip, live, code, liveTrip]);
+  }, [trip, live, code, liveTrip, net, CONTRACT]);
 
   if (!value) return <LiveLoading error={liveTrip.error} />;
   return <TripCtx.Provider value={value}>{children}</TripCtx.Provider>;
 }
 
-const CONTRACT = (import.meta.env.VITE_DIBS_CONTRACT as string | undefined) ?? "dibs-0eb9ae.testnet";
 
 function LiveLoading({ error }: { error: string | null }) {
   return (

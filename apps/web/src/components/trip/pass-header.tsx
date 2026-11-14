@@ -7,7 +7,7 @@ import { Sweep } from "@/components/motion/sweep";
 
 /* The trip's hello: the place, big, then the stay in grey (Hoy's two tones), then four small facts. */
 export function PassHeader() {
-  const { trip, funded } = useTrip();
+  const { trip, funded, live, network } = useTrip();
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 30_000);
@@ -18,7 +18,7 @@ export function PassHeader() {
 
   return (
     <section className="pt-2">
-      <p className="label">Trip {trip.code} · NEAR testnet</p>
+      <p className="label">Trip {trip.code} · {live && network === "mainnet" ? "NEAR mainnet · real USDC" : "NEAR testnet"}</p>
       <Sweep
         as="h1"
         immediate

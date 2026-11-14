@@ -1,6 +1,20 @@
 /* Typed calls to the Dibs API worker (services/api). Every error comes back as { error, code? }. */
 export const API = (import.meta.env.VITE_DIBS_API as string | undefined)?.replace(/\/$/, "") ?? "";
-export const NETWORK = (import.meta.env.VITE_DIBS_NETWORK as string | undefined) ?? "testnet";
+const DEFAULT_NETWORK: Network = import.meta.env.VITE_DIBS_NETWORK === "mainnet" ? "mainnet" : "testnet";
+
+/* Trips that live on NEAR mainnet. Opening one switches every call to the API's /mainnet path, the mainnet
+   contract and mainnet explorers; any other trip code stays on testnet. */
+export type Network = "testnet" | "mainnet";
+export const MAINNET_TRIPS = ["lismain"];
+export const CONTRACTS: Record<Network, string> = {
+  testnet: (import.meta.env.VITE_DIBS_CONTRACT as string | undefined) ?? "dibs-0eb9ae.testnet",
+  mainnet: "dibsapp.near",
+};
+let current: Network = DEFAULT_NETWORK;
+export const networkFor = (code: string): Network => (MAINNET_TRIPS.includes(code.toLowerCase()) ? "mainnet" : DEFAULT_NETWORK);
+export const setNetwork = (n: Network) => void (current = n);
+export const network = (): Network => current;
+const base = () => (current === "mainnet" ? `${API}/mainnet` : API);
 
 export class ApiError extends Error {
   code?: string;
@@ -11,7 +25,7 @@ export class ApiError extends Error {
 }
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
-  const r = await fetch(API + path, init);
+  const r = await fetch(base() + path, init);
   const body = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
   if (!r.ok) throw new ApiError(body.error ?? `HTTP ${r.status}`, body.code);
   return body as T;
@@ -59,6 +73,7 @@ export interface Quote {
   mode: "oneclick" | "testnet";
   depositAddress: string;
   amountIn: string;
+  minAmountIn?: string | null;
   token: string;
   expiresAt: string | null;
   etaSeconds?: number;
@@ -84,7 +99,8 @@ export async function uploadProof(file: File): Promise<{ blob_url: string; blob_
   return call("/proof-blob", { method: "POST", body: fd });
 }
 
-export const explorer = (tx: string) => `https://${NETWORK === "mainnet" ? "" : "testnet."}nearblocks.io/txns/${tx}`;
+export const explorer = (tx: string) => `https://${current === "mainnet" ? "" : "testnet."}nearblocks.io/txns/${tx}`;
+export const accountExplorer = (a: string) => `https://${current === "mainnet" ? "" : "testnet."}nearblocks.io/address/${a}`;
 
 /* Live wiring endpoints (services/api, Lane G) and the trip inbox / card. */
 export const INBOX = (import.meta.env.VITE_DIBS_INBOX as string | undefined)?.replace(/\/$/, "") ?? "";

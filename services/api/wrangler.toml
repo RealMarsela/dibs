@@ -20,6 +20,11 @@ VERIFIER_PUBLIC_KEY = "706445d7daa364e38ea0f410fc3279c83b6200c5cfd89983546b8fecb
 TRIP_DAO = "lis0312-0eb9ae.sputnik-v2.testnet"
 CF_ZONE_ID = "bbaaf33c5998f5ebb76ea82164662d98"
 MAIL_DOMAIN = "dibs.larinova.com"
+# /mainnet/* (src/mainnet.ts): the pay-in on NEAR mainnet. Secret: MAINNET_RELAYER_PRIVATE_KEY.
+MAINNET_RPC_URLS = "https://free.rpc.fastnear.com,https://rpc.mainnet.near.org"
+MAINNET_DIBS_CONTRACT = "dibsapp.near"
+MAINNET_USDC_CONTRACT = "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1"
+MAINNET_RELAYER_ACCOUNT_ID = "relayer.dibsapp.near"
 
 [[r2_buckets]]
 binding = "BLOBS"

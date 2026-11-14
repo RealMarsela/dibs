@@ -1,0 +1,35 @@
+{
+  "network": "mainnet",
+  "rpc": "https://free.rpc.fastnear.com",
+  "explorer": "https://nearblocks.io",
+  "dibs": "dibsapp.near",
+  "usdc": "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+  "relayer": "relayer.dibsapp.near",
+  "api_url": "https://api.dibs.larinova.com/mainnet",
+  "dibs_wasm_sha256": "bdfda04104366b963eb15d7efb775d4a579f898c9c78335c880e141cadd6c120",
+  "bed_wasm_sha256": "7c49e62d6aab02e5789bad612d7727636b49a992dd85abb50776fa1ebc1106a6",
+  "scope": "Pay-in only: hold, NEAR Intents 1Click quote, status and sweep into the crew DAO. Proofs, draw, card, resale and trip creation run on testnet.",
+  "txs": {
+    "deploy_and_init": "A2FUVBt9MDmu1hSWmBPFKeEHjDoCapgWZ8Js2akhzym5",
+    "usdc_registration": "FP98UZo7z6YuMyPcS8sdJeCiB7cpUFHhA9CwW8nWoG8z",
+    "dao_create": "FiggGRJEzAJrM72Hk1rqhgJ3GXLjDDDt5wEUMXskbJyV",
+    "create_trip_lismain": "9ozojmPQeaVxggfLG7HzD1UcP1SNhRuUjA6LtcYKGYTM",
+    "add_relayer": "5LYrpNZqCntjkKyVb7VYPGJDy7pHvwGhZP3HZuV43sn2",
+    "bed2_hold": "bSgWocNVUk3ce7EXSemN49PA5bTZDvJYGmBZvgniKfY",
+    "bed2_usdc_deposit": "6W5hd6BUuQUYnACD792DaEVb7osLBXdQNGB1MMSvGZYf",
+    "bed2_sweep_to_dao": "GKYgYFwfTdEbqe1wPcaxFQBNDvmM2btG8zb5fE2YPp1N"
+  },
+  "trips": {
+    "lismain": {
+      "dao": "dibs-lismain.sputnik-dao.near",
+      "price": "250000",
+      "n_beds": 2,
+      "n_wait": 0,
+      "check_in": "2027-03-12",
+      "check_out": "2027-03-15",
+      "stay": "Alfama flat with a roof terrace",
+      "bed_accounts": ["b01-lismain.dibsapp.near", "b02-lismain.dibsapp.near"],
+      "state": "bed 2 Paid with USDC on NEAR (DAO holds 0.25 USDC); bed 1 Open for a NEAR Intents payment from Base"
+    }
+  }
+}

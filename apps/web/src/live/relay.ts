@@ -1,13 +1,13 @@
 import { KeyPair, KeyPairSigner, actions, buildDelegateAction, encodeSignedDelegate } from "near-api-js";
-import { NETWORK, relay } from "@/live/api";
+import { network, relay } from "@/live/api";
 import type { DeviceKey } from "@/live/passkey";
 
 /* Gasless calls: the friend's passkey key signs a NEP-366 delegate action; the API's relayer submits it and pays
    the gas. The relayer only forwards calls to the dibs contract or a bed account, with an allowlist of methods. */
-const RPC = NETWORK === "mainnet" ? "https://rpc.mainnet.fastnear.com" : "https://rpc.testnet.fastnear.com";
+const rpcUrl = () => (network() === "mainnet" ? "https://rpc.mainnet.fastnear.com" : "https://rpc.testnet.fastnear.com");
 
 async function rpc<T>(method: string, params: unknown): Promise<T> {
-  const r = await fetch(RPC, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: "dibs", method, params }) });
+  const r = await fetch(rpcUrl(), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: "dibs", method, params }) });
   const j = await r.json();
   if (j.error) throw new Error(j.error?.cause?.name ?? j.error?.message ?? "rpc error");
   return j.result as T;
