@@ -8,11 +8,11 @@ import { CHAINS } from "@/data/sample";
 import { useTrip } from "@/data/store";
 import type { ChainId } from "@/data/types";
 import { cn, pad2, usd } from "@/lib/utils";
-import { deviceKey } from "@/live/passkey";
+import { deviceKey, hasDeviceSession, rememberedDevice } from "@/live/passkey";
 import { devKey } from "@/live/dev-keys";
 import { explorer } from "@/live/api";
 import { LivePay } from "@/components/trip/live-pay";
-import { connectNear, isEthAccount, nearError } from "@/live/near-wallet";
+import { connectNear, isEthAccount, nearError, rememberedNear } from "@/live/near-wallet";
 
 type Step = "passkey" | "chain" | "deposit" | "tracking" | "done";
 const MAINNET_TRACK = ["Deposit seen on your chain", "Swapped by NEAR Intents", "Landed in your bed’s own account", "Counted in the crew DAO"];
@@ -33,10 +33,24 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
   const [evm, setEvm] = useState(false);
 
   useEffect(() => {
-    if (n !== null) {
-      setStep("passkey");
-      setTrack(0);
-    }
+    if (n === null) return;
+    setTrack(0);
+    setErr(null);
+    // A bed already held by the account this browser is signed in as (the booker's bed 1 after creating the trip,
+    // or a bed claimed earlier) goes straight to paying instead of asking who you are again.
+    const holder = trip.spots.find((s) => s.n === n)?.holder;
+    const wallet = live ? rememberedNear(network)?.accountId : undefined;
+    if (live && holder && holder === wallet) {
+      setEvm(false);
+      setMe(holder);
+      setChain(isEthAccount(holder) ? "base" : "near");
+      setStep("chain");
+    } else if (live && !mainnet && holder && holder === rememberedDevice() && hasDeviceSession()) {
+      setEvm(false);
+      setMe(holder);
+      setStep("chain");
+    } else setStep("passkey");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [n]);
 
   // The pay call starts as tracking begins; the visual steps advance on their own but the last one waits

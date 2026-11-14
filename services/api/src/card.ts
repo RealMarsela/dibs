@@ -5,7 +5,7 @@ import type { Env } from "./env";
 import { rateLimit } from "./ratelimit";
 import { tripCode } from "./schemas";
 import { simulate, type SimResult } from "./cardsim";
-import { runCardOp } from "./cardrun";
+import { checkCardRun, submitCardOp } from "./cardrun";
 
 /* The trip's virtual card. The dibs-verifier TEE issues it (op `card`) and signs
    `dibs-card:v1:{trip,card_token,last4,spend_limit,mcc,sealed_hex}`. This API stores only what that signature covers,
@@ -92,16 +92,50 @@ cardRoute.post("/card/:trip/issued", async (c) => {
 });
 
 /** Trigger the TEE `card` op (relayer -> OutLayer request_execution), then store the result through the same verification. */
+/* Issue: start the TEE run and answer 202 at once; every later call checks that run, stores the card when it lands,
+   and resubmits a run that OutLayer's busy queue let time out (up to MAX_RUNS). The page polls this route. */
+const PENDING_MS = 5 * 60_000;
+const MAX_RUNS = 4;
+interface PendingRun {
+  tx: string;
+  at: number;
+  runs: number;
+}
+const pendingKey = (trip: string) => `cards/pending/${trip}.json`;
+async function loadPending(env: Env, trip: string): Promise<PendingRun | null> {
+  const o = await env.BLOBS.get(pendingKey(trip));
+  return o ? ((await o.json()) as PendingRun) : null;
+}
 cardRoute.post("/card/:trip/issue", async (c) => {
   const env = c.env;
   const trip = parse(tripCode, c.req.param("trip"));
-  rateLimit(`card:issue:ip:${c.req.header("cf-connecting-ip") ?? "anon"}`, 6, 60_000);
-  rateLimit(`card:issue:${trip}`, 3, 60_000);
+  const ip = c.req.header("cf-connecting-ip") ?? "anon";
+  rateLimit(`card:poll:ip:${ip}`, 40, 60_000);
   const existing = await load(env, trip);
   if (existing) return c.json({ last4: existing.last4, spend_limit: existing.spend_limit, mcc: existing.mcc });
-  const out = await runCardOp(env, trip);
-  const r = await storeIssued(env, trip, out.message, out.signature);
-  return c.json({ last4: r.last4, spend_limit: r.spend_limit, mcc: r.mcc });
+  const pend = await loadPending(env, trip);
+  if (pend) {
+    const s = await checkCardRun(env, pend.tx).catch(async (e) => {
+      await env.BLOBS.delete(pendingKey(trip));
+      throw e;
+    });
+    if (s.state === "done") {
+      await env.BLOBS.delete(pendingKey(trip));
+      const r = await storeIssued(env, trip, s.message, s.signature);
+      return c.json({ last4: r.last4, spend_limit: r.spend_limit, mcc: r.mcc });
+    }
+    if (s.state === "pending" && Date.now() - pend.at < PENDING_MS) return c.json({ pending: true, runs: pend.runs, tx: pend.tx }, 202);
+    if (pend.runs >= MAX_RUNS) {
+      await env.BLOBS.delete(pendingKey(trip));
+      throw new ApiError(503, "E_OUTLAYER_BUSY", "OutLayer's enclave queue is busy right now; try again in a few minutes");
+    }
+  }
+  rateLimit(`card:issue:ip:${ip}`, 6, 60_000);
+  rateLimit(`card:issue:${trip}`, 3, 60_000);
+  const tx = await submitCardOp(env, trip);
+  const runs = (pend?.runs ?? 0) + 1;
+  await env.BLOBS.put(pendingKey(trip), JSON.stringify({ tx, at: Date.now(), runs } satisfies PendingRun));
+  return c.json({ pending: true, runs, tx }, 202);
 });
 
 cardRoute.get("/card/:trip", async (c) => {

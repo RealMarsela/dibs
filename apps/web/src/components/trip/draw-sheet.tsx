@@ -78,12 +78,17 @@ export function DrawSheet({ open, onClose }: { open: boolean; onClose: () => voi
               >
                 <span className="w-6 font-mono text-[12px] text-fg-3">{pad2(s.n)}</span>
                 {s.holder && <Face id={s.holder} size={22} />}
-                <span className="w-16 truncate text-[14px] font-semibold">{s.holder ? PEOPLE[s.holder].name : ""}</span>
+                <span className="w-28 shrink-0 truncate text-[14px] font-semibold">{s.holder ? PEOPLE[s.holder].name : ""}</span>
                 <span className={phase === "done" ? "truncate text-[13.5px] text-fg" : "truncate text-[13.5px] text-fg-3 blur-[0.4px]"}>{bed}</span>
               </motion.li>
             );
           })}
       </ol>
+      {live && phase === "rolling" && !err && (
+        <p className="mt-4 text-[13px] leading-relaxed text-fg-3" aria-live="polite">
+          Asking OutLayer for a verifiable random number. It usually lands in 20 to 30 seconds; you can close this and come back.
+        </p>
+      )}
       {err && <p className="mt-4 rounded-xl bg-refused/10 px-3 py-2 text-[13.5px] text-refused">{err}</p>}
       {phase === "done" && (
         <>

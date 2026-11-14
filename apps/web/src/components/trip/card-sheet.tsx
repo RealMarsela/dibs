@@ -36,6 +36,7 @@ export function CardSheet({ open, onClose }: { open: boolean; onClose: () => voi
   const [details, setDetails] = useState<CardDetails | null>(null);
   const [tries, setTries] = useState<Try[]>([]);
   const [err, setErr] = useState<string | null>(null);
+  const [slow, setSlow] = useState(false);
   const pot = trip.price * trip.spots.length;
 
   useEffect(() => {
@@ -56,11 +57,20 @@ export function CardSheet({ open, onClose }: { open: boolean; onClose: () => voi
   }, [step, k]);
 
   async function issue() {
+    setSlow(false);
     setStep("issuing");
     setK(0);
     try {
       if (live) {
-        await api.cardIssue(code);
+        // The enclave answers through OutLayer's queue, which can take minutes when busy: poll until the card lands.
+        const t0 = Date.now();
+        let r = await api.cardIssue(code);
+        while ("pending" in r) {
+          if (Date.now() - t0 > 20_000) setSlow(true);
+          if (Date.now() - t0 > 12 * 60_000) throw new Error("OutLayer is busy right now. Try again in a few minutes.");
+          await new Promise((ok) => setTimeout(ok, 5000));
+          r = await api.cardIssue(code);
+        }
         const c = await api.cardGet(code);
         setCard({ last4: c.last4, limit: Number(c.spend_limit) / 100, sealed: c.sealed_hex });
       } else {
@@ -117,7 +127,16 @@ export function CardSheet({ open, onClose }: { open: boolean; onClose: () => voi
         </div>
       )}
 
-      {step === "issuing" && <ProgressSteps steps={ISSUE} done={k} />}
+      {step === "issuing" && (
+        <>
+          <ProgressSteps steps={ISSUE} done={k} />
+          {slow && (
+            <p className="mt-4 text-[13px] leading-relaxed text-fg-3" aria-live="polite">
+              The enclave queue on testnet is busy. Still working; this can take a few minutes, and a stalled run is retried for you.
+            </p>
+          )}
+        </>
+      )}
 
       {step === "card" && card && (
         <div>

@@ -16,6 +16,9 @@ export function faceColor(seed: string): string {
 }
 
 export function initials(name: string): [string, string] {
+  // An unnamed account ("Friend 9f0d") wears its own id, so two strangers never get the same face.
+  const anon = /^Friend ([0-9a-f]{4})$/.exec(name);
+  if (anon) return [anon[1][0].toUpperCase(), anon[1][1].toUpperCase()];
   const a = name.normalize("NFD").replace(/[^A-Za-z ]/g, "").trim().toUpperCase();
   const parts = a.split(/\s+/);
   if (parts.length > 1) return [parts[0][0], parts[1][0]];

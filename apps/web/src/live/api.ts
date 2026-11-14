@@ -156,7 +156,9 @@ export interface CardInfo {
   issued_at: string;
   simulations: { merchant: string; descriptor: string; approved: boolean; reason?: string; result?: string; at: string }[];
 }
-export const cardIssue = (trip: string) => post<{ last4: string; spend_limit: string | number; mcc: string | number }>(`/card/${encodeURIComponent(trip)}/issue`, {});
+/** Starts the enclave run (202 {pending}) or returns the card once it has landed; call again to poll. */
+export const cardIssue = (trip: string) =>
+  post<{ last4: string; spend_limit: string | number; mcc: string | number } | { pending: true; runs: number; tx: string }>(`/card/${encodeURIComponent(trip)}/issue`, {});
 export const cardGet = (trip: string) => call<CardInfo>(`/card/${encodeURIComponent(trip)}`);
 export const cardSimulate = (trip: string, merchant: "carlton" | "electronics") =>
   post<{ approved: boolean; descriptor: string; reason?: string; result?: string; lithic_request_id?: string }>(`/card/${encodeURIComponent(trip)}/simulate`, { merchant });

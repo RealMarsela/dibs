@@ -117,6 +117,9 @@ export function rememberedDevice(): string | null {
   return store(ACCOUNT);
 }
 
+/** True when this tab already holds the passkey seed, so deviceKey() will not prompt. */
+export const hasDeviceSession = (): boolean => !!cached || !!sessionSeed();
+
 function sessionSeed(v?: string): string | null {
   try {
     if (v) sessionStorage.setItem(SESSION, v);
