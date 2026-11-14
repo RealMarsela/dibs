@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { hash, LetterFace } from "@/components/motion/face";
+import { hash } from "@/components/motion/face";
+import { Avatar } from "@/components/motion/avatar";
 
 /* The crowd around the hello: friends who have called dibs on a bed somewhere. Laid out once per seed so it is
    the same on every load; each face rises in, then bobs and sways on its own clock. Far ones are smaller and
@@ -74,7 +75,7 @@ export function Crowd({ count = 26 }: { count?: number }) {
         >
           <div className="cf-b">
             <div className="cf-s" style={{ filter: s.blur ? `blur(${s.blur}px)` : undefined, opacity: s.blur ? 0.7 : 1 }}>
-              <LetterFace name={s.name} size={s.size} />
+              <Avatar name={s.name} size={s.size} />
             </div>
           </div>
         </div>

@@ -103,7 +103,7 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
       {step === "passkey" && live && (
         <div>
           <p className="text-[15px] leading-relaxed text-fg-2">
-            Claim bed {pad2(n ?? 0)} with your own NEAR wallet. MetaMask works too: Ethereum Wallets makes its address your NEAR account.
+            Claim bed {pad2(n ?? 0)} with your own NEAR wallet. Paying from OKX, MetaMask or Phantom works either way.
           </p>
           <button className="pill-light focus-ring mt-6 w-full" disabled={busy} onClick={withWallet}>
             {busy ? <Loader2 className="size-4 animate-spin" /> : <Wallet className="size-4" />}

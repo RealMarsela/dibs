@@ -210,3 +210,15 @@ body {
 .hot-connector-popup {
   pointer-events: auto;
 }
+
+/* Landing story cards: the colour bloom behind each card's one vivid element drifts slowly. */
+@keyframes bloom-drift {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(8deg) scale(1.08); }
+}
+.bloom {
+  animation: bloom-drift 14s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bloom { animation: none; }
+}

@@ -59,7 +59,11 @@ export function Sheet({
     );
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="glass rounded-t-[28px] rounded-b-none border-line px-5 pb-[max(20px,env(safe-area-inset-bottom))] text-fg" onInteractOutside={keepForPicker} onEscapeKeyDown={escapeForPicker}>
+      <DrawerContent
+        className="glass border border-line px-5 pb-[max(20px,env(safe-area-inset-bottom))] text-fg data-[vaul-drawer-direction=bottom]:inset-x-2 data-[vaul-drawer-direction=bottom]:bottom-2 data-[vaul-drawer-direction=bottom]:rounded-[28px] data-[vaul-drawer-direction=bottom]:border"
+        onInteractOutside={keepForPicker}
+        onEscapeKeyDown={escapeForPicker}
+      >
         <DrawerHeader className="px-0 pb-4 pt-3 text-left">
           {head}
           <DrawerTitle className="display text-[24px] text-fg">{title}</DrawerTitle>

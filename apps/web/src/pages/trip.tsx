@@ -39,7 +39,8 @@ export function TripPage() {
   // Live: you are the NEAR wallet you signed in with; without one, this device's passkey account (the judge demo).
   // On localhost, demo personas can be picked for filming.
   useEffect(() => {
-    if (!live) return;
+    // Shown inside the landing page's phone frame (?embed): read-only, never asks for a passkey.
+    if (!live || new URLSearchParams(location.search).has("embed")) return;
     const signedIn = () => {
       const w = rememberedNear(network);
       setWallet(w);
@@ -105,7 +106,7 @@ export function TripPage() {
       <main className="mx-auto max-w-[1120px] px-5">
         <div className={cn("mt-3 flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none]", live && viewers.length === 0 && "invisible")}>
           <span className="shrink-0 text-[12px] text-fg-3">{live ? "Acting as" : "Preview as"}</span>
-          <ToggleGroup type="single" value={viewer} onValueChange={(v) => v && setViewer(v)} className="gap-1">
+          <ToggleGroup type="single" value={viewer} onValueChange={(v) => v && setViewer(v)} className="gap-1 rounded-full">
             {viewers.map((v) => (
               <ToggleGroupItem
                 key={v.id}

@@ -143,18 +143,20 @@ export function WalletPay({ chain, network, price, pay, getQuote, onSent, compac
   const rows: { id: string; icon: React.ReactNode; title: string; sub: string; go: () => void }[] =
     wc === "near"
       ? [{ id: "near", icon: <Wallet className="size-4" />, title: "Pay with a NEAR wallet", sub: conn?.id === "near" ? `Connected · ${short(conn.from)}` : testnet ? "Meteor, Intear, Nightly, MyNearWallet, Ledger · test USDC" : "HOT, Meteor, MyNearWallet, Intear, NEAR Mobile, Ledger", go: () => void payNear() }]
-      : ((sol ? solWallets : wallets) ?? []).map((w) => ({
+      : ((sol ? solWallets : wallets) ?? []).map((w, _, list) => ({
           id: w.id,
           icon: w.icon ? <img src={w.icon} alt="" className="size-5 rounded" /> : <Wallet className="size-4" />,
-          title: `Pay with ${w.name}`,
-          sub: conn?.id === w.id ? `Connected · ${short(conn.from)}` : `${testnet ? "Test USDC" : "USDC"} on ${name}, signed in your wallet`,
+          // One wallet: a neutral "Pay from my wallet" naming it underneath. Several (MetaMask and OKX, say): a chooser by name.
+          title: list.length === 1 ? "Pay from my wallet" : w.name,
+          sub: conn?.id === w.id ? `${w.name} · connected · ${short(conn.from)}` : `${list.length === 1 ? `${w.name} · ` : ""}${testnet ? "Test USDC" : "USDC"} on ${name}`,
           go: () => void ("w" in w ? paySolana(w as SolWallet) : payEvm(w as EvmWallet)),
         }));
   const found = wc === "near" ? rows : sol ? solWallets : wallets;
+  const many = wc !== "near" && (found?.length ?? 0) > 1;
 
   return (
     <div className={compact ? "mt-4" : undefined}>
-      {!compact && <p className="label mb-2">Pay with your wallet</p>}
+      {!compact && <p className="label mb-2">{many ? "Pay from my wallet: choose one" : "Your wallet"}</p>}
       {found === null && <p className="flex items-center gap-2 text-[13px] text-fg-3"><Loader2 className="size-3.5 animate-spin" /> Looking for wallets in this browser…</p>}
       {found?.length === 0 && !compact && (
         <p className="text-[13px] leading-relaxed text-fg-3">{testnet ? `No browser wallet found here. Install one with ${name} test USDC, or use the judge demo below.` : "No browser wallet found here. Any wallet or exchange works with the address below."}</p>

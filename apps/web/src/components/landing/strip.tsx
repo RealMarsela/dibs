@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link2 } from "lucide-react";
+import { motion } from "motion/react";
+import { Avatar } from "@/components/motion/avatar";
 import { LetterFace } from "@/components/motion/face";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +19,9 @@ export const CREW = [
 /* The trip strip, the way Hoy's menu bar sits over everything: the invite link, a battery of eight beds,
    the crew's faces stacked (they part around the one under the pointer), and the clock to the booking deadline.
    `active` pulses with sonar: whoever is doing something in this beat. */
-export function TripStrip({ paid, active, clock = "2d 17h", crew = CREW }: { paid: number; active?: string; clock?: string; crew?: { id: string; name: string; color?: string }[] }) {
+/** On the landing page (`landing`), the crew shows the same faces as the story, and Maya's slot receives her face from
+    the hero once the visitor scrolls past it (layoutId "maya-face"). */
+export function TripStrip({ paid, active, clock = "2d 17h", crew = CREW, landing }: { paid: number; active?: string; clock?: string; crew?: { id: string; name: string; color?: string }[]; landing?: { pastHero: boolean } }) {
   const [over, setOver] = useState<number | null>(null);
   return (
     <div className="flex items-center gap-4 text-fg-2 sm:gap-6" aria-label={`${paid} of ${crew.length || 8} beds paid`}>
@@ -40,7 +44,19 @@ export function TripStrip({ paid, active, clock = "2d 17h", crew = CREW }: { pai
                 transition: "translate .5s var(--ease), scale .4s var(--ease)",
               }}
             >
-              <LetterFace name={c.name} seed={c.id.split(".")[0]} color={c.color ?? CREW.find((x) => x.id === c.id.split(".")[0])?.color} size={30} className="ring-[2.5px] ring-void" />
+              {landing && c.id === "maya" ? (
+                landing.pastHero ? (
+                  <motion.span layoutId="maya-face" className="block rounded-full" transition={{ type: "spring", visualDuration: 0.6, bounce: 0.2 }}>
+                    <Avatar name={c.name} seed="maya" size={30} className="ring-[2.5px] ring-void" />
+                  </motion.span>
+                ) : (
+                  <span className="block size-[30px] rounded-full bg-white/[0.06] ring-[2.5px] ring-void" />
+                )
+              ) : landing ? (
+                <Avatar name={c.name} seed={c.id} size={30} className="ring-[2.5px] ring-void" />
+              ) : (
+                <LetterFace name={c.name} seed={c.id.split(".")[0]} color={c.color ?? CREW.find((x) => x.id === c.id.split(".")[0])?.color} size={30} className="ring-[2.5px] ring-void" />
+              )}
             </span>
           );
         })}

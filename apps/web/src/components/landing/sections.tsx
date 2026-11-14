@@ -1,58 +1,15 @@
+import { useRef } from "react";
 import { Link } from "react-router";
-import { Link2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { LetterFace } from "@/components/motion/face";
 import { Rise } from "@/components/motion/rise";
-import { Sweep } from "@/components/motion/sweep";
 import { Wordmark } from "@/components/bits";
 import { MARKS } from "./marks";
 
+export { LinkSection } from "./link";
+
 const wrap = "mx-auto w-full max-w-[1680px] px-[clamp(20px,6vw,128px)]";
-
-const FLOAT = [
-  { k: "f", name: "Zara", x: 8, y: 30, s: 46 },
-  { k: "c", t: "USDC on Base", x: 20, y: 62 },
-  { k: "f", name: "Ravi", x: 30, y: 18, s: 38 },
-  { k: "c", t: "SOL", x: 34, y: 78 },
-  { k: "f", name: "Elif", x: 62, y: 74, s: 42 },
-  { k: "c", t: "USDC on Arbitrum", x: 70, y: 22 },
-  { k: "f", name: "Mateo", x: 84, y: 48, s: 50 },
-  { k: "c", t: "ETH", x: 88, y: 76 },
-  { k: "f", name: "Aiko", x: 14, y: 84, s: 34 },
-  { k: "c", t: "NEAR", x: 50, y: 88 },
-  { k: "f", name: "Kwame", x: 76, y: 8, s: 36 },
-] as const;
-
-export function LinkSection() {
-  return (
-    <section className="relative flex min-h-[86svh] items-center justify-center overflow-hidden px-5 py-24">
-      <Rise className="pointer-events-none absolute inset-0">
-        {FLOAT.map((f, i) => (
-          <div
-            key={i}
-            className="cf-b absolute"
-            style={{ left: `${f.x}%`, top: `${f.y}%`, ["--bob" as string]: "4px", ["--bobT" as string]: `${2.4 + (i % 4) * 0.4}s`, ["--ph1" as string]: `${-i * 0.37}s` }}
-          >
-            {f.k === "f" ? (
-              <LetterFace name={f.name} size={f.s} />
-            ) : (
-              <span className="rounded-full bg-white/[0.06] px-3 py-1.5 text-[13px] font-medium text-fg-2 ring-1 ring-white/10">{f.t}</span>
-            )}
-          </div>
-        ))}
-      </Rise>
-      <div className="relative z-10 flex flex-col items-center text-center">
-        <Sweep className="flex items-center gap-3 text-[clamp(30px,3.6vw,48px)]" lines={[{ text: "A link is all it takes." }]} />
-        <Link2 className="mt-4 size-6 text-fg-2" aria-hidden />
-        <Rise delay={500} className="mt-7">
-          <Link to="/t/lis-0312" className="pill-light focus-ring press h-11 px-6 text-[15px]">
-            Open the Lisbon trip
-          </Link>
-        </Rise>
-      </div>
-    </section>
-  );
-}
 
 const TERMS = [
   ["Dibs is free.", "You pay network fees: cents, not percent."],
@@ -61,19 +18,28 @@ const TERMS = [
   ["Miss the deadline?", "Everyone is refunded automatically. No one has to ask."],
 ];
 
+/* Each term reads grey and turns white as it scrolls up through the middle of the screen. */
+function Term({ a, b }: { a: string; b: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const still = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 92%", "start 52%"] });
+  const color = useTransform(scrollYProgress, [0, 1], ["#5c5b58", "#ececea"]);
+  return (
+    <motion.p ref={ref} className="text-[clamp(28px,3.25vw,46.8px)] font-medium leading-[1.08] tracking-[-0.024em]" style={{ color: still ? "#ececea" : color }}>
+      {a} <span className="tone-2">{b}</span>
+    </motion.p>
+  );
+}
+
 export function Terms() {
   return (
     <section className={`${wrap} py-[clamp(80px,12vw,180px)]`}>
-      <div className="flex max-w-[900px] flex-col gap-7">
-        {TERMS.map(([a, b], i) => (
-          <Rise key={a} delay={i * 60}>
-            <p className="display text-[clamp(26px,2.9vw,42px)]">
-              {a} <span className="tone-2">{b}</span>
-            </p>
-          </Rise>
+      <div className="flex max-w-[980px] flex-col gap-[clamp(22px,2.6vw,36px)]">
+        {TERMS.map(([a, b]) => (
+          <Term key={a} a={a} b={b} />
         ))}
-        <Rise delay={300}>
-          <Link to="/new" className="pill-light focus-ring press mt-2">
+        <Rise delay={200}>
+          <Link to="/new" className="pill-light focus-ring press mt-3 h-[46px] px-6 shadow-[0_13px_24px_-6px_#0000002b,0_5px_10px_-4px_#00000029]">
             Start a trip
           </Link>
         </Rise>
@@ -88,10 +54,10 @@ const HOOD = [
   ["NEAR Intents.", "Pay from Base, Solana, Arbitrum or Ethereum. Your bed’s own NEAR account receives exactly the bed price in USDC."],
   ["OutLayer.", "The trip contract itself asks an Intel TDX enclave whether the booking email is real, then checks the signed answer."],
   ["NEAR AI Cloud.", "Reads the email inside a GPU enclave. Friends see dates, guests and the total. Never names, address or card."],
-  ["A fair draw.", "A verifiable random number decides who sleeps where."],
-  ["Passkeys.", "No wallet, no seed phrase, no gas. Your phone is the key to your bed."],
+  ["Your own wallet.", "NEAR Connect, MetaMask, OKX or Phantom pays. No NEAR wallet? A passkey holds your bed and Dibs pays the gas."],
 ];
 
+/* No boxes: the rules as two-tone lines beside a phone showing the live trip, then the stack as one plain row. */
 export function Hood() {
   return (
     <section id="hood" className={`${wrap} py-[clamp(60px,9vw,140px)]`}>
@@ -100,34 +66,53 @@ export function Hood() {
           Under the hood. <span className="tone-2">Every rule is code.</span>
         </h2>
       </Rise>
-      <div className="grid max-w-[1100px] gap-x-16 gap-y-8 md:grid-cols-2">
-        {HOOD.map(([a, b], i) => (
-          <Rise key={a} delay={(i % 2) * 80}>
-            <p className="text-[clamp(18px,1.5vw,23px)] font-medium leading-snug tracking-[-0.012em]">
-              {a} <span className="tone-2">{b}</span>
-            </p>
-          </Rise>
-        ))}
+      <div className="grid items-start gap-[clamp(40px,6vw,96px)] lg:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="flex max-w-[640px] flex-col gap-6">
+          {HOOD.map(([a, b], i) => (
+            <Rise key={a} delay={i * 50}>
+              <p className="text-[clamp(18px,1.5vw,23px)] font-medium leading-snug tracking-[-0.012em]">
+                {a} <span className="tone-2">{b}</span>
+              </p>
+            </Rise>
+          ))}
+        </div>
+        <Rise className="mx-auto lg:mx-0">
+          <Phone />
+        </Rise>
       </div>
-      <Rise className="mt-[clamp(48px,6vw,88px)]">
-        <p className="mb-4 text-[13.5px] text-fg-2">Runs on</p>
-        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+      <Rise className="mt-[clamp(56px,7vw,104px)]">
+        <p className="mb-5 text-[13.5px] text-fg-2">Runs on</p>
+        <ul className="flex flex-wrap items-center gap-x-[clamp(24px,3.4vw,52px)] gap-y-5">
           {MARKS.map((m) => (
-            <li
-              key={m.slug}
-              className="group rounded-2xl bg-white/[0.025] p-4 ring-1 ring-line transition-colors duration-300 hover:bg-white/[0.05]"
-              style={{ "--brand": m.hover } as React.CSSProperties}
-            >
-              <svg viewBox="0 0 24 24" role="img" aria-label={m.name} className="size-7 fill-current text-fg transition-colors duration-300 ease-[cubic-bezier(.2,.7,.2,1)] group-hover:text-[var(--brand)]">
+            <li key={m.slug} className="group flex items-center gap-2.5 text-fg-2 transition-colors duration-300 hover:text-fg" style={{ "--brand": m.hover } as React.CSSProperties} title={m.role}>
+              <svg viewBox="0 0 24 24" role="img" aria-label={m.name} className="size-6 fill-current transition-colors duration-300 ease-[cubic-bezier(.2,.7,.2,1)] group-hover:text-[var(--brand)]">
                 <path d={m.path} />
               </svg>
-              <p className="mt-3 text-[13.5px] font-medium">{m.name}</p>
-              <p className="mt-1 text-[12.5px] leading-snug text-fg-2">{m.role}</p>
+              <span className="text-[14.5px] font-medium">{m.name}</span>
             </li>
           ))}
         </ul>
       </Rise>
     </section>
+  );
+}
+
+/* The live Lisbon trip in a phone. `embed` keeps the page from asking for a passkey inside the frame. */
+function Phone() {
+  return (
+    <div className="relative h-[608px] w-[296px] rounded-[48px] bg-[#0b0b0c] p-[8px] shadow-[0_0_0_1px_rgb(255_255_255/0.1),0_40px_80px_-30px_rgb(0_0_0/0.9)]">
+      <div className="relative h-full w-full overflow-hidden rounded-[40px] bg-void">
+        <iframe
+          src="/t/lis0312?embed=1"
+          title="The live Lisbon trip"
+          loading="lazy"
+          tabIndex={-1}
+          className="pointer-events-none origin-top-left border-0"
+          style={{ width: 390, height: 784, transform: "scale(0.718)" }}
+        />
+        <span className="absolute left-1/2 top-2.5 h-[22px] w-[86px] -translate-x-1/2 rounded-full bg-black" />
+      </div>
+    </div>
   );
 }
 
@@ -137,7 +122,7 @@ const QS = [
   ["Can I get a refund?", "No. Your money holds a bed your friends are counting on. You can sell the bed at exactly what you paid; the first person on the waitlist takes it and the money goes straight to you."],
   ["Could someone resell a bed for profit?", "No. The contract has no price field: a bed only ever changes hands at face value."],
   ["Who can see the booking email?", "Nobody. It is checked inside two enclaves. Friends see the dates, the number of guests and the total."],
-  ["Do I need a wallet or crypto?", "You need USDC on any of the supported chains, or on NEAR. A passkey on your phone holds your bed, and Dibs pays the gas."],
+  ["Do I need a wallet or crypto?", "You pay USDC from your own wallet: a NEAR wallet, or MetaMask, OKX or Phantom on Base, Arbitrum, Ethereum or Solana. No NEAR wallet? A passkey on your phone holds your bed, and Dibs pays the gas."],
 ];
 
 export function Questions() {
