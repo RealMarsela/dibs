@@ -6,6 +6,12 @@ export const FOOTAGE_READY: Record<string, { w: number; h: number; fps: number; 
   "fps": 24.0,
   "seconds": 33.167
  },
+ "pay-base-orig": {
+  "w": 2880,
+  "h": 1620,
+  "fps": 24.0,
+  "seconds": 23.333
+ },
  "pay-base": {
   "w": 2880,
   "h": 1620,

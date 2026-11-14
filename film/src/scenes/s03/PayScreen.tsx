@@ -30,7 +30,8 @@ const CHAINS = [
   { id: "ethereum", name: "Ethereum", amt: "$40.72", eta: "about 3 min" },
 ] as const;
 
-const TRACK = ["Deposit seen on your chain", "Swapped by NEAR Intents", "Landed in your bed’s own account", "Counted in the crew DAO"];
+/* The live app's testnet copy (coordinator, 14 Nov): on testnet the faucet does the deposit and nothing is swapped. */
+const TRACK = ["Test deposit sent by the faucet", "No swap needed on testnet", "Landed in your bed’s own account", "Counted in the crew DAO"];
 
 /** The crop (screen CSS px) at local frame f, shared by footage and placeholder. 450 wide (the 440 dialog + 5 a side), so
     the slot shows it at x2.56; its height keeps the slot's aspect and the window face shows the middle of it. The visible
