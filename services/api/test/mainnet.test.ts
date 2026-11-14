@@ -56,9 +56,22 @@ describe("mainnet path", () => {
     expect(mainnetAllowed("POST", "/quote")).toBe(true);
     expect(mainnetAllowed("POST", "/hold")).toBe(true);
     expect(mainnetAllowed("GET", "/status/0xabc")).toBe(true);
+    expect(mainnetAllowed("POST", "/deposit/submit")).toBe(true);
     expect(mainnetAllowed("GET", "/trip/lismain")).toBe(true);
     expect(mainnetAllowed("POST", "/card/lismain/issue")).toBe(false);
     expect(mainnetAllowed("GET", "/blob/abc")).toBe(false);
+  });
+
+  it("validates a wallet's deposit transaction before telling 1Click", async () => {
+    for (const body of [
+      { depositAddress: "0xfdF223c4438053E9F84B9342CCd56575ae4039D2", txHash: "0x123" },
+      { depositAddress: "0xfdF223c4438053E9F84B9342CCd56575ae4039D2", txHash: "0x" + "a".repeat(64), extra: 1 },
+      { depositAddress: "bad address!", txHash: "0x" + "a".repeat(64) },
+    ]) {
+      const res = await call(json("/mainnet/deposit/submit", body));
+      expect(res.status).toBe(400);
+      expect(await code(res)).toBe("E_BAD_INPUT");
+    }
   });
 
   it("leaves testnet paths untouched", async () => {

@@ -9,6 +9,8 @@ import { useTrip } from "@/data/store";
 import type { ChainId } from "@/data/types";
 import { pad2 } from "@/lib/utils";
 import * as api from "@/live/api";
+import { evmTxUrl, isEvmChain } from "@/live/evm-wallet";
+import { WalletPay, type Pay } from "@/components/trip/wallet-pay";
 
 /* The real pay-in on NEAR mainnet. Hold the bed for this device's key, ask NEAR Intents 1Click for an exact-output
    quote into the bed's own account, show the one-time deposit address, then follow the swap until the bed's account
@@ -23,7 +25,6 @@ const SOL_USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const SWAP_TRACK = ["Deposit seen on your chain", "Swapped by NEAR Intents", "Landed in your bed’s own account", "Counted in the crew DAO"];
 const NEAR_TRACK = ["USDC sent on NEAR", "No swap needed", "Landed in your bed’s own account", "Counted in the crew DAO"];
 
-type Pay = { depositAddress: string; amountIn: string; expiresAt: string | null; refundTo: string };
 const amount = (base: string) => (Number(base) / 1e6).toFixed(6).replace(/0{1,4}$/, "");
 const validRefund = (c: ChainId, a: string) => (c === "solana" ? /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a) : /^0x[0-9a-fA-F]{40}$/.test(a));
 const saved = (k: string): Pay | null => {
@@ -71,19 +72,33 @@ export function MainnetPay({ n, chain, me, step, setStep }: { n: number; chain: 
     }
   }
 
+  /** Holds the bed for this device's key, then gets the one address and amount: a live 1Click quote, or on NEAR the bed itself. */
+  async function quoteFor(refund: string): Promise<Pay> {
+    await holdBed();
+    if (chain === "near") {
+      const p = { depositAddress: bed, amountIn: String(Math.round(trip.price * 1e6)), expiresAt: null, refundTo: me };
+      setPay(p);
+      return p;
+    }
+    const q = await api.quote({ trip: code, n, kind: "bed", fromChain: API_CHAIN[chain]!, refundTo: refund });
+    const p = { depositAddress: q.depositAddress, amountIn: q.amountIn, expiresAt: q.expiresAt, refundTo: refund };
+    save(key, p);
+    setPay(p);
+    return p;
+  }
+
+  function sent(p: Pay, hash: string, wallet: string) {
+    const q = { ...p, sentTx: hash, wallet };
+    save(key, q);
+    setPay(q);
+    setStep("tracking");
+  }
+
   async function start() {
     setBusy(true);
     setErr(null);
     try {
-      await holdBed();
-      if (chain === "near") {
-        setPay({ depositAddress: bed, amountIn: String(Math.round(trip.price * 1e6)), expiresAt: null, refundTo: me });
-        return;
-      }
-      const q = await api.quote({ trip: code, n, kind: "bed", fromChain: API_CHAIN[chain]!, refundTo });
-      const p = { depositAddress: q.depositAddress, amountIn: q.amountIn, expiresAt: q.expiresAt, refundTo };
-      save(key, p);
-      setPay(p);
+      await quoteFor(refundTo);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Could not get a deposit address");
     } finally {
@@ -138,7 +153,12 @@ export function MainnetPay({ n, chain, me, step, setStep }: { n: number; chain: 
     return (
       <div>
         <ProgressSteps steps={track.map((title) => ({ title }))} done={step === "done" ? track.length : done} />
-        {step === "tracking" && !err && done === 0 && <p className="mt-4 text-[13.5px] text-fg-2">Waiting for your {CHAINS[chain].name} deposit. Keep this open; it moves on its own.</p>}
+        {pay?.sentTx && (
+          <a href={isEvmChain(chain) ? evmTxUrl(chain, pay.sentTx) : api.explorer(pay.sentTx)} target="_blank" rel="noreferrer" className="mt-4 inline-flex text-[13px] text-fg-2 underline decoration-white/20 underline-offset-4 hover:text-fg">
+            Sent from {pay.wallet} · {pay.sentTx.slice(0, 8)}…{pay.sentTx.slice(-4)} ↗
+          </a>
+        )}
+        {step === "tracking" && !err && done === 0 && <p className="mt-4 text-[13.5px] text-fg-2">{pay?.sentTx ? "Waiting for your transaction to confirm." : `Waiting for your ${CHAINS[chain].name} deposit.`} Keep this open; it moves on its own.</p>}
         {err && <p className="mt-4 rounded-xl bg-refused/10 px-3 py-2 text-[13.5px] text-refused">{err}</p>}
         {step === "done" && tx && (
           <a href={api.explorer(tx)} target="_blank" rel="noreferrer" className="mt-4 inline-flex text-[13px] text-fg-2 underline decoration-white/20 underline-offset-4 hover:text-fg">
@@ -149,9 +169,16 @@ export function MainnetPay({ n, chain, me, step, setStep }: { n: number; chain: 
     );
   }
 
+  const wallet = <WalletPay chain={chain} price={trip.price} pay={pay} getQuote={quoteFor} onSent={sent} compact={!!pay} />;
   if (!pay) {
     return (
       <div>
+        {chain !== "solana" && (
+          <>
+            {wallet}
+            <div className="my-5 flex items-center gap-3 text-[12px] text-fg-3"><span className="h-px flex-1 bg-line" />or send it yourself<span className="h-px flex-1 bg-line" /></div>
+          </>
+        )}
         {chain !== "near" && (
           <label className="block">
             <span className="label mb-1.5 block">Your {CHAINS[chain].name} address, for refunds</span>
@@ -193,6 +220,7 @@ export function MainnetPay({ n, chain, me, step, setStep }: { n: number; chain: 
       <button className="pill-light focus-ring mt-5 w-full" onClick={() => setStep("tracking")}>
         I’ve sent it
       </button>
+      {!pay.sentTx && wallet}
     </div>
   );
 }

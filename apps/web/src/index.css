@@ -203,3 +203,8 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* NEAR Connect's wallet picker sits on <body>; an open modal sheet sets pointer-events: none there. */
+.hot-connector-popup {
+  pointer-events: auto;
+}

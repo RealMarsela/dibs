@@ -1,10 +1,12 @@
 import { Hono } from "hono";
-import { ApiError, parse } from "./errors";
+import { z } from "zod";
+import { ApiError, parse, readJson } from "./errors";
 import { type Env, receiptRegex } from "./env";
-import { getStatus } from "./oneclick";
+import { getStatus, submitDeposit } from "./oneclick";
 import { depositAddressParam } from "./schemas";
 import { sweepReceipt } from "./sweep";
 import { ftBalance, getTrip } from "./near";
+import { rateLimit } from "./ratelimit";
 
 export const statusRoute = new Hono<{ Bindings: Env }>();
 
@@ -30,4 +32,16 @@ statusRoute.get("/status/:depositAddress", async (c) => {
   if (!recipient) throw new ApiError(502, "E_ONECLICK", "1Click status had no recipient");
   const sweep = await sweepReceipt(env, addr, recipient);
   return c.json({ mode: "oneclick", status: st.status, recipient, ...sweep });
+});
+
+/* A wallet in the app paid the deposit: pass its transaction hash to 1Click (EVM 0x hash or a base58 signature). */
+const submitBody = z
+  .object({ depositAddress: depositAddressParam, txHash: z.string().regex(/^(0x[0-9a-fA-F]{64}|[1-9A-HJ-NP-Za-km-z]{43,90})$/) })
+  .strict();
+
+statusRoute.post("/deposit/submit", async (c) => {
+  const b = parse(submitBody, await readJson(c));
+  rateLimit(`submit:${b.depositAddress}`, 6, 60_000);
+  await submitDeposit(c.env, b.depositAddress, b.txHash);
+  return c.json({ ok: true });
 });

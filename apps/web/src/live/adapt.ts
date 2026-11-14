@@ -18,6 +18,7 @@ const PLACES: Record<string, { place: string; country: string; beds: string[] }>
   sin1025: { place: "Singapore", country: "Singapore", beds: ["Twin bed by the window", "Twin bed by the door"] },
   drw0001: { place: "Draw test", country: "Testnet", beds: ["Bed one", "Bed two"] },
   lismain: { place: "Lisbon", country: "Portugal", beds: ["Double room, window side", "Double room, courtyard side"] },
+  lismain2: { place: "Lisbon", country: "Portugal", beds: ["Double room, river view", "Twin room, garden side"] },
 };
 
 const CHAIN: Record<string, ChainId> = { base: "base", sol: "solana", solana: "solana", arb: "arbitrum", arbitrum: "arbitrum", eth: "ethereum", ethereum: "ethereum", near: "near" };

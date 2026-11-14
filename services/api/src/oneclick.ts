@@ -96,3 +96,8 @@ export async function getStatus(env: Env, depositAddress: string): Promise<OneCl
   if (!r?.status) throw new ApiError(502, "E_ONECLICK", "1Click returned an unreadable status");
   return r;
 }
+
+/** Tells 1Click which transaction paid a deposit address, so it verifies the deposit without waiting to find it. */
+export async function submitDeposit(env: Env, depositAddress: string, txHash: string): Promise<void> {
+  await call(env, "/v0/deposit/submit", { method: "POST", body: JSON.stringify({ depositAddress, txHash }) });
+}

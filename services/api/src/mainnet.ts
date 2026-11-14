@@ -2,7 +2,7 @@ import type { Env } from "./env";
 
 /*
  * Mainnet rides on the same worker under /mainnet/*. It is deliberately narrow: reading trips, holding a bed,
- * a real NEAR Intents 1Click quote, and the status poll that sweeps a funded bed. Everything that would spend the
+ * a real NEAR Intents 1Click quote, telling 1Click which wallet transaction paid it, and the status poll that sweeps a funded bed. Everything that would spend the
  * relayer's NEAR on anything else (trip creation, proofs, draws, cards, account bootstraps, gasless relays) stays
  * on testnet and is refused here with E_MAINNET_SCOPE.
  */
@@ -23,6 +23,7 @@ const ALLOWED: [string, RegExp][] = [
   ["POST", /^\/hold$/],
   ["POST", /^\/quote$/],
   ["GET", /^\/status\/[^/]+$/],
+  ["POST", /^\/deposit\/submit$/],
 ];
 
 export const mainnetAllowed = (method: string, path: string): boolean =>

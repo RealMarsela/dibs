@@ -5,7 +5,7 @@ const DEFAULT_NETWORK: Network = import.meta.env.VITE_DIBS_NETWORK === "mainnet"
 /* Trips that live on NEAR mainnet. Opening one switches every call to the API's /mainnet path, the mainnet
    contract and mainnet explorers; any other trip code stays on testnet. */
 export type Network = "testnet" | "mainnet";
-export const MAINNET_TRIPS = ["lismain"];
+export const MAINNET_TRIPS = ["lismain", "lismain2"];
 export const CONTRACTS: Record<Network, string> = {
   testnet: (import.meta.env.VITE_DIBS_CONTRACT as string | undefined) ?? "dibs-0eb9ae.testnet",
   mainnet: "dibsapp.near",
@@ -90,6 +90,8 @@ export interface Status {
 export const status = (depositAddress: string) => call<Status>(`/status/${encodeURIComponent(depositAddress)}`);
 
 export const hold = (h: { trip: string; kind: "bed" | "wait"; n: number; holder: string }) => post<{ tx_hash: string }>("/hold", h);
+/** A wallet in the app paid the 1Click deposit: tell 1Click the transaction so it verifies the deposit sooner. */
+export const submitDeposit = (depositAddress: string, txHash: string) => post<{ ok: boolean }>("/deposit/submit", { depositAddress, txHash });
 
 export const relay = (signed_delegate: string) => post<{ tx_hash: string; sender: string; receiver: string }>("/relay", { signed_delegate });
 
