@@ -58,6 +58,11 @@ async function fromSeed(seed: Uint8Array, kind: DeviceKey["kind"]): Promise<Devi
   };
 }
 
+/** A passkey prompt that nobody answers (no authenticator, headless, dismissed) must not freeze the app. */
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
+  return Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
+}
+
 async function prfSeed(): Promise<Uint8Array | null> {
   if (!window.PublicKeyCredential || !navigator.credentials) return null;
   const challenge = crypto.getRandomValues(new Uint8Array(32));
@@ -65,7 +70,7 @@ async function prfSeed(): Promise<Uint8Array | null> {
   const known = store(CRED);
   try {
     if (!known) {
-      const created = (await navigator.credentials.create({
+      const created = (await withTimeout(navigator.credentials.create({
         publicKey: {
           challenge,
           rp: { name: "Dibs" },
@@ -73,19 +78,21 @@ async function prfSeed(): Promise<Uint8Array | null> {
           pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
           authenticatorSelection: { residentKey: "preferred", userVerification: "preferred" },
           extensions: { prf } as AuthenticationExtensionsClientInputs,
+          timeout: 30000,
         },
-      })) as PublicKeyCredential | null;
+      }), 32000)) as PublicKeyCredential | null;
       if (!created) return null;
       store(CRED, b64u(created.rawId));
     }
-    const got = (await navigator.credentials.get({
+    const got = (await withTimeout(navigator.credentials.get({
       publicKey: {
         challenge,
         allowCredentials: [{ type: "public-key", id: fromB64u(store(CRED) ?? "") }],
         userVerification: "preferred",
         extensions: { prf } as AuthenticationExtensionsClientInputs,
+        timeout: 30000,
       },
-    })) as PublicKeyCredential | null;
+    }), 32000)) as PublicKeyCredential | null;
     const res = got?.getClientExtensionResults() as { prf?: { results?: { first?: ArrayBuffer } } } | undefined;
     const first = res?.prf?.results?.first;
     return first ? sha256(new Uint8Array(first)) : null;

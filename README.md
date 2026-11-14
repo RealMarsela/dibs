@@ -86,7 +86,9 @@ flowchart LR
 1. `pnpm install && pnpm verify` re-checks everything in the table above against testnet (no keys needed).
 2. Open the [live Lisbon trip](https://preview.dibs-trips.pages.dev/t/lis0312) and the
    [Singapore trip](https://preview.dibs-trips.pages.dev/t/sin1025) → *See the booking proof*.
-3. Run the attack suite: see [JUDGES.md](JUDGES.md) for the sandbox, verifier and API test commands.
+3. [Start your own trip](https://preview.dibs-trips.pages.dev/new): the relayer creates it on testnet, holds bed 1
+   for your passkey account and opens `<code>@dibs.larinova.com` as its inbox. Share the link; friends pay with test USDC.
+4. Run the attack suite: see [JUDGES.md](JUDGES.md) for the sandbox, verifier and API test commands.
 
 ## Run it yourself
 
@@ -108,7 +110,9 @@ Deployed ids are in [deploy/testnet.json](deploy/testnet.json); the deploy log i
 - **No FX yet.** The booking total is compared to the USDC cap one to one; the Singapore proof's SGD 226.60 was paid as 226.60 USDC.
 - **VRF** is verifiable but not provably unpredictable to the enclave operator.
 - **NEAR AI latency** varied from 10 to 49 s across runs; reasoning is turned off to keep it inside OutLayer's limit.
-- Each trip address needs its own Email Routing rule (`services/inbox/scripts/add-trip-address.sh`).
+- Trips started from the app share one demo crew DAO (the contract keeps each trip's money apart by trip code); the seeded
+  Singapore and Draw trips each have their own. New trips are capped at 6 beds and $50 a bed, 2 per person a day.
+- Each trip address is its own Email Routing rule, added when the trip is created.
 
 ## License
 
