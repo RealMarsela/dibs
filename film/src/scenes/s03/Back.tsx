@@ -2,7 +2,7 @@ import React from "react";
 import { Sequence, useCurrentFrame } from "remotion";
 import { C, DISPLAY, FONT } from "../../tokens";
 import { kf, prog } from "../../lib/anim";
-import { FootageSlot } from "../../components/Footage";
+import { FootageSlot, hasFootage } from "../../components/Footage";
 import { Badge } from "../../components/Surfaces";
 import { V as VARIANT } from "./variant";
 import { BACK, type T } from "./timing";
@@ -43,6 +43,11 @@ function ReceiptPlaceholder() {
    deposit address. The dialog spans CSS x 667-1253; the crop starts under the "Bed 01" eyebrow (y 266-280) and ends above
    the line the cursor rests on (y 660+). From clip 28 s the sheet is still. Swap the id/start here if a better take lands. */
 const MAINNET = { id: "mainnet-pay-a", startS: 28 };
+/* Clip B (when it lands): the live mainnet tracking screen, steps ticking to "Receipt on NEAR mainnet". The back face
+   shows clip A's deposit sheet first, then hard-cuts to clip B at `cutAt` frames after the turn, played from `startS`
+   (measure both when the clip lands). Until then hasFootage("mainnet-pay-b") is false and only clip A plays. */
+const MAINNET_B = { id: "mainnet-pay-b", startS: 0, cutAt: 46, crop: { x: 667, y: 284, w: 586, h: 0 } };
+MAINNET_B.crop.h = (MAINNET_B.crop.w * BACK.h) / BACK.w;
 const RECEIPT_CROP = { x: 667, y: 284, w: 586, h: (586 * BACK.h) / BACK.w };
 
 function YellowPill({ at }: { at: number }) {
@@ -82,9 +87,16 @@ export function BackContent({ t, fade }: { t: T; fade: number }) {
   if (VARIANT !== "A") return null;
   return (
     <div style={{ position: "relative", width: BACK.w, height: BACK.h, opacity: 1 - fade }}>
-      <Sequence from={t.flip0} layout="none">
+      <Sequence from={t.flip0} durationInFrames={hasFootage(MAINNET_B.id) ? MAINNET_B.cutAt : undefined} layout="none">
         <FootageSlot id={MAINNET.id} width={BACK.w} height={BACK.h} crop={RECEIPT_CROP} startFrom={MAINNET.startS * 30} placeholder={<ReceiptPlaceholder />} />
       </Sequence>
+      {hasFootage(MAINNET_B.id) && (
+        <Sequence from={t.flip0 + MAINNET_B.cutAt} layout="none">
+          <div style={{ position: "absolute", inset: 0 }}>
+            <FootageSlot id={MAINNET_B.id} width={BACK.w} height={BACK.h} crop={MAINNET_B.crop} startFrom={Math.round(MAINNET_B.startS * 30)} placeholder={null} />
+          </div>
+        </Sequence>
+      )}
     </div>
   );
 }
