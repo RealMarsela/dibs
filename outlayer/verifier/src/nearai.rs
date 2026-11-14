@@ -9,6 +9,10 @@ use serde_json::{json, Value};
 pub const BASE_URL: &str = "https://cloud-api.near.ai";
 /// A TEE-served model that supports ed25519 response signatures (research/preflight near_ai_tee_probe).
 pub const MODEL: &str = "Qwen/Qwen3.8-27B";
+/// Booking facts sit near the top of a confirmation; the rest is marketing. Keeps each call cheap.
+pub const MAX_INPUT_CHARS: usize = 12_000;
+/// The reply is one small JSON object.
+pub const MAX_OUTPUT_TOKENS: u32 = 300;
 
 /// What the model must return, strictly. Unknown or missing fields reject the extraction.
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
@@ -88,8 +92,10 @@ fn verify_signature(model: &str, req: &[u8], resp: &[u8], sig: &Value, chat_id: 
 
 impl Extractor for NearAi<'_> {
     fn extract(&self, email_text: &str) -> Result<Extraction, String> {
+        // Spend guard (Gabriel, 14 Nov): one call per proof, input trimmed, output capped.
+        let email_text: String = email_text.chars().take(MAX_INPUT_CHARS).collect();
         let req = json!({
-            "model": MODEL, "temperature": 0, "stream": false,
+            "model": MODEL, "temperature": 0, "stream": false, "max_tokens": MAX_OUTPUT_TOKENS,
             "response_format": {"type": "json_object"},
             "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": email_text}],
         })
