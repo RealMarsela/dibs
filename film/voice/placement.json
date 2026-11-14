@@ -14,7 +14,7 @@
     "L03A": 31.55,
     "L03B": 31.8
   },
-  "variant": "B",
+  "variant": "A",
   "note": "starts are for variant A (mainnet tail L03A). Variant B (testnet tail L03B) shifts every line after L03 by shift_B frames; build-timeline.py applies it. Switch variants by setting 'variant'.",
   "tail_speech_end": {
     "L03A": 3.69,

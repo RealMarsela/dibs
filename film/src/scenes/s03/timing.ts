@@ -12,7 +12,7 @@ export const WIN = { w: 1150, h: 888 };
 export const FRONT_H = { passkey: 670, chain: 859, track: 757, done: 869 }; // CSS 262 / 336 / 296 / 340 tall at x2.556
 /** Variant B: the window's pose while the testnet chip sits under it (stage y, scale). */
 export const TAIL_POSE = { y: -40, s: 0.9 };
-export const BACK = VARIANT === "A" ? { w: 1150, h: 736 } : { w: 1200, h: 560 };
+export const BACK = VARIANT === "A" ? { w: 1040, h: 657 } : { w: 1200, h: 560 };
 /** Row 03 of H3's bed list, in stage coords (centre origin). The page renders border-box (measured), so each row is 842 x 84
     at 1x (centre 126 px above the list centre); H3 scales the list by LIST_SCALE about the frame centre. */
 export const ROW_1X = { w: 842, h: 84, y: -126 };
@@ -60,7 +60,9 @@ export function timing(cue: Cue) {
     pull0: base + 6,
     pull1: base + 30,
     chip0: near - 4,
-    track0: swaps - 6,
+    // A: the front never shows the testnet tracking steps (its labels are the testnet copy); the chain list holds
+    // through the coin lift-out and the window turns over to the real mainnet deposit.
+    track0: VARIANT === "A" ? NEVER : swaps - 6,
     deposit: swaps + 2,
     swapped: swaps + 14,
     landed: three,

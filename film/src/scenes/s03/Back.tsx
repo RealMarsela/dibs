@@ -38,8 +38,12 @@ function ReceiptPlaceholder() {
   );
 }
 
-/** Crop on the explorer's summary block (needs one pass when the clip lands; aspect = BACK). */
-const RECEIPT_CROP = { x: 300, y: 250, w: 588, h: (588 * BACK.h) / BACK.w };
+/* The real mainnet payment (coordinator, 14 Nov): mainnet-pay-a.mp4 (2880x1620 @30, CSS 1920x1080 at dsf 1.5), the
+   "One address, one amount" sheet on trip lismain: QR, "Send exactly 0.252579 USDC on Base" and the one-time 1Click
+   deposit address. The dialog spans CSS x 667-1253; the crop starts under the "Bed 01" eyebrow (y 266-280) and ends above
+   the line the cursor rests on (y 660+). From clip 28 s the sheet is still. Swap the id/start here if a better take lands. */
+const MAINNET = { id: "mainnet-pay-a", startS: 28 };
+const RECEIPT_CROP = { x: 667, y: 284, w: 586, h: (586 * BACK.h) / BACK.w };
 
 function YellowPill({ at }: { at: number }) {
   const f = useCurrentFrame();
@@ -79,7 +83,7 @@ export function BackContent({ t, fade }: { t: T; fade: number }) {
   return (
     <div style={{ position: "relative", width: BACK.w, height: BACK.h, opacity: 1 - fade }}>
       <Sequence from={t.flip0} layout="none">
-        <FootageSlot id="mainnet-receipt" width={BACK.w} height={BACK.h} crop={RECEIPT_CROP} placeholder={<ReceiptPlaceholder />} />
+        <FootageSlot id={MAINNET.id} width={BACK.w} height={BACK.h} crop={RECEIPT_CROP} startFrom={MAINNET.startS * 30} placeholder={<ReceiptPlaceholder />} />
       </Sequence>
     </div>
   );

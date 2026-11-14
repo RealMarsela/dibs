@@ -52,10 +52,12 @@ export function PayFront({ f, t, crop }: { f: number; t: T; crop: Crop }) {
   return (
     <div style={{ position: "relative", width: WIN.w, height: WIN.h }}>
       <Seg from={t.win0} until={t.chain0} startS={SEG.pk} freezeS={SEG.pkFreeze} crop={crop} />
-      <Seg from={t.chain0} until={t.track0} startS={SEG.chain} freezeS={SEG.chainFreeze} crop={crop} />
       {V === "A" ? (
-        <Seg from={t.track0} until={t.flip0 + 30} startS={SEG.track} crop={crop} />
+        <Seg from={t.chain0} until={t.flip0 + 30} startS={SEG.chain} freezeS={SEG.chainFreeze} crop={crop} />
       ) : (
+        <Seg from={t.chain0} until={t.track0} startS={SEG.chain} freezeS={SEG.chainFreeze} crop={crop} />
+      )}
+      {V === "A" ? null : (
         <>
           <Seg from={t.track0} until={t.tail.youIn - seg4Lead} startS={SEG.track} crop={crop} />
           <Seg from={t.tail.youIn - seg4Lead} until={t.D} startS={SEG.done} crop={crop} />
