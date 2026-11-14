@@ -9,6 +9,7 @@ import { useTrip } from "@/data/store";
 import type { ChainId } from "@/data/types";
 import { cn, pad2, usd } from "@/lib/utils";
 import { deviceKey } from "@/live/passkey";
+import { devKey } from "@/live/dev-keys";
 import { explorer } from "@/live/api";
 
 type Step = "passkey" | "chain" | "deposit" | "tracking" | "done";
@@ -75,7 +76,7 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
             onClick={async () => {
               setBusy(true);
               try {
-                if (live) setMe((await deviceKey()).accountId);
+                if (live) setMe((devKey(who) ?? (await deviceKey())).accountId);
                 else await new Promise((r) => setTimeout(r, 700));
                 setStep("chain");
               } finally {

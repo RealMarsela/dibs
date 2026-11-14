@@ -10,7 +10,7 @@ import type { DeviceKey } from "@/live/passkey";
 /* One interface for the trip, two engines. Preview (sample data, local reducer) for the showcase, and live
    (the NEAR contract through the API) for real trips. Every action returns the tx it caused when there is one,
    so the UI can link the receipt. */
-export const LIVE_TRIPS = ["lis0312", "sin1025", "drw0001"];
+export const LIVE_TRIPS = ["lis0312", "lis0314", "sin1025", "drw0001"];
 
 export interface ActResult {
   tx?: string;

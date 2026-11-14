@@ -12,6 +12,9 @@ const PLACES: Record<string, { place: string; country: string; beds: string[] }>
     country: "Portugal",
     beds: ["Double room, window side", "Double room, courtyard side", "Bunk room A, top", "Bunk room A, bottom", "Bunk room B, top", "Bunk room B, bottom", "Loft single", "Sofa bed by the terrace"],
   },
+  get lis0314() {
+    return PLACES.lis0312;
+  },
   sin1025: { place: "Singapore", country: "Singapore", beds: ["Twin bed by the window", "Twin bed by the door"] },
   drw0001: { place: "Draw test", country: "Testnet", beds: ["Bed one", "Bed two"] },
 };
