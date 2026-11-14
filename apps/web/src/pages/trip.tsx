@@ -28,7 +28,7 @@ const VIEWERS = [
 ];
 
 export function TripPage() {
-  const { trip, act, paidCount, live } = useTrip();
+  const { trip, act, paidCount, live, network } = useTrip();
   const [viewer, setViewer] = useState(live ? "" : "leo");
   const [me, setMe] = useState<string | null>(null);
   const [card, setCard] = useState(false);
@@ -129,7 +129,7 @@ export function TripPage() {
               <NextStep viewer={viewer} open={opens} />
             </div>
             <Rules />
-            <Waitlist />
+            {!(live && network === "mainnet") && <Waitlist />}
             <ActivityFeed />
             <Link to="/" className="text-[12.5px] text-fg-3 transition-colors hover:text-fg">
               How Dibs works →
