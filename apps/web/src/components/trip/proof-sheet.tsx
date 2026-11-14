@@ -153,7 +153,7 @@ export function ProofSheet({ open, onClose }: { open: boolean; onClose: () => vo
               <Fact k="Booked on" v={trip.proof.signedBy} />
               <Fact k="Dates" v={`${label} · ${nights} night${nights === 1 ? "" : "s"}`} />
               <Fact k="Guests" v={String(trip.proof.guests)} />
-              <Fact k="Total" v={`${usd(trip.proof.total, 0)} of ${usd(total, 0)}`} />
+              <Fact k="Total" v={trip.proof.currency && trip.proof.currency !== "USD" ? `${trip.proof.currency} ${trip.proof.total.toFixed(2)} (cap ${usd(total, 0)})` : `${usd(trip.proof.total, 0)} of ${usd(total, 0)}`} />
             </dl>
             <p className="mt-3 border-t border-dashed border-line-strong pt-3 text-[12px] text-fg-3">Hidden: guest names, address, card, booking reference</p>
           </div>
@@ -164,7 +164,7 @@ export function ProofSheet({ open, onClose }: { open: boolean; onClose: () => vo
           ) : (
             <p className="mt-5 rounded-2xl bg-paid/10 px-4 py-3 text-[14px] text-paid">
               {trip.drawnOut
-                ? `The crew DAO paid ${PEOPLE[trip.booker]?.name} ${usd(trip.proof.total, 0)}. The proposal passed because the contract proved the booking; no vote needed.`
+                ? `The crew DAO paid ${PEOPLE[trip.booker]?.name} ${trip.proof.total.toFixed(2)} USDC. The proposal passed because the contract proved the booking; no vote needed.`
                 : "Verified. The crew DAO is paying out now."}
               {tx && (
                 <a href={api.explorer(tx)} target="_blank" rel="noreferrer" className="ml-2 underline decoration-paid/30 underline-offset-4">

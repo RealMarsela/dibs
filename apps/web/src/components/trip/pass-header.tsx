@@ -31,7 +31,7 @@ export function PassHeader() {
         immediate
         delay={450}
         className="mt-3 max-w-[30ch] text-[clamp(20px,2.2vw,28px)]"
-        lines={[{ text: `${trip.stay}. ${label}, ${nights} nights.`, tone: "fg-2" }]}
+        lines={[{ text: `${trip.stay}. ${label}, ${nights} night${nights === 1 ? "" : "s"}.`, tone: "fg-2" }]}
       />
       <div className="rise-in mt-6 flex flex-wrap gap-2" style={{ animationDelay: "0.9s" }}>
         <Chip k="Per bed" v={usd(trip.price, 0)} />

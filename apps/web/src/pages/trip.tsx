@@ -99,7 +99,7 @@ export function TripPage() {
                 className="press h-8 shrink-0 gap-1.5 rounded-full border-0 py-1 pl-1 pr-3 text-[13px] text-fg-2 hover:bg-white/[0.05] hover:text-fg data-[state=on]:bg-fg data-[state=on]:text-void"
               >
                 <Face id={v.id} size={22} />
-                <span className="font-semibold">{PEOPLE[v.id]?.name ?? "You"}</span>
+                <span className="font-semibold">{PEOPLE[v.id]?.name ?? (v.role === "this device" ? "You" : v.id.split(".")[0].replace(/^./, (c) => c.toUpperCase()))}</span>
                 <span className="opacity-60">{v.role}</span>
               </ToggleGroupItem>
             ))}

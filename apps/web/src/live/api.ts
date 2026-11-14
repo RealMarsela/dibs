@@ -35,7 +35,7 @@ export interface RawTrip {
   stay?: string;
   beds: RawBed[];
   waitlist: { buyer: string; slot: number }[];
-  proof?: { stay: string; guests: number; total: string; dkim_domain: string; check_in: string; check_out: string } | null;
+  proof?: { stay: string; guests: number; total: string; dkim_domain: string; check_in: string; check_out: string; currency?: string } | null;
   payout?: unknown;
   drawn?: number[] | null;
   drawn_out?: boolean;

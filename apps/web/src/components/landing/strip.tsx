@@ -20,9 +20,9 @@ export const CREW = [
 export function TripStrip({ paid, active, clock = "2d 17h", crew = CREW }: { paid: number; active?: string; clock?: string; crew?: { id: string; name: string; color?: string }[] }) {
   const [over, setOver] = useState<number | null>(null);
   return (
-    <div className="flex items-center gap-4 text-fg-2 sm:gap-6" aria-label={`${paid} of 8 beds paid`}>
+    <div className="flex items-center gap-4 text-fg-2 sm:gap-6" aria-label={`${paid} of ${crew.length || 8} beds paid`}>
       <Link2 className="size-5" aria-hidden />
-      <Battery paid={paid} />
+      <Battery paid={paid} total={crew.length || 8} />
       <div className="flex items-center" onMouseLeave={() => setOver(null)}>
         {crew.map((c, i) => {
           const shift = over === null ? 0 : i < over ? -7 : i > over ? 7 : 0;
@@ -50,14 +50,14 @@ export function TripStrip({ paid, active, clock = "2d 17h", crew = CREW }: { pai
   );
 }
 
-function Battery({ paid }: { paid: number }) {
+function Battery({ paid, total = 8 }: { paid: number; total?: number }) {
   return (
-    <span className="flex h-[18px] items-center rounded-[6px] border-[1.5px] border-fg-2 p-[2px]" title={`${paid} of 8 paid`}>
-      {Array.from({ length: 8 }, (_, i) => (
+    <span className="flex h-[18px] items-center rounded-[6px] border-[1.5px] border-fg-2 p-[2px]" title={`${paid} of ${total} paid`}>
+      {Array.from({ length: total }, (_, i) => (
         <span
           key={i}
           className="mx-[0.5px] h-full w-[4px] rounded-[1.5px] transition-colors duration-500"
-          style={{ background: i < paid ? (paid === 8 ? "var(--color-paid)" : "var(--color-fg)") : "rgb(255 255 255 / 0.12)", transitionDelay: `${i * 30}ms` }}
+          style={{ background: i < paid ? (paid === total ? "var(--color-paid)" : "var(--color-fg)") : "rgb(255 255 255 / 0.12)", transitionDelay: `${i * 30}ms` }}
         />
       ))}
       <span className="-mr-[5px] ml-[2px] h-[7px] w-[2px] rounded-r-sm bg-fg-2" />

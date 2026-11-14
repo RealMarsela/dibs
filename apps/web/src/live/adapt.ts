@@ -84,6 +84,7 @@ export function toTrip(view: TripView, names: Record<string, string>, activity: 
           guests: t.proof.guests,
           total: Number(t.proof.total) / 1e6,
           signedBy: t.proof.dkim_domain,
+          currency: t.proof.currency,
         }
       : undefined,
     drawn: !!drawn,

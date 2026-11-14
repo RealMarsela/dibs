@@ -45,6 +45,7 @@ export interface ProofFacts {
   guests: number;
   total: number;
   signedBy: string;
+  currency?: string;
 }
 
 export interface Trip {
