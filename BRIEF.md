@@ -2,7 +2,7 @@
 
 Owner: Opus coordinator session (UI + integration). Deadline: submit by Sun 15 Nov 05:29 IST
 (2026-11-14T23:59Z). Code freeze for features: Sat 14 Nov 21:00 IST. Persona: RealMarsela
-(git user already set in this repo; never change it). Repo root: ~/Documents/hackathons/near-dibs.
+(git user already set in this repo; never change it). Repo root: this repository.
 
 ## Product in one line
 Friends fund every bed of a group trip before anyone books; the booker is paid only against a
@@ -12,7 +12,7 @@ pre-funded waitlist; no proof by the deadline refunds everyone.
 ## Hard rules (every lane)
 - Never sign a mainnet tx, spend money, create accounts on mainnet, log in anywhere, or read the
   vault's master file. Testnet and near-workspaces sandbox only. Mainnet comes later, by the
-  coordinator, with Gabriel's approved cap.
+  coordinator, with the team's approved cap.
 - Files under 300 lines. No console.log in production code. zod at every API boundary. API errors
   are `{ error, code? }`. No secrets in git. Realistic sample data only.
 - Commit only your own paths, by explicit path, with the trailer line
@@ -72,7 +72,7 @@ pre-funded waitlist; no proof by the deadline refunds everyone.
 4. Deploy scripts `contracts/scripts/deploy-testnet.sh` + a seed that creates the Lisbon trip.
 
 ## Lane B: outlayer/ (Sonnet) owns `outlayer/**`
-Pattern to copy (read-only reference, do not edit): ~/Documents/hackathons/near-standin/outlayer.
+Pattern to copy (read-only reference, do not edit): an earlier OutLayer stand-in app (not in this repo).
 wasm32-wasip2 app `dibs-verifier`, ops by input JSON:
 - `{"op":"public_key"}` -> project ed25519 key (path "dibs").
 - `{"op":"vrf","trip":..,"n":..}` -> VRF output + signature over `dibs-vrf:v1:<canonical json>`.

@@ -7,7 +7,7 @@ import { S09 } from "../scenes/S09";
 import { C, MONO } from "../tokens";
 import { LINES } from "../timeline.generated";
 
-/* Gabriel, 15 Nov 04:25 IST: the app plays FULL SCREEN after a <=20 s explainer opening. One continuous real journey
+/* Team note, 15 Nov 04:25 IST: the app plays FULL SCREEN after a <=20 s explainer opening. One continuous real journey
    (journey-testnet-meteor.mp4, 1440x810 -> 1920x1080, ~2 fps app burst, smooth Meteor frames), in order, with a cut to the
    REAL explorer page after each transaction and back to the same app frame. Then the real mainnet receipts, the card,
    the booking proof, the close. No crops, no frames around the UI. Existing VO lines only. */

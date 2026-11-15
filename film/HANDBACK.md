@@ -1,6 +1,6 @@
 # Dibs demo film: handback (FINAL v10 full-screen journey, 15 Nov 2026, IST)
 
-## v10 (Gabriel 04:25 and 04:40 notes): composition `FilmJ`, `src/journey/FilmJ.tsx`
+## v10 (team notes 04:25 and 04:40): composition `FilmJ`, `src/journey/FilmJ.tsx`
 - Final: `out/dibs-film-FINAL.mp4` (+ `.srt`) = `out/dibs-film-v10.mp4`. Kept: `dibs-film-FINAL-v9.mp4` (near.rocks, zoomed
   crops), `-v8` (RPC logs), `-v7` (cropped journey), `-v6`.
 - Opening S01+S02 (19.0 s), then journey-testnet-meteor.mp4 full screen (1440x810 -> 1920x1080), in order, holds on the
@@ -24,9 +24,9 @@
 | Composition | `Film` (scenes `Scene01`-`Scene09`, seam poses `Handoffs`) |
 | Studio | http://localhost:3017 |
 | Technical QA (ffprobe + full decode + ebur128) | 1920x1080, H.264 yuv420p, tv range, BT.709 primaries/transfer/matrix, AAC 48 kHz stereo; 0 decode errors; -14.2 LUFS integrated, true peak -1.1 dBTP, LRA 5.9; all 8 seams identical across the cut (b-6, b-2, b, b+2, b+6) |
-| Not checked | I cannot listen: the mix (narration ~11 dB over the ducked bed, SFX levels) needs Gabriel's ear |
+| Not checked | I cannot listen: the mix (narration ~11 dB over the ducked bed, SFX levels) needs a human ear |
 
-## v7 journey (Gabriel's rules, 15 Nov 02:27)
+## v7 journey (the team's rules, 15 Nov 02:27)
 S03 is the real app journey on NEAR testnet with the real Meteor wallet (journey-testnet-meteor.mp4, realmarsela.testnet), in
 order: Meteor Sign Message (start the trip as the booker) -> new trip page -> This bed is yours -> Pay from any chain (NEAR)
 -> Meteor Approve Transaction (Send 40 tUSDC) + Executing -> You're in (Sent from Meteor Wallet DSX9QnWA…) -> every bed
@@ -53,7 +53,7 @@ the Lisbon L07 (`voice/raw/`).
 ## Music and sound
 Mixkit **"Coffee or Tea"** by Michael Ramir C. (Mixkit Stock Music Free License; ends on the last frame). Runners-up
 "Hazy After Hours" and "Sleepy Cat" on disk (`public/audio/music/`, swap = `MUSIC.file` in `src/audio/Mix.tsx`). SFX only
-from Gabriel's Drive library copies (`public/audio/sfx/`, cue sheet `src/audio/cues.ts`). Provenance: `PROVENANCE.md`.
+from the team's Drive library copies (`public/audio/sfx/`, cue sheet `src/audio/cues.ts`). Provenance: `PROVENANCE.md`.
 
 ## Footage (all real; `python3 -I scripts/footage-ready.py` gates every clip)
 | Slot / clip | Used for |
@@ -76,7 +76,7 @@ Unused: `mainnet-receipt-sweep` (third-party explorer branding), `wallet-near-te
 - Mix not listened to by me.
 - S03 shows a $40 Lisbon story trip (testnet UI) and then the real $0.25 mainnet payment on trip lismain; the narration says "We ran this same payment on NEAR mainnet, with real money."
 - The proof beat is a different real trip (SIN-1025); the narration and a chip say so. SGD is compared 1:1 to the USDC cap (no FX); the film claims no conversion.
-- Kept until Gabriel accepts FINAL: `out/bundle` (61 MB) and the review renders (v1-v6, raw-*); then the bundle is deleted and the
-  superseded renders go to Dropbox via `~/.agents/bin/media-offload`, keeping only FINAL locally.
-- The wallet-first VO line (193 characters) was generated at 02:08 IST, before the coordinator's go reached me; Gabriel had approved
+- Kept until the team accepts FINAL: `out/bundle` (61 MB) and the review renders (v1-v6, raw-*); then the bundle is deleted and the
+  superseded renders go to off-machine storage, keeping only FINAL locally.
+- The wallet-first VO line (193 characters) was generated at 02:08 IST, before the coordinator's go reached me; the team had approved
   ~130 characters at 01:32. One generation, no retries. No further paid generation without an explicit go with its size.

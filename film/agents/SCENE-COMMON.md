@@ -1,7 +1,7 @@
 # Scene owner contract (common to all nine scenes)
 
 You build ONE scene of the Dibs demo film in Remotion (4.0.529, React 19, project at
-`/Users/gabrielantonyxaviour/Documents/hackathons/near-dibs/film`). The film lead integrates.
+`film/`). The film lead integrates.
 
 ## Read first (in this order)
 1. `PLAN.md`: sections 1, 4, 5, your scene's section in 6, the rows of 7 that touch your scene, and 8 if your scene has a footage slot.
@@ -30,7 +30,7 @@ You build ONE scene of the Dibs demo film in Remotion (4.0.529, React 19, projec
   S01 has no in-pose; S09 has no out-pose.
 - Check: render your first and last frames at scale 1 and compare with the `Handoffs` composition (frame index k shows H(k+1)).
 
-## House quality (Gabriel's rules)
+## House quality (the team's rules)
 - One continuous film: camera travel, objects that become the next object; no entrance-then-hold cards, no repeated
   left-copy/right-object layouts, no connector-stroke diagrams, no flat labelled boxes joined by lines, no oversized
   headlines (body/headline 56-88 px; only the wordmark/hero may be bigger).
@@ -57,7 +57,7 @@ You build ONE scene of the Dibs demo film in Remotion (4.0.529, React 19, projec
   (machine-wide queue; it may wait its turn). Never run `remotion render`, never start a Studio, never install packages.
 - Inspect: first and last frame (scale 1), the start / middle / end of every transition, every narration cue moment,
   text fit and readability, nothing crossing text, safe margins. Fix and re-check.
-- Studio (already running for Gabriel): http://localhost:3017 , composition `Scene0X`.
+- Studio (already running for the team): http://localhost:3017 , composition `Scene0X`.
 
 ## Handback (your final message, short)
 - What you built (shots, frames), what you inspected (frame numbers), anything you could not do.

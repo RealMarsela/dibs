@@ -4,11 +4,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 v="${1:?version, e.g. v1}"
-~/.agents/bin/disk-check
+if [ -n "${DISK_CHECK:-}" ]; then "$DISK_CHECK"; fi  # optional free-space guard
 mkdir -p out
 python3 -I scripts/footage-ready.py >/dev/null
-RENDER_POOL=bundle ~/Documents/hackathons/_demo-films/render-slot.sh node scripts/bundle.mjs
-RENDER_POOL=heavy ~/Documents/hackathons/_demo-films/render-slot.sh \
+RENDER_POOL=bundle ${RENDER_SLOT:-env} node scripts/bundle.mjs
+RENDER_POOL=heavy ${RENDER_SLOT:-env} \
   npx remotion render out/bundle Film "out/raw-$v.mp4" --concurrency=4 --color-space=bt709 --crf=18 --audio-codec=aac --log=warn
 scripts/master.sh "out/raw-$v.mp4" "out/dibs-film-$v.mp4"
 python3 -I scripts/srt.py "out/dibs-film-$v.srt"

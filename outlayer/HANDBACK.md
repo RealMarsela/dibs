@@ -14,7 +14,7 @@
   `2f147d7558110a748c8cd08dca40107f5357a5965c2136b38f3d11e0dbddaa49` (hashes change with any rebuild on another toolchain).
   Mainnet wasm contains no fixture domain (checked with `strings`). Manifest is embedded in the `outlayer.manifest` section.
 
-## Not deployed (needs Gabriel or the coordinator)
+## Not deployed (needs the team or the coordinator)
 Deploy needs an OutLayer owner account with a key and about 0.1 NEAR testnet (`outlayer login testnet`, upload to
 FastFS, `outlayer deploy dibs-verifier <url>`). No account was created or logged into. So **no public key yet**:
 after deploying, `outlayer run <owner>/dibs-verifier '{"op":"public_key"}'` returns the key for `set_verifier_key`.

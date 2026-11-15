@@ -84,10 +84,10 @@ export const FACTS = {
   checksPassed: 46,
   checksTotal: 46,
   attacksRefused: 35,
-  /* The URL on the end card. Gabriel named production on 14 Nov: dibs.larinova.com. ONE-LINE SWAP if it changes. */
-  liveUrl: "dibs.larinova.com", // Gabriel 15 Nov 04:50: every try-it URL points to the root
+  /* The URL on the end card. The team named production on 14 Nov: dibs.larinova.com. ONE-LINE SWAP if it changes. */
+  liveUrl: "dibs.larinova.com", // team note 15 Nov 04:50: every try-it URL points to the root
   repo: "github.com/RealMarsela/dibs",
-  /* The proof beat uses a REAL booking (coordinator, 14 Nov): trip sin1025, Gabriel's own booking.com confirmation.
+  /* The proof beat uses a REAL booking (coordinator, 14 Nov): trip sin1025, a team member's own booking.com confirmation.
      Redacted: never his name, address or booking reference. */
   proofTrip: "SIN-1025",
   proofTripId: "sin1025",

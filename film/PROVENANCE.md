@@ -10,15 +10,15 @@ Downloaded 14 Nov 2026 from `assets.mixkit.co` (the URL listed on each track's M
 | `public/audio/music/mixkit-132.mp3` | Hazy After Hours | Alejandro Magaña (A. M.) | https://assets.mixkit.co/music/132/132.mp3 | Runner-up (swap: `MUSIC.file` in `src/audio/Mix.tsx`) |
 | `public/audio/music/mixkit-135.mp3` | Sleepy Cat | Alejandro Magaña (A. M.) | https://assets.mixkit.co/music/135/135.mp3 | Runner-up |
 
-## Sound effects (Gabriel's Drive library copies only)
-Copied unchanged from `~/Documents/video-library/references/strehl-demo/public-demo/sfx/` (original names) and
-`~/Documents/products/fine-print/film/public/sfx/` (prefixed `fp-`). Catalog: `~/Documents/video-library/catalogs/abel-socials/sound-effects-library.json`.
+## Sound effects (the team's Drive library copies only)
+Copied unchanged from the team's licensed SFX library (original names) and
+a second library set (prefixed `fp-`). Catalog: the library's own sound-effects list.
 No Pixabay, no synthesized sounds.
 
 ## Voice
 ElevenLabs Eleven v4 (`eleven_v4`), voice "Talia - Warm Confident Narrator" (`xt1AC3mKnyqJYvD3KK90`, ElevenLabs Voice
-Library, added to Gabriel's account). Generated 14 Nov 2026 via `scripts/voice.py`; text in `voice/lines.json`;
-characters used in `voice/usage.json`. Used under Gabriel's ElevenLabs Creator plan.
+Library, added to the team's account). Generated 14 Nov 2026 via `scripts/voice.py`; text in `voice/lines.json`;
+characters used in `voice/usage.json`. Used under the team's ElevenLabs Creator plan.
 
 ## Visuals
 All visuals are drawn in Remotion from Dibs' own source: colours, glass, pills, badges, LetterFace (ported from

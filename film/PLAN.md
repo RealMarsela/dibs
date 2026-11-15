@@ -1,6 +1,6 @@
 # Dibs demo film: PLAN (Sat 14 Nov 2026, IST)
 
-Film lead: Claude (Opus 5.5). Approved story: `../demo/STORY.md` (Gabriel, 14 Nov). Contract: `~/Documents/hackathons/_demo-films/BRIEF-COMMON.md`.
+Film lead: Claude (Opus 5.5). Approved story: `../demo/STORY.md` (team, 14 Nov). Contract: the team's film brief (not in this repo).
 Delivery: 1920x1080, 30 fps, H.264 yuv420p limited-range BT.709, AAC 48 kHz, about -14 LUFS, true peak <= -1 dBTP.
 Length (v2): **128.37 s (3,851 frames) with voice variant B** (126.0 s with variant A), target 2:00, hard cap 2:15. Milestones: v1 by 23:00 IST, final by 02:30 IST.
 Studio: `http://localhost:3017` (composition `Film`; one composition per scene `Scene01`..`Scene09`; seam reference `Handoffs`).
@@ -36,7 +36,7 @@ returned audio plus character alignment; the tag's characters are aligned at ~0 
 So no forced-alignment fallback was needed; trade-off recorded in section 9.
 Why: v4 is ElevenLabs' newest flagship (launched 28 Sep 2026; "most emotive", audio tags followed more reliably than v3)
 and the with-timestamps endpoint gives the per-word cue frames the timeline is built on. Talia is an American, warm,
-conversational narrator (Gabriel's "across a table" register) with native v4 support; the account's own warm female
+conversational narrator (the team's "across a table" register) with native v4 support; the account's own warm female
 voices are Polish- or Tamil-native or a Gen-Z social read.
 Docs: https://elevenlabs.io/docs/overview/models , https://elevenlabs.io/docs/overview/capabilities/text-to-speech/eleven-v4 ,
 https://elevenlabs.io/docs/api-reference/text-to-speech/convert-with-timestamps , https://elevenlabs.io/blog/eleven-v4 ,
@@ -259,10 +259,10 @@ of the track lands (with the music starting at film 2.2 s, f66) on "We threw thi
 natural ending at ~2:01.5 of the track lands on the film's last frame. Not used by any other film on this Mac.
 Mix (`src/audio/Mix.tsx`): music base 0.34, ducked to 0.13 under narration (6-frame ramps), fade in 30 f, fade out 45 f;
 swells in the gaps between lines (0:18, 0:36, 0:50, 0:59, 1:19, 1:42). Mastering pass: two-pass loudnorm to -14 LUFS,
-TP -1 dBTP (`scripts/master.sh`). I cannot listen; levels are set by measurement and must get Gabriel's ear.
+TP -1 dBTP (`scripts/master.sh`). I cannot listen; levels are set by measurement and must get a human ear.
 
-SFX cue sheet (files from Gabriel's Drive library copies only: `~/Documents/video-library/references/strehl-demo/public-demo/sfx/`
-and `~/Documents/products/fine-print/film/public/sfx/` (prefixed `fp-`); attack measured locally; final frames in `src/audio/cues.ts`):
+SFX cue sheet (files from the team's Drive library copies only: the team's licensed SFX library
+and a second library set (prefixed `fp-`); attack measured locally; final frames in `src/audio/cues.ts`):
 
 | Frame | File | Action it identifies |
 |---|---|---|

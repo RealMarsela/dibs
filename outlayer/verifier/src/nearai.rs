@@ -96,7 +96,7 @@ impl Extractor for NearAi<'_> {
         if self.api_key.is_empty() {
             return Err("NEAR_AI_KEY is not set".into());
         }
-        // Spend guard (Gabriel, 14 Nov): one call per proof, input trimmed, output capped.
+        // Spend guard (team, 14 Nov): one call per proof, input trimmed, output capped.
         let email_text: String = email_text.chars().take(MAX_INPUT_CHARS).collect();
         let req = json!({
             "model": MODEL, "temperature": 0, "stream": false, "max_tokens": MAX_OUTPUT_TOKENS,

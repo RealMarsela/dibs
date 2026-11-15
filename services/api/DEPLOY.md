@@ -27,6 +27,6 @@ Set with `wrangler secret put <NAME>`.
 cd services/api && pnpm install
 pnpm test && pnpm typecheck
 wrangler deploy                 # testnet
-wrangler deploy --env mainnet   # mainnet, only with Gabriel's approved cap
+wrangler deploy --env mainnet   # mainnet, only with the team's approved cap
 ```
 Local: put the two secrets in `.dev.vars` (git-ignored) and run `wrangler dev` (`--env mainnet` for real 1Click quotes).

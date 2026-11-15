@@ -1,11 +1,11 @@
-# Dibs demo film: story plan (draft for Gabriel, Sat 14 Nov, IST)
+# Dibs demo film: story plan (draft for the team, Sat 14 Nov, IST)
 
-Contract: ~/Documents/hackathons/_demo-films/BRIEF-COMMON.md (house quality, plan-first, parallel scenes,
+Contract: the team's film brief (not in this repo) (house quality, plan-first, parallel scenes,
 voice rules, Mixkit + Drive SFX, -14 LUFS, 1920x1080 30 fps). References: Pine Labs P3P and Grok
-recreations (~/Documents/motion-teaching-projects/round2-2026-09-28/), Local Edition and Wallspace finals
+recreations (earlier internal studies), Local Edition and Wallspace finals
 (location to confirm), vibrant.design launch videos. UI: the Hoy-based app (dark, glass, letter faces).
 
-Look rule (Gabriel, 14 Nov): the film wears Dibs' own theme and vibe end to end (near-black #0e0e0e, warm
+Look rule (team, 14 Nov): the film wears Dibs' own theme and vibe end to end (near-black #0e0e0e, warm
 off-white type, frosted glass, pill buttons, blinking letter faces, the status colours, SF/Inter type).
 The references teach only how visuals are constructed: camera travel, shot handoffs, transitions and
 animation timing. Never their colours, fonts or style.
@@ -56,7 +56,7 @@ the release condition (research/competition: 0 of ~600 entries).
 - Lithic sandbox approve/decline request ids (card lane handback).
 
 ## Voice-over
-ElevenLabs, at most 4,000 characters including retries; Gabriel's rules (full sentences, "so", "now",
+ElevenLabs, at most 4,000 characters including retries; the team's rules (full sentences, "so", "now",
 problem first, product before numbers, no taglines). Voice to choose (see questions).
 
 ## Generated media

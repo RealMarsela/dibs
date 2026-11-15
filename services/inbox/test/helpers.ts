@@ -68,7 +68,7 @@ export function forwardAsAttachment(inner: Uint8Array, to: string, encoding: "7b
   const enc = new TextEncoder();
   const b = "----=_Part_42_1700000000.1700000000";
   const head = enc.encode(
-    `From: Gabriel <g@example.org>\r\nTo: ${to}\r\nSubject: Fwd: Your booking\r\nDate: Sat, 14 Nov 2026 10:00:00 +0000\r\nMessage-ID: <fwd1@example.org>\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="${b}"\r\n\r\n` +
+    `From: Maya <g@example.org>\r\nTo: ${to}\r\nSubject: Fwd: Your booking\r\nDate: Sat, 14 Nov 2026 10:00:00 +0000\r\nMessage-ID: <fwd1@example.org>\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="${b}"\r\n\r\n` +
       `--${b}\r\nContent-Type: text/plain; charset="UTF-8"\r\n\r\nForwarded, see attached.\r\n` +
       `--${b}\r\nContent-Type: message/rfc822; name="Your booking.eml"\r\nContent-Disposition: attachment; filename="Your booking.eml"\r\nContent-Transfer-Encoding: ${encoding}\r\n\r\n`,
   );

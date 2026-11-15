@@ -1,4 +1,4 @@
-/* SFX cue sheet. Files come only from Gabriel's Drive library copies in public/audio/sfx/ (PROVENANCE.md).
+/* SFX cue sheet. Files come only from the team's Drive library copies in public/audio/sfx/ (PROVENANCE.md).
    `at` is the absolute film frame of the hit, written as scene start + local frame so voice-variant shifts carry
    through. `lead` = frames from the file start to its hit (measured attack), so the hit lands on `at`.
    Integrator owns this file; scene owners proposed these cues in their handbacks. */

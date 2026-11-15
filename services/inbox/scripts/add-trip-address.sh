@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Add the literal routing rule <trip>@dibs.larinova.com -> Worker dibs-inbox (Cloudflare documents catch-all as apex-only,
 # so each trip address gets its own rule). Needs CLOUDFLARE_API_TOKEN (Email Routing edit); load it with
-#   ~/.claude/vault/inject.sh get CLOUDFLARE_API_TOKEN --dir <scratch>; set -a; . <scratch>/.env.local; set +a
+#   export CLOUDFLARE_API_TOKEN from your secret store first
 # Usage: scripts/add-trip-address.sh lis0312 [more codes...]
 set -euo pipefail
 ZONE=${CF_ZONE_ID:-bbaaf33c5998f5ebb76ea82164662d98}   # larinova.com
