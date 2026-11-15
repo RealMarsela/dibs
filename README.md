@@ -8,6 +8,10 @@ verified booking confirmation.
 **[Open the live Lisbon trip](https://dibs.larinova.com/t/lis0312)** ·
 [Five-minute judge path](JUDGES.md) · [Threat model](docs/THREAT_MODEL.md) · `pnpm verify` (reads the chain, no keys)
 
+**Demo video:** https://x.com/RealMarsella/status/2121752210497479085
+
+**Submitted version:** tag `hackathon-submission` (6e83a1c). Later commits are post-deadline fixes from a readiness pass: https://github.com/RealMarsela/dibs/compare/hackathon-submission...main
+
 Built at NEAR HACKATHON, November 2026. The full product runs on NEAR testnet, and the pay-in also runs on
 **NEAR mainnet with real USDC** ([Live on NEAR mainnet](#live-on-near-mainnet-real-usdc)). Card rails are the Lithic
 sandbox (details in [Honest limits](#honest-limits)).
