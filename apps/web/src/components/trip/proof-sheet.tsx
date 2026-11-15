@@ -12,7 +12,7 @@ type Step = "upload" | "checking" | "facts" | "released" | "refused";
 
 const CHECKS = [
   { what: "The trip contract asks OutLayer to check the email", where: "trip contract → OutLayer" },
-  { what: "DKIM signature is booking.com’s own", where: "Inside an Intel TDX enclave" },
+  { what: "DKIM signature is the booking site’s own", where: "Inside an Intel TDX enclave" },
   { what: "Read privately by NEAR AI Cloud", where: "Inside a GPU enclave; nobody sees the email" },
   { what: "Signed verdict checked by the contract", where: "ed25519 signature verified on-chain" },
 ];
@@ -136,7 +136,16 @@ export function ProofSheet({ open, onClose }: { open: boolean; onClose: () => vo
 
       {step === "refused" && (
         <div className="rounded-2xl bg-refused/10 p-4">
-          <p className="text-[15px] font-semibold text-refused">The contract refused this proof: {lastError}</p>
+          <p className="text-[15px] font-semibold text-refused">
+            {lastError === "E_NO_RESULT"
+              ? "The enclave gave no verdict for this email."
+              : `The contract refused this proof: ${lastError}`}
+          </p>
+          {lastError === "E_NO_RESULT" && (
+            <p className="mt-1.5 text-[13.5px] text-fg-2">
+              Either a check failed (the sender’s DKIM signature, the dates, the guest count or the total against this trip), or OutLayer’s queue didn’t answer in time.
+            </p>
+          )}
           <p className="mt-1.5 text-[13.5px] text-fg-2">Nothing moved. The crew’s money stays in the DAO until a real, matching booking is proven.</p>
           <button className="pill-dark focus-ring mt-4" onClick={() => setStep("upload")}>Try another email</button>
         </div>

@@ -115,7 +115,9 @@ export const evmDeposit = (b: { trip: string; kind: "bed" | "wait"; n: number; t
 export const fund = (b: { trip: string; kind: "bed" | "wait"; n: number }) => post<{ mint_tx?: string; sweep_tx?: string; status?: string }>("/testnet/fund", b);
 export const refundCheck = (b: { trip: string; n: number }) => post<{ code: string; tx_hash?: string }>("/refund-check", b);
 export const draw = (trip: string) => post<{ tx_hash: string }>("/draw", { trip });
-export const proofSubmit = (b: { trip: string; blob_url: string; blob_sha256: string }) => post<{ tx_hash: string }>("/proof/submit", b);
+/** Only the three fields the API accepts: callers pass an upload result or an inbox item, which carry more. */
+export const proofSubmit = (b: { trip: string; blob_url: string; blob_sha256: string }) =>
+  post<{ tx_hash: string }>("/proof/submit", { trip: b.trip, blob_url: b.blob_url, blob_sha256: b.blob_sha256 });
 export const bootstrap = (account: string) => post<{ tx_hash?: string; existed?: boolean }>("/account/bootstrap", { account });
 export const names = (accounts: string[]) =>
   accounts.length ? call<Record<string, string>>(`/names?accounts=${accounts.map(encodeURIComponent).join(",")}`) : Promise.resolve({});
