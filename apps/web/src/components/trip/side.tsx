@@ -1,4 +1,6 @@
-import { CreditCard, Dices, FileCheck2, ListPlus } from "lucide-react";
+import { useState } from "react";
+import { CreditCard, Dices, FileCheck2, ListPlus, Loader2 } from "lucide-react";
+import { deviceKey } from "@/live/passkey";
 import { useTrip } from "@/data/store";
 import { PEOPLE } from "@/data/sample";
 import { ChainTag, Face } from "@/components/bits";
@@ -24,8 +26,36 @@ export interface Opens {
 }
 
 /* What this person should do next, said Hoy's way: a white statement and its grey continuation, then one button. */
+/* Joining needs an account to hold the spot. A visitor who has not signed in gets this device's passkey account,
+   the same no-wallet route as a bed on testnet; the test faucet then pays the spot. */
+function JoinWaitlist({ viewer }: { viewer: string }) {
+  const { act, live } = useTrip();
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  async function join() {
+    setBusy(true);
+    setErr(null);
+    try {
+      await act.join(viewer || (live ? (await deviceKey()).accountId : viewer));
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Couldn’t join the waitlist");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div>
+      <button className="pill-light focus-ring press" disabled={busy} onClick={join}>
+        {busy ? <Loader2 className="size-4 animate-spin" /> : <ListPlus className="size-4" />} {busy ? "Joining…" : "Join the waitlist"}
+      </button>
+      {err && <p className="mt-3 rounded-xl bg-refused/10 px-3 py-2 text-[13px] text-refused">{err}</p>}
+      {live && !viewer && <p className="mt-3 text-[12.5px] text-fg-3">Testnet: a passkey on this device holds your spot and the test faucet pays it.</p>}
+    </div>
+  );
+}
+
 export function NextStep({ viewer, open }: { viewer: string; open: Opens }) {
-  const { trip, funded, paidCount, act, live, network } = useTrip();
+  const { trip, funded, paidCount, live, network } = useTrip();
   const mine = trip.spots.find((s) => s.holder === viewer);
   const openSpot = trip.spots.find((s) => s.status === "open");
   const mainnet = live && network === "mainnet";
@@ -59,7 +89,7 @@ export function NextStep({ viewer, open }: { viewer: string; open: Opens }) {
   } else if (!mine) {
     a = "Every bed is taken.";
     b = `Join the waitlist with ${usd(trip.price, 0)} from any chain. When someone sells, you get their bed instantly.`;
-    cta = <button className="pill-light focus-ring press" onClick={() => act.join(viewer)}><ListPlus className="size-4" /> Join the waitlist</button>;
+    cta = <JoinWaitlist viewer={viewer} />;
   } else if (!funded) {
     a = `Waiting on ${trip.spots.length - paidCount} bed${trip.spots.length - paidCount === 1 ? "" : "s"}.`;
     b = isBooker ? "You can’t book yet, and that’s the point: you never front the money." : "Nobody books until every bed is paid, so nobody covers for anyone.";
