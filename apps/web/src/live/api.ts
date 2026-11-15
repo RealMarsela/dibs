@@ -49,6 +49,8 @@ export interface RawTrip {
   stay?: string;
   beds: RawBed[];
   waitlist: { buyer: string; slot: number }[];
+  /** Waitlist reservations by slot (null = free); a reserved slot is paid separately. */
+  wait_res?: (string | null)[];
   proof?: { stay: string; guests: number; total: string; dkim_domain: string; check_in: string; check_out: string; currency?: string } | null;
   payout?: unknown;
   drawn?: number[] | null;

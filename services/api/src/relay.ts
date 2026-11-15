@@ -1,11 +1,12 @@
 import { Hono } from "hono";
 import { ApiError, parse, readJson } from "./errors";
 import type { Env } from "./env";
-import { provider, relayerAccount } from "./near";
+import { getTrip, provider, relayerAccount } from "./near";
 import { txHashOf } from "./sweep";
 import { checkPolicy, decodeDelegate, verifySignature } from "./policy";
 import { rateLimit } from "./ratelimit";
 import { relayBody } from "./schemas";
+import { recordActivity } from "./activity";
 
 export const relayRoute = new Hono<{ Bindings: Env }>();
 
@@ -31,9 +32,26 @@ relayRoute.post("/relay", async (c) => {
 
   try {
     const res = await relayerAccount(env).relayMetaTransaction(sd);
-    return c.json({ tx_hash: txHashOf(res), sender: sd.delegateAction.senderId, receiver: sd.delegateAction.receiverId });
+    const tx_hash = txHashOf(res);
+    await noteResale(env, sd.delegateAction.actions, tx_hash);
+    return c.json({ tx_hash, sender: sd.delegateAction.senderId, receiver: sd.delegateAction.receiverId });
   } catch (e) {
     if (e instanceof ApiError) throw e;
     throw new ApiError(502, "E_RELAY_FAILED", "relay transaction was rejected by the network");
   }
 });
+
+/** A relayed list_for_resale goes on the trip's receipts: resold to the waitlist at once, or listed at face value. */
+async function noteResale(env: Env, actions: { functionCall?: { methodName: string; args: Uint8Array } }[], tx: string | null): Promise<void> {
+  const fc = actions.find((a) => a.functionCall?.methodName === "list_for_resale")?.functionCall;
+  if (!fc) return;
+  try {
+    const { trip, n } = JSON.parse(new TextDecoder().decode(fc.args)) as { trip: string; n: number };
+    const beds = (await getTrip(env, trip))?.beds as { status?: string }[] | undefined;
+    const bed = beds?.[n - 1];
+    const text = bed?.status === "Listed" ? `Bed ${n} listed for resale at face value` : `Bed ${n} resold at face value to the waitlist`;
+    await recordActivity(env, trip, { kind: "resale", text, tx });
+  } catch {
+    // A receipt line is best effort; the relay itself already succeeded.
+  }
+}

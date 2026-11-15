@@ -43,6 +43,6 @@ holdRoute.post("/hold", async (c) => {
     return c.json({ tx_hash, trip: b.trip, kind: b.kind, n: b.n, holder: b.holder, bootstrap_tx: boot.tx_hash });
   } catch (e) {
     if (e instanceof ApiError) throw e;
-    throw new ApiError(502, "E_HOLD_FAILED", "hold transaction was rejected (bed not open, or relayer not registered on the contract)");
+    throw new ApiError(502, "E_HOLD_FAILED", b.kind === "bed" ? "hold transaction was rejected (bed not open, or relayer not registered on the contract)" : "that waitlist slot is already taken, or the waitlist is closed");
   }
 });

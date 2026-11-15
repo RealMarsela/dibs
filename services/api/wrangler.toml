@@ -7,7 +7,7 @@ routes = [{ pattern = "api.dibs.larinova.com", custom_domain = true }]
 # Default = testnet. Mainnet is a separate deploy: `wrangler deploy --env mainnet`.
 [vars]
 NEAR_NETWORK = "testnet"
-NEAR_RPC_URLS = "https://test.rpc.fastnear.com,https://rpc.testnet.near.org"
+NEAR_RPC_URLS = "https://near-testnet.drpc.org,https://test.rpc.fastnear.com,https://rpc.testnet.near.org"
 ONECLICK_URL = "https://1click.chaindefuser.com"
 # TODO(coordinator): fill after Lane A deploys.
 DIBS_CONTRACT = "dibs-0eb9ae.testnet"
@@ -24,7 +24,7 @@ MAIL_DOMAIN = "dibs.larinova.com"
 TESTNET_EVM_DEPOSIT = "0xad3bbf501fee270894c3a77ff383dd6c3e9fc30b"
 BASE_SEPOLIA_RPC_URLS = "https://sepolia.base.org,https://base-sepolia-rpc.publicnode.com"
 # /mainnet/* (src/mainnet.ts): the pay-in on NEAR mainnet. Secret: MAINNET_RELAYER_PRIVATE_KEY.
-MAINNET_RPC_URLS = "https://free.rpc.fastnear.com,https://rpc.mainnet.near.org"
+MAINNET_RPC_URLS = "https://near.drpc.org,https://free.rpc.fastnear.com,https://rpc.mainnet.near.org"
 MAINNET_DIBS_CONTRACT = "dibsapp.near"
 MAINNET_USDC_CONTRACT = "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1"
 MAINNET_RELAYER_ACCOUNT_ID = "relayer.dibsapp.near"
@@ -42,7 +42,7 @@ name = "dibs-api-mainnet"
 
 [env.mainnet.vars]
 NEAR_NETWORK = "mainnet"
-NEAR_RPC_URLS = "https://free.rpc.fastnear.com,https://rpc.mainnet.near.org"
+NEAR_RPC_URLS = "https://near.drpc.org,https://free.rpc.fastnear.com,https://rpc.mainnet.near.org"
 ONECLICK_URL = "https://1click.chaindefuser.com"
 DIBS_CONTRACT = "dibs-REPLACE.near"
 USDC_CONTRACT = "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1"

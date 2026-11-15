@@ -74,8 +74,14 @@ export function TripProvider({ code, children }: { code: string; children: React
           },
           resell: async () => after({}),
           join: async (who) => {
-            const slot = trip.waitlist.length + 1;
-            await api.hold({ trip: c, kind: "wait", n: slot, holder: who });
+            // Reuse a slot this account already reserved; otherwise take the first free one. Reservations are on chain
+            // (wait_res), so a slot someone reserved but never paid is skipped rather than collided with.
+            const res = (await api.getTrip(c)).trip.wait_res ?? [];
+            const own = res.indexOf(who);
+            const free = res.indexOf(null);
+            if (own < 0 && free < 0) throw new Error("The waitlist is full.");
+            const slot = (own >= 0 ? own : free) + 1;
+            if (own < 0) await api.hold({ trip: c, kind: "wait", n: slot, holder: who });
             return after({ tx: (await api.fund({ trip: c, kind: "wait", n: slot })).sweep_tx });
           },
           draw: async () => after({ tx: (await api.draw(c)).tx_hash }),
