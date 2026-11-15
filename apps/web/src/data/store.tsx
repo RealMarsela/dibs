@@ -74,14 +74,24 @@ export function TripProvider({ code, children }: { code: string; children: React
           },
           resell: async () => after({}),
           join: async (who) => {
-            // Reuse a slot this account already reserved; otherwise take the first free one. Reservations are on chain
-            // (wait_res), so a slot someone reserved but never paid is skipped rather than collided with.
-            const res = (await api.getTrip(c)).trip.wait_res ?? [];
-            const own = res.indexOf(who);
-            const free = res.indexOf(null);
-            if (own < 0 && free < 0) throw new Error("The waitlist is full.");
-            const slot = (own >= 0 ? own : free) + 1;
-            if (own < 0) await api.hold({ trip: c, kind: "wait", n: slot, holder: who });
+            // Reuse this account's own reservation; else a free slot; else an unpaid reservation, which the contract
+            // hands over only once it has sat unpaid past its hold window. Paid slots are never touched.
+            const t = (await api.getTrip(c)).trip;
+            const res = t.wait_res ?? [];
+            const paid = new Set(t.waitlist.map((w) => w.slot));
+            let slot = res.indexOf(who) + 1;
+            if (!slot) {
+              const order = res.map((_, i) => i).filter((i) => !paid.has(i + 1)).sort((a, b) => Number(res[a] !== null) - Number(res[b] !== null));
+              if (!order.length) throw new Error("The waitlist is full.");
+              for (const i of order) {
+                const ok = await api.hold({ trip: c, kind: "wait", n: i + 1, holder: who }).then(() => true, (e) => (res[i] === null ? Promise.reject(e) : false));
+                if (ok) {
+                  slot = i + 1;
+                  break;
+                }
+              }
+              if (!slot) throw new Error("Every waitlist spot is reserved right now. An unpaid spot frees up after an hour; try again then.");
+            }
             return after({ tx: (await api.fund({ trip: c, kind: "wait", n: slot })).sweep_tx });
           },
           draw: async () => after({ tx: (await api.draw(c)).tx_hash }),
