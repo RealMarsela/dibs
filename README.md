@@ -197,7 +197,6 @@ Deployed ids are in [deploy/testnet.json](deploy/testnet.json); the deploy log i
   prompt is in [PROVENANCE.md](apps/web/public/faces/PROVENANCE.md)). No real people.
 - **Test key in the repo.** `outlayer/verifier/tests/fixtures/dibs_test_dkim_key.pem` signs mail for the fake
   `dibs-test.example` domain, which only the testnet contract allowlists.
-- **Other project filed at NEAR HACKATHON by the same author:** <!-- OTHER_FILED_PROJECT: set at filing --> to be named at filing.
 
 ## License
 
