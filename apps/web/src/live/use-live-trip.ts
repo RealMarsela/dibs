@@ -51,7 +51,8 @@ export function useLiveTrip(code: string, enabled: boolean) {
       setProofPending(!!(t as unknown as { proof_pending?: boolean }).proof_pending);
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not reach the trip");
+      // A trip that does not exist is not an outage: say so instead of "retrying".
+      setError(e instanceof api.ApiError && e.code === "E_TRIP_NOT_FOUND" ? "E_TRIP_NOT_FOUND" : e instanceof Error ? e.message : "Could not reach the trip");
     } finally {
       busy.current = false;
     }

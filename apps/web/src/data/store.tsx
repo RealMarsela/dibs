@@ -121,15 +121,24 @@ export function TripProvider({ code, children }: { code: string; children: React
     };
   }, [trip, live, code, liveTrip, net, CONTRACT]);
 
-  if (!value) return <LiveLoading error={liveTrip.error} />;
+  if (!value) return <LiveLoading error={liveTrip.error} code={code} />;
   return <TripCtx.Provider value={value}>{children}</TripCtx.Provider>;
 }
 
 
-function LiveLoading({ error }: { error: string | null }) {
+function LiveLoading({ error, code }: { error: string | null; code: string }) {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-3 px-6 text-center">
-      {error ? (
+      {error === "E_TRIP_NOT_FOUND" ? (
+        <>
+          <p className="display text-[22px]">No trip called {code.toUpperCase()}.</p>
+          <p className="text-[14.5px] text-fg-2">Check the link you were sent, or start a trip of your own.</p>
+          <div className="mt-3 flex gap-2">
+            <a href="/new" className="pill-light focus-ring press">Start a trip</a>
+            <a href="/" className="pill-dark focus-ring press">How Dibs works</a>
+          </div>
+        </>
+      ) : error ? (
         <>
           <p className="display text-[22px]">Can’t reach the trip right now.</p>
           <p className="text-[14.5px] text-fg-2">{error}. It retries on its own every few seconds.</p>
