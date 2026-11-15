@@ -147,16 +147,4 @@ impl Dibs {
         ensure(n >= 1 && n <= t.n_beds, "E_BAD_ARGS");
         t.beds[n as usize - 1].paid_from_chain = chain;
     }
-
-    /// Reserve a waitlist account for a buyer, who then pays `price` to `w<slot>-<trip>.<dibs>`.
-    pub fn reserve_wait(&mut self, trip: String, slot: u8, buyer: AccountId) {
-        let caller = env::predecessor_account_id();
-        ensure(caller == buyer || self.is_relayer(&caller), "E_NOT_RELAYER");
-        let t = self.trip_mut(&trip);
-        ensure(!t.refunded, "E_REFUNDED");
-        ensure(slot >= 1 && slot <= t.n_wait, "E_NO_SLOT");
-        ensure(t.wait_res[slot as usize - 1].is_none(), "E_SLOT_TAKEN");
-        t.wait_res[slot as usize - 1] = Some(buyer.clone());
-        self.register_usdc(buyer);
-    }
 }

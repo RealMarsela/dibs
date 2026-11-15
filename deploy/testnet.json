@@ -22,7 +22,7 @@
   "api_url": "https://api.dibs.larinova.com",
   "r2_bucket": "dibs-proof-blobs",
   "relayer": "relayer.dao-0eb9ae.testnet",
-  "dibs_wasm_sha256": "0f67bf94d56b406746b2284a5cce029889065fc75fe4b6e7bd5bd8dc356c2721",
+  "dibs_wasm_sha256": "483ee1691cd19f683bcb6ade8aa87bc3212972670e35427d81df8c70d2071e0f",
   "bed_wasm_sha256": "c5546ccb307422534493702eb88a23c6764c4a7c6ea3d748dd9d826215441b8c",
   "usdc_wasm_sha256": "5926c540e47cfad4b650faf5820d69dd4e603535b89eb4eaed055e8a396e44b9",
   "trips": {
@@ -152,6 +152,8 @@
     "submit_proof_by_relayer_sin1025": "9yvxadwsAWrexVWjsd7gSwNEVW15YEpsKpKa8j7ACuDW",
     "deploy_dibs_and_init": "2YFYeopF4bRAcRD9qf6bReGcUd4GbksAzWgQM9pvVotu",
     "create_usdc_account": "7R5xh85Ysx269GaLDB9rkfbM7969zFYSgo2sEpW2Ak2z",
-    "dibs_usdc_storage_deposit": "AuoWfv8xkUA82U6SyzBpmuaoh1PgQLpBtab8sKWGz8qT"
+    "dibs_usdc_storage_deposit": "AuoWfv8xkUA82U6SyzBpmuaoh1PgQLpBtab8sKWGz8qT",
+    "upgrade_wait_expiry": "GxA7TA7iLjJw1Zg61WzXfzqaWtDKSRLEFTF7ZuZ6iSms",
+    "release_expired_wait_porc621f_1": "9QXCqFKy4pKRYpNcw5ckPHq2nkyJWAFLDzoJLSWoxfSa"
   }
 }

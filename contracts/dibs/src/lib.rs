@@ -9,6 +9,7 @@ mod refund;
 mod trip;
 mod types;
 mod util;
+mod wait;
 
 use types::*;
 use util::*;

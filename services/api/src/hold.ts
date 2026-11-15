@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import { ApiError, parse, readJson } from "./errors";
-import type { Env } from "./env";
-import { relayerAccount } from "./near";
+import { receiptAccount, type Env } from "./env";
+import { ftBalance, getTrip, relayerAccount } from "./near";
 import { txHashOf } from "./sweep";
 import { rateLimit } from "./ratelimit";
 import { ensureImplicitAccount } from "./bootstrap";
@@ -22,12 +22,26 @@ const holdBody = z
   .object({ trip: tripCode, kind: z.enum(["bed", "wait"]), n: bedIndex, holder: accountId })
   .strict();
 
+/**
+ * The contract lets a new buyer take over an expired, unfunded waitlist reservation. A payment sent to the slot's receipt
+ * account is credited to whoever holds the slot when it is swept, so while USDC sits there for the current reserver, refuse.
+ */
+async function guardPayingSlot(env: Env, trip: string, n: number, holder: string): Promise<void> {
+  const t = await getTrip(env, trip);
+  const current = (t?.wait_res as (string | null)[] | undefined)?.[n - 1];
+  if (!current || current === holder) return;
+  if ((await ftBalance(env, receiptAccount(env, "wait", trip, n))) > 0n) {
+    throw new ApiError(409, "E_SLOT_PAYING", "a payment is landing for the current holder of that waitlist slot; try again in a few minutes");
+  }
+}
+
 /** Sponsored hold: a keyless passkey account has no NEAR, so the relayer calls hold / reserve_wait and pays the deposit. */
 holdRoute.post("/hold", async (c) => {
   const env = c.env;
   const b = parse(holdBody, await readJson(c));
   rateLimit(`hold:ip:${c.req.header("cf-connecting-ip") ?? "anon"}`, 12, 60_000);
   rateLimit(`hold:${b.holder}`, 6, 60_000);
+  if (b.kind === "wait") await guardPayingSlot(env, b.trip, b.n, b.holder);
   const boot = await ensureImplicitAccount(env, b.holder);
   try {
     const res = await relayerAccount(env).callFunctionRaw({

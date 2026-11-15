@@ -103,7 +103,7 @@ impl Dibs {
         require_self();
         let t = self.trip_mut(&trip);
         if ok() {
-            t.wait_res[entry.slot as usize - 1] = None;
+            crate::wait::clear_wait_if(t, entry.slot, &entry.buyer);
             return U128(0);
         }
         let b = &mut t.beds[n as usize - 1];
@@ -121,7 +121,7 @@ impl Dibs {
         let good = ok();
         let t = self.trip_mut(&trip);
         if good {
-            t.wait_res[entry.slot as usize - 1] = None;
+            crate::wait::clear_wait_if(t, entry.slot, &entry.buyer);
         } else {
             t.waitlist.push(entry);
             t.last_error = "E_PAYOUT".to_string();
@@ -161,7 +161,7 @@ impl Dibs {
             return PromiseOrValue::Promise(p.then(Self::ext(env::current_account_id()).with_static_gas(G_CB).on_left(trip, entry)));
         }
         let i = t.wait_res.iter().position(|r| r.as_ref() == Some(&caller)).unwrap_or_else(|| fail("E_NO_SLOT"));
-        t.wait_res[i] = None;
+        crate::wait::clear_wait(t, i as u8 + 1);
         PromiseOrValue::Value(U128(0))
     }
 }

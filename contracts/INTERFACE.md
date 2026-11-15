@@ -89,7 +89,8 @@ Init (owner): `new{owner, usdc, outlayer, project_id, domains, run_fee}`. Owner 
 | `ft_on_transfer{sender_id, amount, msg}` | usdc only | | see below |
 | `request_refund{trip, n}` | anyone | | always `E_NO_REFUND` |
 | `list_for_resale{trip, n}` | bed holder | 300 T | Paid -> Listed (no price parameter exists: resale is at face). With a funded waitlist the head fills the bed at once and the seller is paid `price` |
-| `reserve_wait{trip, slot, buyer}` | buyer or relayer | 60 T | reserves `w<slot>-<trip>.<dibs>` |
+| `reserve_wait{trip, slot, buyer}` | buyer or relayer | 60 T | reserves `w<slot>-<trip>.<dibs>` for 60 min (`E_SLOT_TAKEN` while held; an unfunded, expired or legacy reservation is taken over) |
+| `release_expired_wait{trip, slot}` | anyone | 5 T | frees an expired, unfunded reservation (`E_NO_SLOT`, `E_FUNDED`, `E_NOT_EXPIRED`) |
 | `leave_waitlist{trip}` | buyer | 100 T | funded entry: `price` returned in USDC; bare reservation: freed |
 | `request_draw{trip}` | anyone, deposit >= 0.02 NEAR | 300 T | all beds Paid. Sets `drawn` (permutation of 1..n) and `drawn_out` |
 | `submit_proof{trip, blob_url, blob_sha256}` | booker or a relayer (v1.2; anyone else gets `E_NOT_BOOKER`), deposit >= 0.02 NEAR, before `book_by` | 300 T | all beds Paid. On acceptance stores `proof`, then DAO `add_proposal` Transfer(booker, total; the payout goes only to the booker even when a relayer submits) and `act_proposal` VoteApprove; `payout` goes `None -> Added(id) -> Acted(id) -> Done` (Done only after the proposal reads back Approved) |
@@ -100,7 +101,7 @@ Init (owner): `new{owner, usdc, outlayer, project_id, domains, run_fee}`. Owner 
 Views: `get_trip{trip}` (full state: price, n_beds, n_wait, book_by, booker, dao, dates, `beds[{holder, buyer,
 status Open|Held|Paid|Listed, paid_from_chain}]`, `wait_res`, `waitlist[{buyer, slot}]`, `proof`, `payout`,
 `proof_pending`, `draw_pending`, `drawn`, `drawn_out`, `refunded`, `refund_cursor`, `last_error`),
-`get_bed{trip,n}`, `get_waitlist{trip}`, `get_config`, `create_cost{n_beds,n_wait}`,
+`get_bed{trip,n}`, `get_waitlist{trip}`, `get_wait_holds{trip}` (reserved_at ns per slot), `get_config`, `create_cost{n_beds,n_wait}`,
 `check_proof{trip, message, signature}` (returns `"OK"` or the code `on_proof` would store).
 
 `ft_on_transfer` (msg `{"kind","trip","n"}`): `E_NOT_USDC` (caller), `E_BAD_MSG`, `E_BAD_SENDER` (sender must be
