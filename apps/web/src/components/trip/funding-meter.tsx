@@ -12,7 +12,7 @@ export function FundingMeter() {
       <p className="display text-[clamp(20px,2vw,26px)]">
         {funded ? "Every bed is paid." : `${paidCount} of ${trip.spots.length} paid.`}{" "}
         <span className="tone-2">
-          {funded ? `${usd(total, 0)} sits in the crew’s DAO.` : `${left} to go before anyone can book. ${usd(paidCount * trip.price, 0)} of ${usd(total, 0)} in the crew’s DAO.`}
+          {funded && trip.drawnOut ? `${usd(total, 0)} went to the booker for a verified booking.` : funded ? `${usd(total, 0)} sits in the crew’s DAO.` : `${left} to go before anyone can book. ${usd(paidCount * trip.price, 0)} of ${usd(total, 0)} in the crew’s DAO.`}
         </span>
       </p>
       <div className="mt-5 grid grid-cols-8 gap-1.5" role="img" aria-label={`${paidCount} of ${trip.spots.length} beds paid`}>

@@ -38,7 +38,7 @@ export function NextStep({ viewer, open }: { viewer: string; open: Opens }) {
 
   if (trip.drawnOut) {
     a = `Booked and paid. See you in ${trip.place}.`;
-    b = mine?.bed ? `You’re in the ${mine.bed.toLowerCase()}.` : "Every bed is paid and the booking is verified.";
+    b = mine?.bed ? `You’re in ${/^bed \d+$/i.test(mine.bed) ? "" : "the "}${mine.bed.toLowerCase()}.` : "Every bed is paid and the booking is verified.";
     cta = trip.proof ? <button className="pill-dark focus-ring press" onClick={open.proof}><FileCheck2 className="size-4" /> See the booking proof</button> : null;
   } else if (mine?.status === "held") {
     a = "Your bed is held, not paid.";
