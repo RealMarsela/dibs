@@ -62,11 +62,11 @@ const STATUS: Record<SpotStatus, { label: string; variant: "success-light" | "wa
   open: { label: "Open", variant: "invert-light" },
 };
 
-export function StatusBadge({ status, className }: { status: SpotStatus; className?: string }) {
+export function StatusBadge({ status, label, className }: { status: SpotStatus; label?: string; className?: string }) {
   const s = STATUS[status];
   return (
     <Badge variant={s.variant} radius="full" size="lg" className={cn("px-2.5 font-semibold", className)}>
-      {s.label}
+      {label ?? s.label}
     </Badge>
   );
 }

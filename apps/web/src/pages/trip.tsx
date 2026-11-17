@@ -156,7 +156,7 @@ export function TripPage() {
           </button>}
         </div>
 
-        {isExample(code) && <ExampleBanner code={code} mainnet={network === "mainnet"} refunded={!!trip.refunded} bookBy={trip.bookBy} />}
+        {isExample(code) && <ExampleBanner code={code} live={live} mainnet={network === "mainnet"} refunded={!!trip.refunded} bookBy={trip.bookBy} />}
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16">
           <div className="flex min-w-0 flex-col gap-10">

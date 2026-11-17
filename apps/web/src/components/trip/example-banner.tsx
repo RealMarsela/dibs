@@ -9,7 +9,9 @@ const REFUND_EXAMPLES = new Set(["lis0312", "lis0314", "drw0001"]);
 const norm = (code: string) => code.replace(/-/g, "").toLowerCase();
 export const isExample = (code: string) => EXAMPLES.has(norm(code));
 
-function blurb(code: string, mainnet: boolean, refunded: boolean, bookBy: string): string {
+function blurb(code: string, live: boolean, mainnet: boolean, refunded: boolean, bookBy: string): string {
+  if (!live)
+    return "A walkthrough that runs in your browser: switch who you’re previewing as to see each person’s side. No money moves here. The same trip on chain shows the refund guarantee: its deadline passed with no verified booking, so the contract refunded every bed.";
   if (mainnet)
     return "Real USDC on NEAR mainnet, seeded by the Dibs team. Every payment, swap and DAO deposit links to its explorer in the receipts, so you can check the money moved without paying.";
   if (norm(code) === "sin1025")
@@ -21,13 +23,18 @@ function blurb(code: string, mainnet: boolean, refunded: boolean, bookBy: string
   return "Seeded by the Dibs team so you can look around. Everything here also works on a trip of your own.";
 }
 
-export function ExampleBanner({ code, mainnet, refunded, bookBy }: { code: string; mainnet: boolean; refunded: boolean; bookBy: string }) {
+export function ExampleBanner({ code, live, mainnet, refunded, bookBy }: { code: string; live: boolean; mainnet: boolean; refunded: boolean; bookBy: string }) {
   return (
     <div className="glass mt-5 flex flex-col gap-3 rounded-[22px] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-[14px] leading-relaxed text-fg-2">
-        <span className="font-semibold text-fg">Example trip.</span> {blurb(code, mainnet, refunded, bookBy)}
+        <span className="font-semibold text-fg">Example trip.</span> {blurb(code, live, mainnet, refunded, bookBy)}
       </p>
       <div className="flex shrink-0 flex-wrap items-center gap-2 self-start sm:self-auto">
+        {!live && (
+          <Link to={`/t/${norm(code)}`} className="pill-dark pill-sm focus-ring press">
+            See it on chain
+          </Link>
+        )}
         {mainnet && (
           <a href="https://near.rocks/account/dibs-lismain.sputnik-dao.near" target="_blank" rel="noreferrer" className="pill-dark pill-sm focus-ring press">
             Crew DAO balance ↗

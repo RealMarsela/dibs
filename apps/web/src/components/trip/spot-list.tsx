@@ -77,6 +77,7 @@ function SpotRow({ spot, viewer, onPay, onExit, last }: { spot: Spot; last: bool
 
 function Action({ spot, mine, onPay, onExit }: { spot: Spot; mine: boolean; onPay: Props["onPay"]; onExit: Props["onExit"] }) {
   const { trip } = useTrip();
+  if (trip.refunded && spot.status === "paid") return <StatusBadge status="open" label="Refunded" />;
   if (spot.status === "held" && mine)
     return (
       <button className="pill-light pill-sm focus-ring press" onClick={() => onPay(spot.n)}>

@@ -36,7 +36,11 @@ export function PassHeader() {
       <div className="rise-in mt-6 flex flex-wrap gap-2" style={{ animationDelay: "0.9s" }}>
         <Chip k="Per bed" v={usd(trip.price, 0)} />
         <Chip k="Pot" v={`${usd(total, 0)}`} />
-        <Chip k={funded ? "Ready" : "Book by"} v={funded ? "every bed paid" : `${countdown(trip.bookBy, now)} · ${localDeadline(trip.bookBy)}`} />
+        {trip.refunded ? (
+          <Chip k="Refunded" v="no booking by the deadline" />
+        ) : (
+          <Chip k={funded ? "Ready" : "Book by"} v={funded ? "every bed paid" : `${countdown(trip.bookBy, now)} · ${localDeadline(trip.bookBy)}`} />
+        )}
         <span className="inline-flex h-9 items-center gap-2 rounded-full bg-panel py-1 pl-1 pr-3.5 text-[13.5px] ring-1 ring-line">
           <Face id={trip.booker} size={26} />
           <span>
