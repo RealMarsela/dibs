@@ -6,7 +6,7 @@ import type { Env } from "./env";
  * holds on the trip (a booker can also hold a later bed). The entry is mirrored into the key's metadata so a
  * prefix list returns everything in one call.
  */
-export type Role = "booker" | "bed" | "waitlist";
+export type Role = "booker" | "bed" | "waitlist" | "left";
 export interface RoleRef {
   role: Role;
   n?: number;

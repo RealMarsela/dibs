@@ -42,7 +42,21 @@ interface ChainTrip {
   stay?: string;
   payout?: unknown;
   refunded?: boolean;
-  beds: { status: string }[];
+  booker?: string;
+  beds: { status: string; holder?: string | null }[];
+  waitlist?: { buyer: string; slot: number }[];
+  wait_res?: (string | null)[];
+}
+
+/** Roles read from the chain now (the index is history: a sold bed or a filled waitlist spot moves on). */
+export function currentRoles(t: ChainTrip, accounts: string[]): RoleRef[] {
+  const mine = (a?: string | null) => !!a && accounts.includes(a);
+  const out: RoleRef[] = [];
+  if (mine(t.booker)) out.push({ role: "booker" });
+  t.beds.forEach((b, i) => mine(b.holder) && out.push({ role: "bed", n: i + 1 }));
+  for (const w of t.waitlist ?? []) if (mine(w.buyer)) out.push({ role: "waitlist", n: w.slot });
+  (t.wait_res ?? []).forEach((r, i) => mine(r) && !out.some((o) => o.role === "waitlist" && o.n === i + 1) && out.push({ role: "waitlist", n: i + 1 }));
+  return out.length ? out : [{ role: "left" }];
 }
 
 export function tripStatus(t: Pick<ChainTrip, "refunded" | "payout" | "beds">): TripStatus {
@@ -60,7 +74,7 @@ function envFor(env: Env, network: AcctEntry["network"]): Env | null {
 
 const rolesOf = (e: AcctEntry): RoleRef[] => e.roles ?? [{ role: e.role, ...(e.n ? { n: e.n } : {}) }];
 
-async function build(env: Env, code: string, entry: { network: AcctEntry["network"]; at: string; roles: RoleRef[] }): Promise<MyTrip | null> {
+async function build(env: Env, code: string, entry: { network: AcctEntry["network"]; at: string; roles: RoleRef[] }, accounts: string[]): Promise<MyTrip | null> {
   const e = envFor(env, entry.network);
   if (!e) return null;
   const [t, meta] = await Promise.all([getTrip(e, code) as Promise<ChainTrip | undefined>, readMeta(e, code)]);
@@ -76,7 +90,7 @@ async function build(env: Env, code: string, entry: { network: AcctEntry["networ
     paid: t.beds.filter((b) => b.status === "Paid").length,
     price_usdc: Number(BigInt(t.price)) / 1_000_000,
     status: tripStatus(t),
-    roles: entry.roles,
+    roles: currentRoles(t, accounts),
     created_at: meta?.created_at ?? entry.at,
     book_by: new Date(Number(BigInt(t.book_by) / 1_000_000n)).toISOString(),
   };
@@ -103,7 +117,7 @@ myTripsRoute.get("/my-trips", async (c) => {
     merged.set(code, cur);
   }
   const picked = [...merged.entries()].sort((a, b) => (a[1].at < b[1].at ? 1 : a[1].at > b[1].at ? -1 : 0)).slice(0, MAX_TRIPS);
-  const settled = await Promise.allSettled(picked.map(([code, entry]) => build(env, code, entry)));
+  const settled = await Promise.allSettled(picked.map(([code, entry]) => build(env, code, entry, list)));
   const trips = settled.flatMap((r) => (r.status === "fulfilled" && r.value ? [r.value] : []));
   // A trip dropped by a flaky RPC is skipped, but an answer made only of failures is an error, not an empty list.
   if (trips.length === 0 && settled.some((r) => r.status === "rejected")) throw new ApiError(502, "E_RPC", "could not read the trips from NEAR, try again");

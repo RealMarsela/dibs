@@ -132,7 +132,7 @@ export interface MyTrip {
   paid: number;
   price_usdc: number;
   status: "filling" | "all_paid" | "booked" | "refunded";
-  roles: { role: "booker" | "bed" | "waitlist"; n?: number }[];
+  roles: { role: "booker" | "bed" | "waitlist" | "left"; n?: number }[];
   created_at: string;
   book_by?: string;
 }

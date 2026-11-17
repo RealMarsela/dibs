@@ -33,7 +33,9 @@ const STATUS: Record<MyTrip["status"], { text: (t: MyTrip) => string; tone: stri
 };
 
 function roleLine(t: MyTrip): string {
-  const parts = t.roles.map((r) => (r.role === "booker" ? "You’re the booker" : r.role === "bed" ? `Bed ${String(r.n ?? "").padStart(2, "0")}` : `Waitlist #${r.n ?? ""}`));
+  const parts = t.roles.map((r) =>
+    r.role === "booker" ? "You’re the booker" : r.role === "bed" ? `Bed ${String(r.n ?? "").padStart(2, "0")}` : r.role === "waitlist" ? `Waitlist #${r.n ?? ""}` : "You sold your spot",
+  );
   return [...new Set(parts)].join(" · ");
 }
 

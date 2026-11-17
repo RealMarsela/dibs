@@ -13,7 +13,7 @@ const A = "a".repeat(64);
 const B = "0x" + "b".repeat(40);
 const chainTrip = (paid: number, extra = {}) => ({
   price: "1000000", n_beds: 2, book_by: String(Date.parse("2026-12-01T00:00:00Z") * 1_000_000), check_in: "2026-12-11", check_out: "2026-12-13",
-  beds: [{ status: paid > 0 ? "Paid" : "Held" }, { status: paid > 1 ? "Paid" : "Open" }], ...extra,
+  booker: A, beds: [{ status: paid > 0 ? "Paid" : "Held", holder: A }, { status: paid > 1 ? "Paid" : "Open", holder: paid > 1 ? B : null }], waitlist: [], wait_res: [null, null], ...extra,
 });
 const get = (q: string, env = makeEnv()) => app.fetch(new Request(`http://api.test/my-trips?accounts=${q}`), env);
 
@@ -53,13 +53,20 @@ describe("GET /my-trips", () => {
     expect(r.status).toBe(200);
     const { trips } = (await r.json()) as { trips: { code: string; place: string; status: string; paid: number; roles: unknown[] }[] };
     expect(trips.map((t) => t.code)).toEqual(["kyo1", "por1"]);
-    expect(trips[0]).toMatchObject({ place: "Kyoto", status: "all_paid", paid: 2, roles: [{ role: "booker" }, { role: "bed", n: 2 }] });
+    expect(trips[0]).toMatchObject({ place: "Kyoto", status: "all_paid", paid: 2, roles: [{ role: "booker" }, { role: "bed", n: 1 }, { role: "bed", n: 2 }] });
     expect(trips[1]).toMatchObject({ place: "Porto", status: "filling", paid: 1 });
   });
   it("is an empty list for an account with no trips, and 503 when the index is down", async () => {
     expect(((await (await get(A)).json()) as { trips: unknown[] }).trips).toEqual([]);
     const down = makeEnv({ NAMES: { list: async () => { throw new Error("kv down"); } } as unknown as KVNamespace });
     expect((await get(A, down)).status).toBe(503);
+  });
+  it("reports roles from the chain now: a seller who left shows as left", async () => {
+    const env = makeEnv();
+    await indexAccount(env, B, "lyo1", { role: "bed", n: 2 });
+    near.getTrip.mockResolvedValue(chainTrip(2, { beds: [{ status: "Paid", holder: A }, { status: "Paid", holder: "c".repeat(64) }] }));
+    const { trips } = (await (await get(B, env)).json()) as { trips: { roles: unknown[] }[] };
+    expect(trips[0].roles).toEqual([{ role: "left" }]);
   });
   it("reads status in contract order", () => {
     expect(tripStatus({ refunded: true, payout: "Done", beds: [] })).toBe("refunded");
