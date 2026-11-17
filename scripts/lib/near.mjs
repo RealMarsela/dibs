@@ -4,6 +4,8 @@ const RPCS = [
   'https://near-testnet.drpc.org',
   'https://test.rpc.fastnear.com',
 ];
+// Regular nodes keep only a few days of transactions; older ones (the recorded proof, draw and refusal) need an archive.
+const ARCHIVAL = ['https://archival-rpc.testnet.fastnear.com', 'https://archival-rpc.testnet.near.org', ...RPCS];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const ALPHA = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 
@@ -31,9 +33,9 @@ async function post(url, body) {
   throw new Error(`rate limited by ${url}`);
 }
 
-export async function rpc(method, params) {
+export async function rpc(method, params, urls = RPCS) {
   let last;
-  for (const url of RPCS) {
+  for (const url of urls) {
     try {
       const out = await post(url, { jsonrpc: '2.0', id: 'v', method, params });
       if (out.error) {
@@ -67,7 +69,7 @@ export async function view(account, method, args = {}) {
 }
 
 export async function txStatus(hash, sender) {
-  const out = await rpc('EXPERIMENTAL_tx_status', { tx_hash: hash, sender_account_id: sender, wait_until: 'FINAL' });
+  const out = await rpc('EXPERIMENTAL_tx_status', { tx_hash: hash, sender_account_id: sender, wait_until: 'FINAL' }, ARCHIVAL);
   if (out.error) throw new Error(`tx ${hash}: ${JSON.stringify(out.error.cause ?? out.error).slice(0, 160)}`);
   return out.result;
 }
