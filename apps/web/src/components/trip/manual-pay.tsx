@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Check, Copy, Loader2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { ChainTag } from "@/components/bits";
+import { ChainMark } from "@/components/chain-mark";
 import { Input } from "@/components/ui/input";
 import { CHAINS } from "@/data/sample";
 import type { ChainId } from "@/data/types";
@@ -61,7 +61,10 @@ export function DepositCard({ chain, pay, bed, onSent, children }: { chain: Chai
           <button className="focus-ring flex items-center gap-2 rounded-md font-mono text-[24px] font-semibold tracking-[-0.03em]" onClick={() => copy("amount", amount(pay.amountIn))}>
             {amount(pay.amountIn)} {copied === "amount" ? <Check className="size-4 text-paid" /> : <Copy className="size-4 text-fg-3" />}
           </button>
-          <ChainTag id={chain} />
+          <span className="mt-1 inline-flex items-center gap-2.5 text-[13px] text-fg-2">
+            <ChainMark id={chain} size={24} />
+            {CHAINS[chain].token} on {CHAINS[chain].name}
+          </span>
         </div>
       </div>
       <button className="focus-ring mt-3 flex w-full items-start gap-2 break-all rounded-xl bg-white/[0.06] px-3 py-2 text-left font-mono text-[12.5px] leading-relaxed text-fg-2 hover:text-fg" onClick={() => copy("address", pay.depositAddress)}>

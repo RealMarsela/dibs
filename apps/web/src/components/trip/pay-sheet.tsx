@@ -3,6 +3,7 @@ import { Fingerprint, Loader2, Wallet } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Sheet } from "@/components/sheet";
 import { ChainTag } from "@/components/bits";
+import { ChainMark } from "@/components/chain-mark";
 import { ProgressSteps } from "@/components/trip/steps";
 import { CHAINS } from "@/data/sample";
 import { useTrip } from "@/data/store";
@@ -168,13 +169,14 @@ export function PaySheet({ n, who, onClose }: { n: number | null; who: string; o
                   aria-checked={on}
                   onClick={() => setChain(id)}
                   className={cn(
-                    "focus-ring flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors",
+                    "focus-ring flex items-center gap-3.5 rounded-xl border px-4 py-3 text-left transition-colors",
                     on ? "border-fg bg-white/[0.04]" : "border-line hover:bg-white/[0.05]",
                   )}
                 >
-                  <span>
+                  <ChainMark id={id} size={32} />
+                  <span className="min-w-0 flex-1">
                     <span className="block text-[15px] font-semibold">{ch.name}</span>
-                    <ChainTag id={id} className="mt-0.5" />
+                    <span className="mt-0.5 block text-[12.5px] text-fg-2">{ch.token} on {ch.name}</span>
                   </span>
                   <span className="text-right">
                     <span className="block font-mono text-[14px] font-semibold">{usd(trip.price * (1 + ch.fee))}</span>

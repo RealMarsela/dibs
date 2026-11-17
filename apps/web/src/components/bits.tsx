@@ -1,3 +1,4 @@
+import { ChainMark } from "@/components/chain-mark";
 import { Link } from "react-router";
 import { CHAINS, PEOPLE } from "@/data/sample";
 import type { ChainId, SpotStatus } from "@/data/types";
@@ -44,19 +45,11 @@ export function FaceStack({ ids, size = 26, max = 8 }: { ids: string[]; size?: n
   );
 }
 
-const CHAIN_DOT: Record<ChainId, string> = {
-  near: "#ececea",
-  base: "#3b82f6",
-  solana: "#a78bfa",
-  arbitrum: "#38bdf8",
-  ethereum: "#94a3b8",
-};
-
 export function ChainTag({ id, className }: { id: ChainId; className?: string }) {
   const c = CHAINS[id];
   return (
     <span className={cn("inline-flex items-center gap-1.5 text-[12.5px] text-fg-2", className)}>
-      <span className="size-1.5 rounded-full" style={{ background: CHAIN_DOT[id] }} />
+      <ChainMark id={id} size={16} badge={false} />
       {c.token} on {c.name}
     </span>
   );

@@ -6,8 +6,9 @@ import { WalletPay, walletChain, type Pay } from "@/components/trip/wallet-pay";
 import { CHAINS } from "@/data/sample";
 import { useTrip } from "@/data/store";
 import type { ChainId } from "@/data/types";
-import { pad2 } from "@/lib/utils";
+import { pad2, usd } from "@/lib/utils";
 import * as api from "@/live/api";
+import { ChainMark } from "@/components/chain-mark";
 import { evmTxUrl, isEvmChain } from "@/live/evm-wallet";
 import { isEthAccount, rememberedNear } from "@/live/near-wallet";
 import { rememberEvm } from "@/live/evm-wallet";
@@ -203,11 +204,21 @@ export function LivePay({ n, chain, me, step, setStep }: { n: number; chain: Cha
   }
 
   const wallet = <WalletPay chain={chain} network={network} price={trip.price} pay={pay} getQuote={quoteFor} onSent={sent} compact={!!pay && !testnet} onConnected={setWalletOn} />;
+  const summary = (
+    <div className="mb-5 flex items-center gap-3.5 rounded-2xl bg-white/[0.04] px-4 py-3">
+      <ChainMark id={chain} size={32} />
+      <span className="min-w-0 flex-1">
+        <span className="block text-[14.5px] font-semibold">{usd(trip.price)} in USDC on {CHAINS[chain].name}</span>
+        <span className="block truncate font-mono text-[12px] text-fg-3">to {bed}</span>
+      </span>
+    </div>
+  );
   const divider = (label: string) => <div className="my-5 flex items-center gap-3 text-[12px] text-fg-3"><span className="h-px flex-1 bg-line" />{label}<span className="h-px flex-1 bg-line" /></div>;
 
   if (testnet && !pay?.sentTx) {
     return (
       <div>
+        {summary}
         {wallet}
         {walletChain(chain, network) === null && <p className="text-[13.5px] leading-relaxed text-fg-2">On testnet, {CHAINS[chain].name} has no test wallet route. Pick NEAR or Base to pay from your own wallet, or use the judge demo.</p>}
         {divider("Judge demo: no wallet")}
@@ -223,6 +234,7 @@ export function LivePay({ n, chain, me, step, setStep }: { n: number; chain: Cha
   if (!pay) {
     return (
       <div>
+        {summary}
         {wallet}
         {/* Once a wallet is connected, the copy-and-send route folds away (it confused next to the wallet rows). */}
         {walletOn && !manual ? (
