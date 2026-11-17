@@ -1,4 +1,5 @@
 import { myTripsRoute } from "./mytrips";
+import { walletReceiptRoute } from "./walletreceipt";
 import { runRefunds } from "./refundcron";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -55,6 +56,7 @@ export function createApp() {
   app.route("/", createRoute);
   app.route("/", authRoute);
   app.route("/", myTripsRoute);
+  app.route("/", walletReceiptRoute);
   app.notFound((c) => c.json({ error: "not found", code: "E_NOT_FOUND" }, 404));
   app.onError(onError);
   return app;

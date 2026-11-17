@@ -9,7 +9,7 @@ import type { ChainId } from "@/data/types";
 import { pad2 } from "@/lib/utils";
 import * as api from "@/live/api";
 import { evmTxUrl, isEvmChain } from "@/live/evm-wallet";
-import { isEthAccount } from "@/live/near-wallet";
+import { isEthAccount, rememberedNear } from "@/live/near-wallet";
 import { rememberEvm } from "@/live/evm-wallet";
 import { deviceKey } from "@/live/passkey";
 import { solTxUrl } from "@/live/solana-wallet";
@@ -100,6 +100,9 @@ export function LivePay({ n, chain, me, step, setStep }: { n: number; chain: Cha
     save(key, q);
     setPay(q);
     setStep("tracking");
+    // Paid straight from a NEAR wallet: no API call moved the money, so ask the API to verify the tx and write the receipt.
+    const w = chain === "near" ? rememberedNear(network) : null;
+    if (w) void api.walletReceipt({ trip: code, kind: "bed", n, tx_hash: hash, sender: w.accountId }).catch(() => undefined);
   }
 
   async function run(body: () => Promise<void>) {

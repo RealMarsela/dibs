@@ -182,6 +182,8 @@ export interface CardInfo {
   issued_at: string;
   simulations: { merchant: string; descriptor: string; approved: boolean; reason?: string; result?: string; at: string }[];
 }
+/** A bed paid straight from a NEAR wallet: the API checks the tx on chain, then writes the trip's receipt. */
+export const walletReceipt = (b: { trip: string; kind: "bed" | "wait"; n: number; tx_hash: string; sender: string }) => post<{ ok: boolean; recorded: boolean }>("/receipt/wallet-pay", b);
 /** Starts the enclave run (202 {pending}) or returns the card once it has landed; call again to poll. */
 export const cardIssue = (trip: string) =>
   post<{ last4: string; spend_limit: string | number; mcc: string | number } | { pending: true; runs: number; tx: string }>(`/card/${encodeURIComponent(trip)}/issue`, {});

@@ -24,6 +24,7 @@ const ALLOWED: [string, RegExp][] = [
   ["POST", /^\/quote$/],
   ["GET", /^\/status\/[^/]+$/],
   ["POST", /^\/deposit\/submit$/],
+  ["POST", /^\/receipt\/wallet-pay$/],
 ];
 
 export const mainnetAllowed = (method: string, path: string): boolean =>
