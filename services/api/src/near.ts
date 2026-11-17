@@ -2,6 +2,7 @@ import { Account, FailoverRpcProvider, JsonRpcProvider, KeyPairSigner } from "ne
 import type { Provider } from "near-api-js";
 import { ApiError } from "./errors";
 import { type Env, rpcUrls } from "./env";
+import { fastSends } from "./txsend";
 
 let cached: { key: string; p: Provider } | undefined;
 
@@ -18,7 +19,8 @@ export function provider(env: Env): Provider {
 export function relayerAccount(env: Env): Account {
   if (!env.RELAYER_PRIVATE_KEY) throw new ApiError(503, "E_RELAYER_UNCONFIGURED", "relayer key not configured");
   const signer = KeyPairSigner.fromSecretKey(env.RELAYER_PRIVATE_KEY as `ed25519:${string}`);
-  return new Account(env.RELAYER_ACCOUNT_ID, provider(env), signer);
+  // Sends broadcast-then-poll instead of a long RPC wait (see txsend.ts).
+  return fastSends(env, new Account(env.RELAYER_ACCOUNT_ID, provider(env), signer));
 }
 
 /**
