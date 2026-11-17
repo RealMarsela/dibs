@@ -160,3 +160,20 @@ describe("meta and codes", () => {
     expect(new Set(Array.from({ length: 50 }, () => makeCode("Lisbon"))).size).toBeGreaterThan(45);
   });
 });
+
+describe("POST /trips deadline_minutes", () => {
+  const bookByMin = () => {
+    const args = call.mock.calls[0][0].args as { book_by: string };
+    return (Number(BigInt(args.book_by) / 1_000_000n) - Date.now()) / 60_000;
+  };
+  it("defaults to 3 days and accepts a 15-minute testnet deadline", async () => {
+    expect((await post(good())).status).toBe(200);
+    expect(Math.round(bookByMin())).toBe(4320);
+    call.mockClear();
+    expect((await post({ ...good(), deadline_minutes: 15 }, env(), "2.2.2.2")).status).toBe(200);
+    expect(Math.round(bookByMin())).toBe(15);
+  });
+  it("refuses a deadline out of range", async () => {
+    for (const m of [5, 5000, 1.5]) expect((await post({ ...good(), deadline_minutes: m }, env(), "3.3.3.3")).status).toBe(400);
+  });
+});

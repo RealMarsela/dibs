@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 export const tripCode = z.string().regex(/^[a-z0-9]{3,12}$/, "trip code: 3-12 chars a-z 0-9");
+export const IMPLICIT = z.string().regex(/^[0-9a-f]{64}$/);
+export const NAMED = /^(?=.{2,64}$)([a-z\d]+[-_])*[a-z\d]+(\.([a-z\d]+[-_])*[a-z\d]+)*$/;
+export const ETH_IMPLICIT = z.string().regex(/^0x[0-9a-f]{40}$/);
+/** A 64-hex implicit id, a 0x eth-implicit id, or a NEAR named account. */
+export const accountId = z.union([IMPLICIT, ETH_IMPLICIT, z.string().regex(NAMED, "not a valid NEAR account id")]);
 export const bedIndex = z.number().int().min(1).max(99);
 
 export const FROM_CHAINS = ["eth", "arb", "base", "sol", "pol", "op"] as const;

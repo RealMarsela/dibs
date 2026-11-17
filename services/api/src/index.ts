@@ -1,3 +1,5 @@
+import { myTripsRoute } from "./mytrips";
+import { runRefunds } from "./refundcron";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { blobRoute } from "./blob";
@@ -52,6 +54,7 @@ export function createApp() {
   app.route("/", proofRoute);
   app.route("/", createRoute);
   app.route("/", authRoute);
+  app.route("/", myTripsRoute);
   app.notFound((c) => c.json({ error: "not found", code: "E_NOT_FOUND" }, 404));
   app.onError(onError);
   return app;
@@ -61,6 +64,10 @@ const app = createApp();
 
 /* /mainnet/* is the same API against NEAR mainnet (see mainnet.ts); everything else is testnet. */
 export default {
+  /** Every 10 minutes: refund testnet trips whose deadline passed without a verified booking. */
+  scheduled(_event: ScheduledController, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(runRefunds(env).then(() => undefined, (e) => console.error("refund cron failed", e instanceof Error ? e.message : "unknown")));
+  },
   fetch(req: Request, env: Env & MainnetVars, ctx: ExecutionContext) {
     const url = new URL(req.url);
     if (!isMainnetPath(url.pathname)) return app.fetch(req, env, ctx);

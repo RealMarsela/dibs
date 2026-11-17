@@ -1,13 +1,14 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import { ApiError, parse, readJson } from "./errors";
-import type { Env } from "./env";
+import { isTestnet, type Env } from "./env";
 import { clientIp, GAS_300, NEAR, relayerCall } from "./calls";
 import { ensureImplicitAccount } from "./bootstrap";
 import { accountExists, nearBalance, view } from "./near";
 import { recordActivity } from "./activity";
+import { indexAccount } from "./acctindex";
 import { addInboxRule } from "./inboxrule";
-import { tripCode } from "./schemas";
+import { ETH_IMPLICIT, IMPLICIT, NAMED, tripCode } from "./schemas";
 import { BOOKER_MESSAGE, type Nep413Proof, proofSchema, verifyNep413 } from "./nep413";
 import { type Erc191Proof, erc191ProofSchema, verifyErc191 } from "./erc191";
 
@@ -20,7 +21,8 @@ export const PER_DAY = 80;
 const IP_MSG = `${PER_IP_PER_DAY} trips per network per day, try tomorrow`;
 export const MIN_RELAYER = NEAR; // refuse below 1 NEAR
 const MARGIN = 2n * 10n ** 22n; // 0.02 NEAR on top of create_cost; the contract refunds the excess
-const BOOK_BY_MS = 3 * 24 * 3600 * 1000;
+export const DEFAULT_DEADLINE_MIN = 3 * 24 * 60;
+export const MIN_DEADLINE_MIN = 15;
 const DAY_TTL = 2 * 24 * 3600;
 
 export interface TripMeta {
@@ -39,9 +41,6 @@ const ymd = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD").refine((s) => 
 const text = (min: number, max: number) =>
   z.string().trim().min(min).max(max).refine((s) => !/[\u0000-\u001f<>]/.test(s), "no control characters or angle brackets");
 
-const IMPLICIT = z.string().regex(/^[0-9a-f]{64}$/);
-const NAMED = /^(?=.{2,64}$)([a-z\d]+[-_])*[a-z\d]+(\.([a-z\d]+[-_])*[a-z\d]+)*$/;
-const ETH_IMPLICIT = z.string().regex(/^0x[0-9a-f]{40}$/);
 const isImplicit = (a: string): boolean => /^[0-9a-f]{64}$/.test(a);
 const isEth = (a: string): boolean => /^0x[0-9a-f]{40}$/.test(a);
 
@@ -55,6 +54,8 @@ export const createBody = z
     price_usdc: z.number().int().min(1).max(50),
     booker: z.union([IMPLICIT, ETH_IMPLICIT, z.string().regex(NAMED, "booker must be a 64-hex implicit account or a NEAR account id")]),
     auth: z.union([proofSchema, erc191ProofSchema]).optional(),
+    /** Testnet only: minutes until book_by (the refund deadline). Short ones let judges watch the automatic refund. */
+    deadline_minutes: z.number().int().min(MIN_DEADLINE_MIN).max(DEFAULT_DEADLINE_MIN).optional(),
   })
   .strict()
   .superRefine((b, ctx) => {
@@ -84,6 +85,7 @@ async function bump(env: Env, key: string, max: number, code: string, msg: strin
 createRoute.post("/trips", async (c) => {
   const env = c.env;
   const b = parse(createBody, await readJson(c));
+  if (b.deadline_minutes !== undefined && !isTestnet(env)) throw new ApiError(400, "E_BAD_INPUT", "deadline_minutes is testnet only");
   const dao = env.TRIP_DAO;
   const eth = isEth(b.booker);
   const named = !isImplicit(b.booker) && !eth;
@@ -119,7 +121,7 @@ createRoute.post("/trips", async (c) => {
   await bump(env, ipKey, PER_IP_PER_DAY, "E_RATE_LIMIT", IP_MSG);
   await bump(env, dayKey, PER_DAY, "E_DAILY_CAP", "the demo has reached today's trip limit, try tomorrow");
 
-  const book_by = String((Date.now() + BOOK_BY_MS) * 1_000_000);
+  const book_by = String((Date.now() + (b.deadline_minutes ?? DEFAULT_DEADLINE_MIN) * 60_000) * 1_000_000);
   const tx_hash = await relayerCall(
     env, env.DIBS_CONTRACT, "create_trip",
     { code, price: String(b.price_usdc * 1_000_000), n_beds: b.beds, n_wait: 2, book_by, booker: b.booker, dao, check_in: b.check_in, check_out: b.check_out, stay: b.stay },
@@ -132,6 +134,7 @@ createRoute.post("/trips", async (c) => {
   const meta: TripMeta = { code, place: b.place, stay: b.stay, created_at: new Date().toISOString(), creator: b.booker };
   await env.NAMES.put(`trip/${code}`, JSON.stringify(meta));
   await recordActivity(env, code, { kind: "created", text: `Trip created, bed 1 held`, tx: tx_hash });
+  await indexAccount(env, b.booker, code, { role: "booker" });
   const inbox = await addInboxRule(env, code);
   return c.json({ code, url: `/t/${code}`, tx_hash, hold_tx, inbox });
 });

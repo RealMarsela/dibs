@@ -28,13 +28,19 @@ export class FakeR2 {
 
 export class FakeKV {
   store = new Map<string, string>();
+  meta = new Map<string, unknown>();
   async get(key: string, type?: string) {
     const v = this.store.get(key);
     if (v === undefined) return null;
     return type === "json" ? JSON.parse(v) : v;
   }
-  async put(key: string, value: string) {
+  async put(key: string, value: string, opts?: { metadata?: unknown }) {
     this.store.set(key, value);
+    if (opts?.metadata !== undefined) this.meta.set(key, opts.metadata);
+  }
+  async list(o: { prefix?: string } = {}) {
+    const keys = [...this.store.keys()].filter((k) => k.startsWith(o.prefix ?? "")).sort().map((name) => ({ name, metadata: this.meta.get(name) }));
+    return { keys, list_complete: true, cursor: undefined };
   }
 }
 

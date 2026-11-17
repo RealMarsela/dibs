@@ -7,6 +7,7 @@ import { txHashOf } from "./sweep";
 import { rateLimit } from "./ratelimit";
 import { ensureImplicitAccount } from "./bootstrap";
 import { recordActivity } from "./activity";
+import { indexAccount } from "./acctindex";
 import { bedIndex, tripCode } from "./schemas";
 
 export const holdRoute = new Hono<{ Bindings: Env }>();
@@ -54,6 +55,7 @@ holdRoute.post("/hold", async (c) => {
     });
     const tx_hash = txHashOf(res);
     await recordActivity(env, b.trip, { kind: "hold", text: `${b.kind === "bed" ? "Bed" : "Waitlist slot"} ${b.n} held`, tx: tx_hash });
+    await indexAccount(env, b.holder, b.trip, b.kind === "bed" ? { role: "bed", n: b.n } : { role: "waitlist", n: b.n });
     return c.json({ tx_hash, trip: b.trip, kind: b.kind, n: b.n, holder: b.holder, bootstrap_tx: boot.tx_hash });
   } catch (e) {
     if (e instanceof ApiError) throw e;

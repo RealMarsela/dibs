@@ -30,6 +30,8 @@ export interface Env {
   BLOBS: R2Bucket;
   /** Display names and the per-trip activity log. */
   NAMES: KVNamespace;
+  /** "1": the deadline refund cron also sweeps the seeded example trips (SAMPLE_TRIPS in refundcron.ts). */
+  REFUND_SAMPLES?: string;
 }
 
 export const isTestnet = (env: Env): boolean => env.NEAR_NETWORK !== "mainnet";
