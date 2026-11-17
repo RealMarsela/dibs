@@ -9,7 +9,7 @@ routes = [{ pattern = "api.dibs.larinova.com", custom_domain = true }]
 crons = ["*/10 * * * *"]
 
 [vars]
-REFUND_SAMPLES = "0"
+REFUND_SAMPLES = "1"
 NEAR_NETWORK = "testnet"
 NEAR_RPC_URLS = "https://near-testnet.drpc.org,https://test.rpc.fastnear.com,https://rpc.testnet.near.org"
 ONECLICK_URL = "https://1click.chaindefuser.com"

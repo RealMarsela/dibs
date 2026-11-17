@@ -75,5 +75,8 @@ export function fastSends(env: Env, acct: Account): Account {
   a.callFunctionRaw = (p) =>
     signAndPoll(env, acct, p.contractId, [actions.functionCall(p.methodName, p.args, BigInt(p.gas ?? 30_000_000_000_000n), BigInt(p.deposit ?? 0n))], SLOW.has(p.methodName) ? 300_000 : 90_000);
   a.transfer = (p) => signAndPoll(env, acct, p.receiverId, [actions.transfer(BigInt(p.amount))], 90_000);
+  // Gasless relays (list_for_resale, release, names) wrap the user's signed delegate in a relayer transaction.
+  (acct as unknown as { relayMetaTransaction: (sd: Parameters<typeof actions.signedDelegate>[0]) => Promise<unknown> }).relayMetaTransaction = (sd) =>
+    signAndPoll(env, acct, sd.delegateAction.senderId, [actions.signedDelegate(sd)], 90_000);
   return acct;
 }

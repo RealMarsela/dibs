@@ -42,11 +42,12 @@ relayRoute.post("/relay", async (c) => {
 });
 
 /** A relayed list_for_resale goes on the trip's receipts: resold to the waitlist at once, or listed at face value. */
-async function noteResale(env: Env, actions: { functionCall?: { methodName: string; args: Uint8Array } }[], tx: string | null): Promise<void> {
+async function noteResale(env: Env, actions: { functionCall?: { methodName: string; args: ArrayLike<number> } }[], tx: string | null): Promise<void> {
   const fc = actions.find((a) => a.functionCall?.methodName === "list_for_resale")?.functionCall;
   if (!fc) return;
   try {
-    const { trip, n } = JSON.parse(new TextDecoder().decode(fc.args)) as { trip: string; n: number };
+    // Borsh-decoded delegate args come back as a plain number array, not a Uint8Array.
+    const { trip, n } = JSON.parse(new TextDecoder().decode(Uint8Array.from(fc.args))) as { trip: string; n: number };
     const beds = (await getTrip(env, trip))?.beds as { status?: string }[] | undefined;
     const bed = beds?.[n - 1];
     const text = bed?.status === "Listed" ? `Bed ${n} listed for resale at face value` : `Bed ${n} resold at face value to the waitlist`;

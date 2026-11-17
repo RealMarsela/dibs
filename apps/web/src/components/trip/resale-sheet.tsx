@@ -135,20 +135,20 @@ export function ResaleSheet({ n, onClose }: { n: number | null; onClose: () => v
             ariaLabel={`Tear off the stub to list bed ${pad2(n ?? 0)} for resale`}
             onTear={async () => {
               setStartHolder(spot?.holder);
-              if (live) {
-                try {
-                  // A bed held by the signed-in NEAR wallet is listed by that wallet; a passkey bed signs gaslessly.
-                  const w = rememberedNear(network);
-                  if (w && spot?.holder === w.accountId) {
-                    await callFromNear(network, w, contract, "list_for_resale", { trip: code.toLowerCase(), n: n! });
-                    await refresh();
-                  } else await act.list(n!, await signer());
-                } catch (e) {
-                  setErr(e instanceof Error ? e.message : "Listing failed");
-                  return;
-                }
-              } else act.list(n!);
-              setTimeout(() => setStep("matching"), 650);
+              // Move on as the stub flies off; the matching step reads the result back from the chain.
+              setTimeout(() => setStep((s) => (s === "tear" ? "matching" : s)), 650);
+              if (!live) return void act.list(n!);
+              try {
+                // A bed held by the signed-in NEAR wallet is listed by that wallet; a passkey bed signs gaslessly.
+                const w = rememberedNear(network);
+                if (w && spot?.holder === w.accountId) {
+                  await callFromNear(network, w, contract, "list_for_resale", { trip: code.toLowerCase(), n: n! });
+                  await refresh();
+                } else await act.list(n!, await signer());
+              } catch (e) {
+                setErr(e instanceof Error ? e.message : "Listing failed");
+                setStep("tear");
+              }
             }}
             stub={
               <div className="flex h-full flex-col items-center justify-center gap-1 text-center">
