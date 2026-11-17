@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { LandingPage } from "@/pages/landing";
 import { TripPage } from "@/pages/trip";
 import { NewTripPage } from "@/pages/new-trip";
+import { MyTripsPage } from "@/pages/my-trips";
 
 /* Each route fades in on its own key (Hoy's main: opacity .3s), and a new page starts at the top. */
 function AppRoutes() {
@@ -21,6 +22,7 @@ function AppRoutes() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/t/:code" element={<TripRoute />} />
         <Route path="/new" element={<NewTripPage />} />
+        <Route path="/trips" element={<MyTripsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

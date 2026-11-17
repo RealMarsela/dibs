@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CreditCard, Dices, FileCheck2, ListPlus, Loader2 } from "lucide-react";
 import { deviceKey } from "@/live/passkey";
+import { explorer } from "@/live/api";
 import { useTrip } from "@/data/store";
 import { PEOPLE } from "@/data/sample";
 import { ChainTag, Face } from "@/components/bits";
@@ -66,7 +67,14 @@ export function NextStep({ viewer, open }: { viewer: string; open: Opens }) {
   let b: string;
   let cta: React.ReactNode = null;
 
-  if (trip.drawnOut) {
+  const lapsed = !trip.drawnOut && !trip.proof && Date.now() > new Date(trip.bookBy).getTime();
+  if (trip.refunded) {
+    a = "The deadline passed, so everyone got their money back.";
+    b = `No verified booking by ${localDeadline(trip.bookBy)}. The contract refunded every paid bed; each refund is in the receipts with its transaction.`;
+  } else if (lapsed && paidCount > 0) {
+    a = "The deadline passed without a booking.";
+    b = "Refunds go out automatically within about ten minutes. They’ll appear in the receipts below, each with its transaction.";
+  } else if (trip.drawnOut) {
     a = `Booked and paid. See you in ${trip.place}.`;
     b = mine?.bed ? `You’re in ${/^bed \d+$/i.test(mine.bed) ? "" : "the "}${mine.bed.toLowerCase()}.` : "Every bed is paid and the booking is verified.";
     cta = trip.proof ? <button className="pill-dark focus-ring press" onClick={open.proof}><FileCheck2 className="size-4" /> See the booking proof</button> : null;
@@ -177,9 +185,18 @@ export function Waitlist() {
   );
 }
 
+/* Where a receipt's transaction can be checked: NEAR txs on near.rocks, EVM txs on Basescan, a 1Click swap
+   ("intents:<deposit address>") on the NEAR Intents explorer. */
+function txUrl(tx: string, network: string): string {
+  if (tx.startsWith("intents:")) return `https://explorer.near-intents.org/transactions/${tx.slice(8)}`;
+  if (/^0x[0-9a-fA-F]{64}$/.test(tx)) return `https://${network === "mainnet" ? "" : "sepolia."}basescan.org/tx/${tx}`;
+  return explorer(tx);
+}
+const txLabel = (tx: string) => (tx.startsWith("intents:") ? "NEAR Intents explorer" : /^0x/.test(tx) ? "Basescan" : "NEAR explorer");
+
 export function ActivityFeed() {
-  const { trip } = useTrip();
-  const items = trip.activity.slice(0, 8);
+  const { trip, network } = useTrip();
+  const items = trip.activity.slice(0, 12);
   return (
     <Rise>
       <p className="label mb-4">Receipts</p>
@@ -192,9 +209,14 @@ export function ActivityFeed() {
               <TimelineTitle className={a.kind === "refused" ? "text-[14px] font-medium text-refused" : "text-[14px] font-medium"}>{a.text}</TimelineTitle>
               <TimelineIndicator className="border-white/25 bg-void group-data-completed/timeline-item:border-fg-2" />
             </TimelineHeader>
-            {a.chain && (
-              <TimelineContent>
-                <ChainTag id={a.chain} />
+            {(a.chain || a.tx) && (
+              <TimelineContent className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                {a.chain && <ChainTag id={a.chain} />}
+                {a.tx && (
+                  <a href={txUrl(a.tx, network)} target="_blank" rel="noreferrer" className="focus-ring text-[12.5px] text-fg-2 underline decoration-white/20 underline-offset-4 hover:text-fg">
+                    {txLabel(a.tx)} ↗
+                  </a>
+                )}
               </TimelineContent>
             )}
           </TimelineItem>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { RotateCcw, Share2 } from "lucide-react";
+import { Luggage, RotateCcw, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTrip } from "@/data/store";
 import { PEOPLE } from "@/data/sample";
@@ -16,6 +16,8 @@ import { ResaleSheet } from "@/components/trip/resale-sheet";
 import { ProofSheet } from "@/components/trip/proof-sheet";
 import { DrawSheet } from "@/components/trip/draw-sheet";
 import { CardSheet } from "@/components/trip/card-sheet";
+import { ExampleBanner, isExample } from "@/components/trip/example-banner";
+import { NameButton } from "@/components/trip/name-sheet";
 import { rememberedDevice } from "@/live/passkey";
 import { devAccounts } from "@/live/dev-keys";
 import { rememberedNear } from "@/live/near-wallet";
@@ -30,7 +32,8 @@ const VIEWERS = [
 ];
 
 export function TripPage() {
-  const { trip, act, paidCount, live, network } = useTrip();
+  const { trip, act, paidCount, live, network, code } = useTrip();
+  const [, rerender] = useState(0);
   const [viewer, setViewer] = useState(live ? "" : "leo");
   const [me, setMe] = useState<string | null>(null);
   const [card, setCard] = useState(false);
@@ -80,6 +83,16 @@ export function TripPage() {
   const opens: Opens = { pay: setPay, exit: setExit, proof: () => setProof(true), draw: () => setDraw(true), card: () => setCard(true) };
   const active = pay !== null ? viewer : exit !== null ? viewer : proof ? trip.booker : undefined;
 
+  // Under an hour to the deadline the clock counts seconds, so a 15-minute test trip visibly runs out.
+  const left = new Date(trip.bookBy).getTime() - Date.now();
+  const booked = trip.drawnOut || !!trip.proof;
+  useEffect(() => {
+    if (booked || trip.refunded || left > 3_600_000 || left < -60_000) return;
+    const id = setInterval(() => rerender((x) => x + 1), 1000);
+    return () => clearInterval(id);
+  }, [booked, trip.refunded, left > 3_600_000, left < -60_000]); // eslint-disable-line react-hooks/exhaustive-deps
+  const clock = trip.refunded ? "refunded" : !booked && left <= 0 && paidCount > 0 ? "refunding" : paidCount === trip.spots.length ? "ready" : countdown(trip.bookBy);
+
   useEffect(() => {
     const look = () => setFloat(scrollY > 8);
     addEventListener("scroll", look, { passive: true });
@@ -100,10 +113,14 @@ export function TripPage() {
             <TripStrip
               paid={paidCount}
               active={active}
-              clock={paidCount === trip.spots.length ? "ready" : countdown(trip.bookBy)}
+              clock={clock}
               crew={trip.spots.filter((s) => s.holder).map((s) => ({ id: s.holder!, name: PEOPLE[s.holder!]?.name ?? "?" }))}
             />
           </div>
+          <div className="flex shrink-0 items-center gap-1.5">
+          <Link to="/trips" className="pill-dark pill-sm focus-ring press" aria-label="My trips">
+            <Luggage className="size-3.5" /> <span className="hidden sm:inline">My trips</span>
+          </Link>
           <button
             className="pill-dark pill-sm focus-ring press"
             onClick={() => {
@@ -113,6 +130,7 @@ export function TripPage() {
           >
             <Share2 className="size-3.5" /> Invite
           </button>
+          </div>
         </div>
       </header>
 
@@ -132,10 +150,13 @@ export function TripPage() {
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
+          {live && me && viewer === me && /^[0-9a-f]{64}$/.test(me) && <NameButton account={me} onSaved={() => rerender((x) => x + 1)} />}
           {!live && <button onClick={() => act.reset()} className="press focus-ring ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] text-fg-3 hover:text-fg" aria-label="Reset the preview trip">
             <RotateCcw className="size-3.5" /> Reset
           </button>}
         </div>
+
+        {isExample(code) && <ExampleBanner mainnet={network === "mainnet"} />}
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16">
           <div className="flex min-w-0 flex-col gap-10">

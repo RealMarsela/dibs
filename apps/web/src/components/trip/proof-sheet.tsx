@@ -7,6 +7,7 @@ import { PEOPLE } from "@/data/sample";
 import { useTrip } from "@/data/store";
 import { stayDates, usd } from "@/lib/utils";
 import * as api from "@/live/api";
+import { testBookingEml } from "@/components/trip/test-booking";
 
 type Step = "upload" | "checking" | "facts" | "released" | "refused";
 
@@ -18,7 +19,7 @@ const CHECKS = [
 ];
 
 export function ProofSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { trip, act, live, code, lastError, proofPending } = useTrip();
+  const { trip, act, live, code, lastError, proofPending, network } = useTrip();
   const [step, setStep] = useState<Step>(trip.proof ? "facts" : "upload");
   const [k, setK] = useState(0);
   const [items, setItems] = useState<api.InboxItem[]>([]);
@@ -113,6 +114,30 @@ export function ProofSheet({ open, onClose }: { open: boolean; onClose: () => vo
               <button className="pill-dark focus-ring mt-3 w-full" onClick={() => file.current?.click()}>
                 <Upload className="size-4" /> Or upload the .eml
               </button>
+              <details className="group mt-4 rounded-2xl bg-white/[0.04] px-4 py-3 text-[13.5px] leading-relaxed text-fg-2">
+                <summary className="focus-ring cursor-pointer list-none font-medium text-fg">What counts as proof, and how to send it <span className="text-fg-3 group-open:hidden">+</span></summary>
+                <ul className="mt-3 flex list-disc flex-col gap-2 pl-4">
+                  <li>The confirmation email itself from booking.com, airbnb.com or hostelworld.com, signed by them (DKIM). A screenshot or PDF can’t be checked.</li>
+                  <li>It has to match this trip: check-in {stayDates(trip.checkIn, trip.checkOut).label}, {trip.spots.length} guests, a total up to {usd(total, 0)}.</li>
+                  <li><span className="text-fg">Forward it as an attachment</span> to {address}. Gmail: open it, ⋮, Forward as attachment. Outlook: …, Forward as attachment. Apple Mail: Message, Forward as Attachment.</li>
+                  <li><span className="text-fg">Or download the original</span> and upload it above. Gmail: ⋮, Download message. Outlook: …, Save as. Apple Mail: File, Save As, Raw Message Source.</li>
+                </ul>
+              </details>
+              {network === "testnet" && (
+                <div className="mt-3 rounded-2xl border border-dashed border-line px-4 py-3">
+                  <p className="text-[13px] leading-relaxed text-fg-2">
+                    <span className="font-medium text-fg">No booking to hand?</span> Run the whole check with a test confirmation for this trip. It is signed by <span className="font-mono text-[12px]">dibs-test.example</span>, a test domain whose key is public and which only testnet accepts.
+                  </p>
+                  <button
+                    className="pill-dark pill-sm focus-ring press mt-3"
+                    onClick={async () =>
+                      onFile(await testBookingEml({ code, place: trip.place, stay: trip.stay, checkIn: trip.checkIn, checkOut: trip.checkOut, guests: trip.spots.length, total }))
+                    }
+                  >
+                    <FileText className="size-3.5" /> Use a test confirmation
+                  </button>
+                </div>
+              )}
             </>
           ) : (
             <button

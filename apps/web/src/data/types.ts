@@ -57,6 +57,8 @@ export interface Trip {
   checkOut: string;
   price: number;
   bookBy: string;
+  /** The deadline passed without a verified booking and the contract refunded every paid bed. */
+  refunded?: boolean;
   booker: string;
   beds: string[];
   spots: Spot[];

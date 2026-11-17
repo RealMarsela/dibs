@@ -121,6 +121,28 @@ export const draw = (trip: string) => post<{ tx_hash: string }>("/draw", { trip 
 export const proofSubmit = (b: { trip: string; blob_url: string; blob_sha256: string }) =>
   post<{ tx_hash: string }>("/proof/submit", { trip: b.trip, blob_url: b.blob_url, blob_sha256: b.blob_sha256 });
 export const bootstrap = (account: string) => post<{ tx_hash?: string; existed?: boolean }>("/account/bootstrap", { account });
+export interface MyTrip {
+  code: string;
+  network: "testnet" | "mainnet";
+  place: string;
+  stay: string;
+  check_in: string;
+  check_out: string;
+  n_beds: number;
+  paid: number;
+  price_usdc: number;
+  status: "filling" | "all_paid" | "booked" | "refunded";
+  roles: { role: "booker" | "bed" | "waitlist"; n?: number }[];
+  created_at: string;
+  book_by?: string;
+}
+/** Trips any of these accounts created, holds a bed in, or waits for (testnet API root; it indexes both networks). */
+export const myTrips = async (accounts: string[]): Promise<{ trips: MyTrip[] }> => {
+  const r = await fetch(`${API}/my-trips?accounts=${accounts.map(encodeURIComponent).join(",")}`);
+  const body = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+  if (!r.ok) throw new ApiError(body.error ?? `HTTP ${r.status}`, body.code);
+  return body;
+};
 export const names = (accounts: string[]) =>
   accounts.length ? call<Record<string, string>>(`/names?accounts=${accounts.map(encodeURIComponent).join(",")}`) : Promise.resolve({});
 export const putName = (b: { account: string; name: string; ts: number; sig: string }) => call<{ ok: boolean }>("/names", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(b) });
@@ -180,5 +202,7 @@ export const createTrip = (b: {
   price_usdc: number;
   booker: string;
   auth?: Nep413Auth | Erc191Auth;
+  /** Testnet only: minutes until the booking deadline (default 3 days). */
+  deadline_minutes?: number;
 }) =>
   post<{ code: string; url: string; tx_hash: string; hold_tx?: string; inbox?: string | null }>("/trips", b);

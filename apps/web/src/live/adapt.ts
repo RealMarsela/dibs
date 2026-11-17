@@ -74,6 +74,7 @@ export function toTrip(view: TripView, names: Record<string, string>, activity: 
     checkOut: t.check_out,
     price,
     bookBy: new Date(Number(BigInt(t.book_by) / 1_000_000n)).toISOString(),
+    refunded: !!t.refunded,
     booker: register(t.booker, names),
     beds: meta.beds,
     spots,

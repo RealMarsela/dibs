@@ -53,6 +53,8 @@ export function NewTripPage() {
   const [checkOut, setCheckOut] = useState<Date | undefined>();
   const [beds, setBeds] = useState(4);
   const [price, setPrice] = useState(25);
+  // Testnet: a 15-minute deadline lets someone watch the automatic refund instead of waiting 3 days.
+  const [quick, setQuick] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [booker, setBooker] = useState<NearSession | null>(null);
@@ -84,7 +86,7 @@ export function NewTripPage() {
     setBusy(true);
     setErr(null);
     try {
-      const base = { place: place.trim(), stay: stay.trim(), check_in: ymd(checkIn), check_out: ymd(checkOut), beds, price_usdc: price };
+      const base = { place: place.trim(), stay: stay.trim(), check_in: ymd(checkIn), check_out: ymd(checkOut), beds, price_usdc: price, ...(quick ? { deadline_minutes: 15 } : {}) };
       let r;
       if (booker) {
         const n = nonce ?? (await authNonce());
@@ -136,8 +138,18 @@ export function NewTripPage() {
             </Field>
           </div>
           <p className="display text-[18px]">
-            {beds} beds × {usd(price, 0)} = {usd(beds * price, 0)}. <span className="tone-2">Held by a crew DAO until the booking is proven. Book within 3 days or everyone is refunded.</span>
+            {beds} beds × {usd(price, 0)} = {usd(beds * price, 0)}. <span className="tone-2">Held by a crew DAO until the booking is proven. Book within {quick ? "15 minutes" : "3 days"} or everyone is refunded.</span>
           </p>
+          <Field label="Booking deadline" hint={quick ? "For trying the refund: when it runs out with no verified booking, every paid bed is refunded automatically." : undefined}>
+            <div className="grid grid-cols-2 gap-1 rounded-full bg-white/[0.05] p-1" role="radiogroup" aria-label="Booking deadline">
+              {[false, true].map((q) => (
+                <button key={String(q)} type="button" role="radio" aria-checked={quick === q} onClick={() => setQuick(q)}
+                  className={`press focus-ring h-10 rounded-full text-[13.5px] font-medium ${quick === q ? "bg-fg text-void" : "text-fg-2 hover:text-fg"}`}>
+                  {q ? "15 min · test refund" : "3 days"}
+                </button>
+              ))}
+            </div>
+          </Field>
           <Field label="You book it" hint={booker ? "The payout goes to this wallet once a real booking is proven. You sign one message; no gas." : undefined}>
             {booker ? (
               <div className="flex h-12 items-center justify-between gap-3 rounded-2xl border border-line bg-white/[0.04] pl-4 pr-1.5">

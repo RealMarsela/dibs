@@ -29,7 +29,8 @@ export function countdown(iso: string, now = Date.now()): string {
   const h = Math.floor(ms / 3_600_000);
   const m = Math.floor((ms % 3_600_000) / 60_000);
   if (h >= 24) return `${Math.floor(h / 24)}d ${h % 24}h`;
-  return `${h}h ${String(m).padStart(2, "0")}m`;
+  if (h >= 1) return `${h}h ${String(m).padStart(2, "0")}m`;
+  return `${m}m ${String(Math.floor((ms % 60_000) / 1000)).padStart(2, "0")}s`;
 }
 
 export function stayDates(checkIn: string, checkOut: string): { label: string; nights: number } {

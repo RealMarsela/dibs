@@ -47,8 +47,11 @@ export function Header({ ctaId = "hello-cta" }: { ctaId?: string }) {
             <a href="#hood" className="focus-ring hidden rounded-md px-1.5 py-2 text-fg-2 transition-colors hover:text-fg sm:inline">
               under the hood
             </a>
-            <Link to="/t/lis-0312" className="pill-dark pill-sm focus-ring press ml-2">
-              Open a trip
+            <Link to="/trips" className="focus-ring rounded-md px-1.5 py-2 text-fg-2 transition-colors hover:text-fg">
+              my trips
+            </Link>
+            <Link to="/new" className="pill-light pill-sm focus-ring press ml-2">
+              Start a trip
             </Link>
           </div>
           <div
@@ -57,11 +60,11 @@ export function Header({ ctaId = "hello-cta" }: { ctaId?: string }) {
               past ? "translate-y-0 opacity-100 delay-100" : "pointer-events-none translate-y-2 opacity-0",
             )}
           >
-            <Link to="/new" className="pill-dark pill-sm focus-ring press hidden sm:inline-flex">
-              Start a trip
+            <Link to="/trips" className="pill-dark pill-sm focus-ring press hidden sm:inline-flex">
+              My trips
             </Link>
-            <Link to="/t/lis-0312" className="pill-light pill-sm focus-ring press whitespace-nowrap">
-              Open the Lisbon trip
+            <Link to="/new" className="pill-light pill-sm focus-ring press whitespace-nowrap">
+              Start a trip
             </Link>
           </div>
         </nav>

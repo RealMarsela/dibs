@@ -36,8 +36,11 @@ export function LinkSection() {
       <div className="relative z-10 flex flex-col items-center text-center">
         <Sweep className="flex items-center gap-3 text-[clamp(30px,3.6vw,48px)]" lines={[{ text: "A link is all it takes." }]} />
         <Link2 className="mt-4 size-6 text-fg-2" aria-hidden />
-        <Link to="/t/lis-0312" className="pill-light focus-ring press mt-7 h-[46px] px-6 shadow-[0_13px_24px_-6px_#0000002b,0_5px_10px_-4px_#00000029]">
-          Open the Lisbon trip
+        <Link to="/new" className="pill-light focus-ring press mt-7 h-[46px] px-6 shadow-[0_13px_24px_-6px_#0000002b,0_5px_10px_-4px_#00000029]">
+          Start a trip
+        </Link>
+        <Link to="/t/lis-0312" className="focus-ring mt-3 rounded-md px-2 py-1 text-[13px] text-fg-2 underline decoration-white/20 underline-offset-4 hover:text-fg">
+          or see an example trip
         </Link>
       </div>
       <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[230px]">

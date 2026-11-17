@@ -43,11 +43,11 @@ export function Hero() {
         />
         <div className="rise-in mt-9 flex flex-col items-center gap-3.5" style={{ animationDelay: "2.6s" }}>
           <div className="flex flex-wrap items-center justify-center gap-2.5">
-            <Link id="hello-cta" to="/t/lis-0312" className={`pill-light focus-ring press h-[46px] px-6 ${LIFT}`}>
-              Open the Lisbon trip
-            </Link>
-            <Link to="/new" className={`pill-dark focus-ring press h-[46px] px-6 ${LIFT}`}>
+            <Link id="hello-cta" to="/new" className={`pill-light focus-ring press h-[46px] px-6 ${LIFT}`}>
               Start a trip
+            </Link>
+            <Link to="/t/lis-0312" className={`pill-dark focus-ring press h-[46px] px-6 ${LIFT}`}>
+              See an example trip
             </Link>
           </div>
           <p className="text-[12.5px] text-fg-3">
